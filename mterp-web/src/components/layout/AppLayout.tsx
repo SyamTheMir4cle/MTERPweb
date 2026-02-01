@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import Sidebar from './Sidebar';
+import MobileNav from './MobileNav';
 import { useAuth } from '../../contexts/AuthContext';
 import { Badge, IconButton } from '../shared';
 import './AppLayout.css';
@@ -54,6 +55,8 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 }
+

@@ -17,6 +17,7 @@ import Tasks from './pages/Tasks';
 import Attendance from './pages/Attendance';
 import AttendanceLogs from './pages/AttendanceLogs';
 import DailyReport from './pages/DailyReport';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/attendance-logs" element={<AttendanceLogs />} />
             <Route path="/daily-report" element={<DailyReport />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
 
           {/* Fallback */}

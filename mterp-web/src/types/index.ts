@@ -95,6 +95,9 @@ export interface User {
   email?: string;
   role: string;
   token?: string;
+  phone?: string;
+  address?: string;
+  profilePhoto?: string;
 }
 
 export interface MaterialRequest {

@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { User } = require('../models');
+const { auth } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -184,4 +186,79 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile - Update user profile
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { fullName, email, phone, address } = req.body;
+    
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (address) updateData.address = address;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateData },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// PUT /api/auth/profile/photo - Update profile photo
+router.put('/profile/photo', auth, upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ msg: 'No photo uploaded' });
+    }
+    
+    const photoUrl = req.file.path;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { profilePhoto: photoUrl } },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Update photo error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// DELETE /api/auth/profile/photo - Remove profile photo
+router.delete('/profile/photo', auth, async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $unset: { profilePhoto: 1 } },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Delete photo error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
+
