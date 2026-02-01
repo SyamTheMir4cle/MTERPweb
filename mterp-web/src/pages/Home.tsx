@@ -1,0 +1,259 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Wrench,
+  ClipboardList,
+  Clock,
+  Truck,
+  CheckSquare,
+  ChevronRight,
+  HardHat,
+  FileText,
+} from 'lucide-react';
+import api from '../api/api';
+import { useAuth } from '../contexts/AuthContext';
+import { Card, Badge } from '../components/shared';
+import './Home.css';
+
+interface DashboardCardProps {
+  icon: React.ElementType;
+  label: string;
+  sub: string;
+  color: string;
+  bg: string;
+  onClick: () => void;
+}
+
+interface UpdateItem {
+  _id: string;
+  type: 'project' | 'attendance' | 'report';
+  icon: string;
+  title: string;
+  description: string;
+  subtitle: string;
+  timestamp: string;
+  color: string;
+  bg: string;
+}
+
+const DashboardCard: React.FC<DashboardCardProps> = ({
+  icon: Icon,
+  label,
+  sub,
+  color,
+  bg,
+  onClick,
+}) => (
+  <Card className="dashboard-card" onClick={onClick}>
+    <div className="dashboard-card-icon" style={{ backgroundColor: bg }}>
+      <Icon size={24} color={color} />
+    </div>
+    <div className="dashboard-card-content">
+      <span className="dashboard-card-label">{label}</span>
+      <span className="dashboard-card-sub">{sub}</span>
+    </div>
+  </Card>
+);
+
+const getIcon = (iconName: string) => {
+  const icons: Record<string, React.ElementType> = {
+    HardHat,
+    Clock,
+    FileText,
+    Wrench,
+    Truck,
+  };
+  return icons[iconName] || FileText;
+};
+
+export default function Home() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [updates, setUpdates] = useState<UpdateItem[]>([]);
+  const [loadingUpdates, setLoadingUpdates] = useState(true);
+
+  useEffect(() => {
+    fetchUpdates();
+  }, []);
+
+  const fetchUpdates = async () => {
+    try {
+      const response = await api.get('/updates');
+      setUpdates(response.data);
+    } catch (err) {
+      console.error('Failed to fetch updates', err);
+    } finally {
+      setLoadingUpdates(false);
+    }
+  };
+
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  return (
+    <div className="home-container">
+      {/* Header Section */}
+      <div className="home-header">
+        <div className="home-header-content">
+          <div className="home-header-text">
+            <span className="home-greeting">{getGreeting()},</span>
+            <h1 className="home-username">{user?.fullName || 'User'}</h1>
+            <Badge
+              label={user?.role?.toUpperCase() || 'STAFF'}
+              variant="neutral"
+              size="small"
+              className="home-role-badge"
+            />
+          </div>
+        </div>
+        <div className="home-header-decor1"></div>
+        <div className="home-header-decor2"></div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="home-grid">
+        {/* Big Cards */}
+        <Card className="big-card" onClick={() => navigate('/projects')}>
+          <div className="big-card-content">
+            <div className="big-card-icon gradient-gold">
+              <HardHat size={32} color="white" />
+            </div>
+            <div>
+              <h3 className="big-card-title">Projects</h3>
+              <p className="big-card-sub">Manage Projects</p>
+            </div>
+          </div>
+          <div className="big-card-arrow">
+            <ChevronRight size={20} color="var(--primary)" />
+          </div>
+        </Card>
+
+        <Card className="big-card" onClick={() => navigate('/tools')}>
+          <div className="big-card-content">
+            <div className="big-card-icon gradient-primary">
+              <Wrench size={32} color="white" />
+            </div>
+            <div>
+              <h3 className="big-card-title">Tool Tracking</h3>
+              <p className="big-card-sub">Manage Inventory</p>
+            </div>
+          </div>
+          <div className="big-card-arrow">
+            <ChevronRight size={20} color="var(--primary)" />
+          </div>
+        </Card>
+
+        {/* Small Cards Row - Role Based */}
+        <div className="small-cards-row">
+          <DashboardCard
+            icon={Clock}
+            label="Attendance"
+            sub="Check In/Out"
+            color="#10B981"
+            bg="#D1FAE5"
+            onClick={() => navigate('/attendance')}
+          />
+          <DashboardCard
+            icon={ClipboardList}
+            label="My Tasks"
+            sub="View Tasks"
+            color="#F59E0B"
+            bg="#FEF3C7"
+            onClick={() => navigate('/tasks')}
+          />
+        </div>
+
+        {/* Materials - for supervisor, asset_admin, director, owner */}
+        {user?.role && ['supervisor', 'asset_admin', 'director', 'owner'].includes(user.role) && (
+          <div className="small-cards-row">
+            <DashboardCard
+              icon={Truck}
+              label="Materials"
+              sub="Request Item"
+              color="#8B5CF6"
+              bg="#EDE9FE"
+              onClick={() => navigate('/materials')}
+            />
+            {/* Approvals - for director, owner only */}
+            {['director', 'owner'].includes(user.role) ? (
+              <DashboardCard
+                icon={CheckSquare}
+                label="Approvals"
+                sub="Review Requests"
+                color="#3B82F6"
+                bg="#DBEAFE"
+                onClick={() => navigate('/approvals')}
+              />
+            ) : (
+              <DashboardCard
+                icon={ClipboardList}
+                label="Daily Report"
+                sub="Submit Report"
+                color="#3B82F6"
+                bg="#DBEAFE"
+                onClick={() => navigate('/daily-report')}
+              />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Site Updates Section */}
+      <div className="home-updates">
+        <div className="updates-header">
+          <span className="updates-title">SITE UPDATES</span>
+          {updates.length > 3 && (
+            <button className="updates-link" onClick={() => navigate('/updates')}>View All</button>
+          )}
+        </div>
+        
+        {loadingUpdates ? (
+          <div className="updates-loading">Loading updates...</div>
+        ) : updates.length === 0 ? (
+          <div className="updates-empty">
+            <p>No recent updates</p>
+          </div>
+        ) : (
+          <div className="updates-list">
+            {updates.slice(0, 5).map((update) => {
+              const IconComponent = getIcon(update.icon);
+              return (
+                <div key={update._id} className="update-item">
+                  <div className="update-icon" style={{ backgroundColor: update.bg }}>
+                    <IconComponent size={18} color={update.color} />
+                  </div>
+                  <div className="update-content">
+                    <div className="update-header">
+                      <span className="update-type">{update.title}</span>
+                      <span className="update-time">{formatTimeAgo(update.timestamp)}</span>
+                    </div>
+                    <p className="update-description">{update.description}</p>
+                    <p className="update-subtitle">{update.subtitle}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

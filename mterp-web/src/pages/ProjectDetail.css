@@ -1,0 +1,144 @@
+.project-detail-container {
+  padding: var(--space-6);
+  max-width: 800px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.back-btn:hover {
+  background-color: var(--border);
+}
+
+.detail-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.detail-location {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.progress-card {
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.progress-label {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.progress-value {
+  font-size: var(--font-size-2xl);
+  color: white;
+  font-weight: 700;
+}
+
+.progress-bar-white {
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill-white {
+  height: 100%;
+  background-color: white;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.actions-card {
+  margin-bottom: var(--space-4);
+}
+
+.actions-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.description-card {
+  margin-top: var(--space-4);
+}
+
+.section-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.description-text {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}

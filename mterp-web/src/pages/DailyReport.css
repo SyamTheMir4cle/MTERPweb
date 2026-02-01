@@ -1,0 +1,64 @@
+.report-container {
+  padding: var(--space-6);
+  max-width: 700px;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.report-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.report-date {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.report-card {
+  margin-bottom: var(--space-4);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.weather-options {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.weather-btn {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-white);
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.weather-btn:hover {
+  border-color: var(--primary);
+}
+
+.weather-btn.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}

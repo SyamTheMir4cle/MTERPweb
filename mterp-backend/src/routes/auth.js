@@ -1,0 +1,187 @@
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const { User } = require('../models');
+
+const router = express.Router();
+
+// Generate JWT token
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+};
+
+// Generate OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Email transporter (configure in production)
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: process.env.EMAIL_PORT || 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// POST /api/auth/register
+router.post('/register', async (req, res) => {
+  try {
+    const { username, email, password, fullName, role } = req.body;
+
+    // Check if user exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ msg: 'User already exists' });
+    }
+
+    // Generate OTP
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Create user
+    const user = new User({
+      username,
+      email,
+      password,
+      fullName,
+      role: role || 'worker',
+      otp: {
+        code: otp,
+        expiresAt: otpExpiry,
+      },
+    });
+
+    await user.save();
+
+    // Send OTP email (in production)
+    if (process.env.EMAIL_USER) {
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'MTERP - Verifikasi Email',
+          html: `
+            <h2>Verifikasi Email MTERP</h2>
+            <p>Kode OTP Anda: <strong>${otp}</strong></p>
+            <p>Kode berlaku selama 10 menit.</p>
+          `,
+        });
+      } catch (emailError) {
+        console.log('Email sending failed:', emailError.message);
+      }
+    }
+
+    // For development, return OTP in response
+    res.status(201).json({
+      msg: 'Registration successful. Check your email for OTP.',
+      // Remove in production:
+      devOtp: otp,
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/auth/verify
+router.post('/verify', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ msg: 'User already verified' });
+    }
+
+    if (!user.otp || user.otp.code !== otp) {
+      return res.status(400).json({ msg: 'Invalid OTP' });
+    }
+
+    if (new Date() > user.otp.expiresAt) {
+      return res.status(400).json({ msg: 'OTP expired' });
+    }
+
+    // Verify user
+    user.isVerified = true;
+    user.otp = undefined;
+    await user.save();
+
+    res.json({ msg: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Verify error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/auth/login
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Find user by username or email
+    const user = await User.findOne({
+      $or: [{ username }, { email: username }]
+    });
+
+    if (!user) {
+      return res.status(401).json({ msg: 'Invalid credentials' });
+    }
+
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ msg: 'Invalid credentials' });
+    }
+
+    // Check if verified (optional - can skip in dev)
+    // if (!user.isVerified) {
+    //   return res.status(401).json({ msg: 'Please verify your email first' });
+    // }
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    res.json({
+      ...user.toJSON(),
+      token,
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// GET /api/auth/me - Get current user
+router.get('/me', async (req, res) => {
+  try {
+    const authHeader = req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ msg: 'No token' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(401).json({ msg: 'Invalid token' });
+  }
+});
+
+module.exports = router;
