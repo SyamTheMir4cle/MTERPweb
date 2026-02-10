@@ -64,3 +64,14 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .register-content {
+    padding: 24px 20px;
+  }
+
+  .register-title {
+    font-size: 24px;
+  }
+}

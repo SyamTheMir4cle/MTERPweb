@@ -100,3 +100,10 @@
   padding-top: var(--space-4);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ========== Hide sidebar on tablet & mobile ========== */
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+}

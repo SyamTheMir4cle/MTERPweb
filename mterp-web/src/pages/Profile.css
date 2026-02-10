@@ -268,3 +268,40 @@
   flex-direction: column;
   gap: var(--space-1);
 }
+
+/* ========== Tablet (≤1024px) ========== */
+@media (max-width: 1024px) {
+  .profile-container {
+    padding: var(--space-4);
+    padding-bottom: 100px;
+  }
+}
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .profile-container {
+    padding: var(--space-3);
+    padding-bottom: 100px;
+  }
+
+  .profile-title {
+    font-size: var(--font-size-md);
+  }
+
+  .photo-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .photo-initials {
+    font-size: var(--font-size-2xl);
+  }
+
+  .settings-item {
+    padding: var(--space-3);
+  }
+
+  .settings-item-label {
+    font-size: var(--font-size-base);
+  }
+}

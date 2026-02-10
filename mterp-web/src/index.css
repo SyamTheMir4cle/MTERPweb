@@ -346,3 +346,25 @@ select {
   letter-spacing: 1px;
   margin-bottom: var(--space-2);
 }
+
+/* ========== Responsive Breakpoints ========== */
+
+/* Tablet (≤1024px) */
+@media (max-width: 1024px) {
+  .page-container {
+    padding: var(--space-4);
+  }
+}
+
+/* Mobile (≤640px) */
+@media (max-width: 640px) {
+  .page-container {
+    padding: var(--space-3);
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 85vh;
+    border-radius: var(--radius-lg);
+  }
+}

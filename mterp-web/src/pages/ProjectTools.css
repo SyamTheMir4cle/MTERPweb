@@ -248,16 +248,37 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .project-tools-container {
+    padding: var(--space-4);
+  }
+}
+
 @media (max-width: 640px) {
+  .project-tools-container {
+    padding: var(--space-3);
+  }
+
+  .tools-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .tools-header > button:last-child {
+    margin-left: 0;
+    width: 100%;
+  }
+
   .tool-card {
     flex-direction: column;
   }
-  
+
   .tool-actions {
     flex-direction: row;
     width: 100%;
   }
-  
+
   .tool-actions button {
     flex: 1;
   }

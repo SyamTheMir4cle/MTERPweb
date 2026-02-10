@@ -58,18 +58,28 @@
   color: var(--text-muted);
 }
 
-/* Responsive adjustments */
+/* ========== Tablet & Below (≤1024px) — sidebar hidden ========== */
 @media (max-width: 1024px) {
   .app-main {
     margin-left: 0;
   }
-  
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform var(--transition-normal);
+}
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .app-header {
+    padding: var(--space-3) var(--space-4);
   }
-  
-  .sidebar.open {
-    transform: translateX(0);
+
+  .app-greeting {
+    font-size: var(--font-size-xs);
+  }
+
+  .app-username {
+    font-size: var(--font-size-sm);
+  }
+
+  .app-content {
+    padding-bottom: 80px; /* clearance for MobileNav FAB */
   }
 }

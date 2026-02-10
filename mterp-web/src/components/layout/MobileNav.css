@@ -1,5 +1,5 @@
-/* Mobile Navigation - Only visible on mobile */
-@media (min-width: 769px) {
+/* Mobile Navigation - Visible on tablet & mobile (sidebar hidden ≤1024px) */
+@media (min-width: 1025px) {
   .mobile-nav-fab,
   .mobile-nav-overlay,
   .mobile-nav-menu {

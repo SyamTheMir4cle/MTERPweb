@@ -151,3 +151,46 @@
 .nav-buttons > button:only-child {
   margin-left: auto;
 }
+
+/* ========== Tablet (≤1024px) ========== */
+@media (max-width: 1024px) {
+  .add-project-container {
+    padding: var(--space-4);
+  }
+}
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .add-project-container {
+    padding: var(--space-3);
+  }
+
+  .add-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .steps-container {
+    gap: var(--space-1);
+  }
+
+  .step-label {
+    font-size: 9px;
+  }
+
+  .date-row {
+    grid-template-columns: 1fr;
+  }
+
+  .supply-item,
+  .work-item {
+    flex-direction: column;
+  }
+
+  .nav-buttons {
+    flex-direction: column;
+  }
+
+  .nav-buttons button {
+    width: 100%;
+  }
+}

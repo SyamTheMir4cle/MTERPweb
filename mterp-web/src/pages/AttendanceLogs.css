@@ -363,16 +363,47 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .logs-container {
+    padding: var(--space-4);
+  }
+}
+
 @media (max-width: 640px) {
+  .logs-container {
+    padding: var(--space-3);
+  }
+
+  .logs-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .logs-title {
+    font-size: var(--font-size-lg);
+  }
+
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .custom-dates {
     flex-direction: column;
   }
-  
+
   .date-range-tabs {
     flex-wrap: wrap;
+  }
+
+  .record-times {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .record-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
   }
 }

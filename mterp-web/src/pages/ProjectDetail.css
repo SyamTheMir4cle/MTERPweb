@@ -142,3 +142,35 @@
   line-height: 1.6;
   margin: 0;
 }
+
+/* ========== Tablet (≤1024px) ========== */
+@media (max-width: 1024px) {
+  .project-detail-container {
+    padding: var(--space-4);
+  }
+}
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .project-detail-container {
+    padding: var(--space-3);
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .detail-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}

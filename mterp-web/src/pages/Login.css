@@ -145,3 +145,26 @@
     transform: translateY(0);
   }
 }
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .login-content {
+    padding: 24px 20px;
+  }
+
+  .login-title {
+    font-size: 32px;
+  }
+
+  .login-subtitle {
+    font-size: 15px;
+  }
+
+  .login-header {
+    margin-bottom: 28px;
+  }
+
+  .loading-text {
+    font-size: 36px;
+  }
+}

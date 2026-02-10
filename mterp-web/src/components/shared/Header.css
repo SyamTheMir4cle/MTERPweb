@@ -54,3 +54,24 @@
   align-items: center;
   gap: var(--space-3);
 }
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .header {
+    padding: var(--space-4);
+    padding-top: var(--space-5);
+  }
+
+  .header-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .header-left {
+    gap: var(--space-3);
+  }
+
+  .header-back {
+    width: 36px;
+    height: 36px;
+  }
+}

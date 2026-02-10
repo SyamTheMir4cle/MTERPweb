@@ -263,3 +263,45 @@
   margin: var(--space-1) 0 0;
 }
 
+/* ========== Tablet (≤1024px) ========== */
+@media (max-width: 1024px) {
+  .home-container {
+    padding: var(--space-4);
+  }
+}
+
+/* ========== Mobile (≤640px) ========== */
+@media (max-width: 640px) {
+  .home-container {
+    padding: var(--space-3);
+  }
+
+  .home-header {
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+  }
+
+  .home-username {
+    font-size: var(--font-size-lg);
+  }
+
+  .small-cards-row {
+    grid-template-columns: 1fr;
+  }
+
+  .big-card {
+    padding: var(--space-4);
+  }
+
+  .big-card-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .update-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+}
+
