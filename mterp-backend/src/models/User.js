@@ -39,6 +39,14 @@ const userSchema = new mongoose.Schema({
     code: String,
     expiresAt: Date,
   },
+  phone: {
+    type: String,
+    trim: true,
+  },
+  address: {
+    type: String,
+    trim: true,
+  },
   profileImage: String,
   createdAt: {
     type: Date,

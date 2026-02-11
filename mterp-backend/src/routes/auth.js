@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const { User } = require('../models');
 const { auth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { uploadLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -215,7 +216,7 @@ router.put('/profile', auth, async (req, res) => {
 });
 
 // PUT /api/auth/profile/photo - Update profile photo
-router.put('/profile/photo', auth, upload.single('photo'), async (req, res) => {
+router.put('/profile/photo', auth, uploadLimiter, upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ msg: 'No photo uploaded' });

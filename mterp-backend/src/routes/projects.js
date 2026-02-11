@@ -2,6 +2,7 @@ const express = require('express');
 const { Project } = require('../models');
 const { auth, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { uploadLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // POST /api/projects - Create project
-router.post('/', auth, authorize('owner', 'director'), 
+router.post('/', auth, authorize('owner', 'director'), uploadLimiter,
   upload.fields([
     { name: 'shopDrawing', maxCount: 1 },
     { name: 'hse', maxCount: 1 },

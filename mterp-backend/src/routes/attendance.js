@@ -2,6 +2,7 @@ const express = require('express');
 const { Attendance, User } = require('../models');
 const { auth, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { uploadLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -168,7 +169,7 @@ router.post('/checkin', auth, async (req, res) => {
 });
 
 // PUT /api/attendance/checkout - Check out (with selfie photo required)
-router.put('/checkout', auth, upload.single('photo'), async (req, res) => {
+router.put('/checkout', auth, uploadLimiter, upload.single('photo'), async (req, res) => {
   try {
     const { lat, lng } = req.body;
     
@@ -242,7 +243,7 @@ router.put('/:id/wage', auth, authorize('owner', 'director', 'supervisor'), asyn
 });
 
 // Legacy POST /api/attendance - for backwards compatibility
-router.post('/', auth, upload.single('photo'), async (req, res) => {
+router.post('/', auth, uploadLimiter, upload.single('photo'), async (req, res) => {
   try {
     const { wageType, projectId, lat, lng } = req.body;
     
