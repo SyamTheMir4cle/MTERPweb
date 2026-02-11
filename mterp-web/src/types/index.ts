@@ -142,3 +142,12 @@ export interface TaskItem {
   status: 'Pending' | 'Progress' | 'Done';
   priority: 'High' | 'Low';
 }
+
+export interface KasbonItem {
+  id: string;
+  requester: string;
+  role: string;
+  amount: number;
+  reason: string;
+  date: string;
+}

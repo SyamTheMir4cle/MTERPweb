@@ -9,6 +9,7 @@ import {
   ChevronRight,
   HardHat,
   FileText,
+  DollarSign,
 } from 'lucide-react';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -180,6 +181,20 @@ export default function Home() {
             onClick={() => navigate('/tasks')}
           />
         </div>
+
+        {/* My Payments - for worker roles */}
+        {user?.role && ['worker', 'tukang', 'mandor'].includes(user.role) && (
+          <div className="small-cards-row">
+            <DashboardCard
+              icon={DollarSign}
+              label="My Payments"
+              sub="Kasbon & Wages"
+              color="#059669"
+              bg="#D1FAE5"
+              onClick={() => navigate('/my-payments')}
+            />
+          </div>
+        )}
 
         {/* Materials - for supervisor, asset_admin, director, owner */}
         {user?.role && ['supervisor', 'asset_admin', 'director', 'owner'].includes(user.role) && (

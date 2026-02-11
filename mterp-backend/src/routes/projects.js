@@ -11,8 +11,8 @@ router.get('/', auth, async (req, res) => {
   try {
     let query = {};
     
-    // Workers and supervisors see only assigned projects
-    if (['worker', 'supervisor'].includes(req.user.role)) {
+    // Workers can only see projects assigned to them or created by them
+    if (req.user.role === 'worker') {
       query = {
         $or: [
           { assignedTo: req.user._id },

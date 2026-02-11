@@ -13,6 +13,7 @@ import {
   X,
   LogOut,
   User,
+  DollarSign,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './MobileNav.css';
@@ -99,6 +100,15 @@ const NAV_ITEMS: NavItem[] = [
     roles: ['worker', 'tukang', 'mandor', 'supervisor', 'admin_project'],
     color: '#F59E0B',
     bg: '#FEF3C7',
+  },
+  {
+    id: 'my-payments',
+    label: 'My Payments',
+    icon: DollarSign,
+    route: '/my-payments',
+    roles: ['worker', 'tukang', 'mandor'],
+    color: '#059669',
+    bg: '#D1FAE5',
   },
   {
     id: 'approvals',
