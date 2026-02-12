@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Clock, TrendingUp, Plus, ChevronDown, ChevronUp, AlertCircle, Inbox } from 'lucide-react';
+import { DollarSign, Clock, TrendingUp, Plus, ChevronDown, ChevronUp, AlertCircle, Inbox, User, Wallet } from 'lucide-react';
 import api from '../api/api';
-import { Card, Badge, Button, EmptyState } from '../components/shared';
+import { useAuth } from '../contexts/AuthContext';
+import { Card, Badge, Button, EmptyState, CostInput } from '../components/shared';
 import { Alert } from '../components/shared';
 import './MyPayments.css';
 
@@ -34,9 +35,11 @@ interface WageSummary {
   late: number;
   totalHours: number;
   wageMultiplierTotal: number;
+  totalPayment?: number;
 }
 
 export default function MyPayments() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'kasbon' | 'wages'>('kasbon');
   const [kasbons, setKasbons] = useState<KasbonRecord[]>([]);
   const [wageRecords, setWageRecords] = useState<WageRecord[]>([]);
@@ -201,9 +204,34 @@ export default function MyPayments() {
           onClick={() => setActiveTab('wages')}
         >
           <TrendingUp size={16} />
-          Wages
+          Add Request
         </button>
       </div>
+
+      {/* Slip Gaji / Summary Card */}
+      <Card className="summary-card" style={{ marginBottom: 20, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)', color: 'white' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <User size={20} style={{ opacity: 0.9 }} />
+              <span style={{ fontSize: '1.2em', fontWeight: 600 }}>{user?.fullName}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Badge label={user?.role || 'User'} variant="neutral" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none' }} />
+              <span style={{ fontSize: '0.9em', opacity: 0.8 }}>Period: This Month</span>
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 4, opacity: 0.9 }}>
+              <Wallet size={16} />
+              <span style={{ fontSize: '0.9em' }}>Total Earnings</span>
+            </div>
+            <span style={{ fontSize: '1.5em', fontWeight: 700 }}>
+              Rp {new Intl.NumberFormat('id-ID').format(wageSummary?.totalPayment || 0)}
+            </span>
+          </div>
+        </div>
+      </Card>
 
       {/* Loading */}
       {loading && (
@@ -247,14 +275,11 @@ export default function MyPayments() {
             <Card className="kasbon-form-card">
               <h3 className="form-title">New Kasbon Request</h3>
               <div className="form-group">
-                <label className="form-label">Amount (IDR)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                <CostInput
+                  label="Amount (IDR)"
                   placeholder="e.g. 500000"
-                  min="0"
+                  value={Number(amount) || 0}
+                  onChange={(v) => setAmount(v.toString())}
                 />
               </div>
               <div className="form-group">

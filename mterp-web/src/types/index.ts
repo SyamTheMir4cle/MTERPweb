@@ -15,11 +15,14 @@ export interface Resource {
 
 export interface WorkItem {
   id: number;
+  _id?: string;
   name: string;
   qty: number;
   volume: string; // e.g., "M3", "M2"
+  unit: string;   // e.g., "M2", "M3", "pcs"
   cost: number;   // Total Cost (Rv) for this item
   weight: number; // Calculated Percentage (Cost / TotalProjectBudget * 100)
+  actualCost: number;
   
   // Schedule
   dates: {
@@ -46,10 +49,12 @@ export interface WorkItem {
 export interface ProjectSupply {
   id: string;
   item: string;
+  qty: number;
+  unit: string;
   cost: number; // Estimated Cost
   staffAssigned: string;
   deadline: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Ordered' | 'Delivered';
   actualPurchaseDate?: string;
   actualCost?: number;
 }

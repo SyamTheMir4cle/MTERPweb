@@ -91,16 +91,120 @@
   margin-bottom: var(--space-4);
 }
 
-.supply-item,
-.work-item {
+/* Cost Summary */
+.cost-summary {
   display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
-.supply-item > div:first-child,
-.work-item > div:first-child {
-  flex: 1;
+.cost-summary-value {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-left: auto;
+}
+
+/* Item Cards (Supply & Work Items) */
+.item-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  transition: border-color var(--transition-fast);
+}
+
+.item-card:hover {
+  border-color: var(--primary);
+}
+
+.item-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.item-card-number {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.item-delete-btn {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.item-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.item-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.item-field-full {
+  width: 100%;
+}
+
+.item-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.item-field {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Small form controls */
+.form-label-sm {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.form-select-sm {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  height: 40px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.form-select-sm:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 /* Documents */
@@ -181,9 +285,8 @@
     grid-template-columns: 1fr;
   }
 
-  .supply-item,
-  .work-item {
-    flex-direction: column;
+  .item-field-row {
+    grid-template-columns: 1fr;
   }
 
   .nav-buttons {
@@ -192,5 +295,9 @@
 
   .nav-buttons button {
     width: 100%;
+  }
+
+  .cost-summary {
+    flex-wrap: wrap;
   }
 }

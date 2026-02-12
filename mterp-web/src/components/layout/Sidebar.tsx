@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   Briefcase,
@@ -9,6 +9,10 @@ import {
   CheckSquare,
   Truck,
   FileText,
+  DollarSign,
+  User,
+  LogOut,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './Sidebar.css';
@@ -72,6 +76,13 @@ const NAV_ITEMS: NavItem[] = [
     roles: ['worker', 'tukang', 'mandor', 'supervisor', 'admin_project'],
   },
   {
+    id: 'my-payments',
+    label: 'My Payments',
+    icon: DollarSign,
+    route: '/my-payments',
+    roles: ['worker', 'tukang', 'mandor'],
+  },
+  {
     id: 'approvals',
     label: 'Approvals',
     icon: CheckSquare,
@@ -81,13 +92,20 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function Sidebar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const userRole = user?.role?.toLowerCase() || 'worker';
 
   const filteredItems = NAV_ITEMS.filter((item) =>
     item.roles.includes(userRole)
   );
+
+  const isProfileActive = location.pathname === '/profile';
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <aside className="sidebar">
@@ -115,10 +133,36 @@ export default function Sidebar() {
             >
               <Icon size={20} />
               <span>{item.label}</span>
+              {isActive && <ChevronRight size={16} className="sidebar-link-indicator" />}
             </NavLink>
           );
         })}
       </nav>
+
+      {/* Footer with profile & logout */}
+      <div className="sidebar-footer">
+        <NavLink
+          to="/profile"
+          className={`sidebar-profile-btn ${isProfileActive ? 'sidebar-link-active' : ''}`}
+        >
+          <div className="sidebar-avatar">
+            {user?.profilePhoto ? (
+              <img src={user.profilePhoto} alt={user?.fullName} className="sidebar-avatar-img" />
+            ) : (
+              <User size={18} />
+            )}
+          </div>
+          <div className="sidebar-profile-info">
+            <span className="sidebar-profile-name">{user?.fullName || 'User'}</span>
+            <span className="sidebar-profile-role">{user?.role || 'Worker'}</span>
+          </div>
+        </NavLink>
+
+        <button className="sidebar-logout-btn" onClick={handleLogout}>
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
+      </div>
     </aside>
   );
 }

@@ -13,6 +13,9 @@ router.get('/', auth, async (req, res) => {
     
     let query = {};
     
+    // Default sort by date desc
+    let sort = { date: -1 };
+
     // Filter by user (workers can only see their own)
     if (req.user.role === 'worker') {
       query.userId = req.user._id;
@@ -101,6 +104,14 @@ router.get('/recap', auth, async (req, res) => {
       summary.wageMultiplierTotal += a.wageMultiplier || 1;
     });
     
+    // Calculate total payment
+    summary.totalPayment = attendance.reduce((sum, a) => {
+      // Daily rate + Overtime
+      const daily = a.dailyRate || 0;
+      const overtime = a.overtimePay || 0;
+      return sum + daily + overtime;
+    }, 0);
+    
     res.json({ records: attendance, summary });
   } catch (error) {
     console.error('Get attendance recap error:', error);
@@ -121,10 +132,28 @@ router.get('/users', auth, authorize('owner', 'director', 'supervisor'), async (
   }
 });
 
-// POST /api/attendance/checkin - Simple check in (no photo required)
+// POST /api/attendance/checkin - Check in with time & project validation
 router.post('/checkin', auth, async (req, res) => {
   try {
     const { projectId, lat, lng } = req.body;
+    
+    // 1. Time Validation (08:00 - 16:00)
+    const now = new Date();
+    const hour = now.getHours();
+    
+    // Allow supervisor/admin to bypass? For now, strict for everyone or just workers?
+    // User request: "outside of that time worker cant check in"
+    // Assuming strict for workers.
+    if (req.user.role === 'worker') {
+      if (hour < 8 || hour >= 16) {
+        return res.status(400).json({ msg: 'Check-in is only allowed between 08:00 and 16:00' });
+      }
+    }
+
+    // 2. Project Validation
+    if (!projectId) {
+      return res.status(400).json({ msg: 'Please select a project to check in' });
+    }
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -146,6 +175,7 @@ router.post('/checkin', auth, async (req, res) => {
     
     if (attendance) {
       attendance.checkIn = checkInData;
+      attendance.projectId = projectId;
     } else {
       attendance = new Attendance({
         userId: req.user._id,
@@ -153,7 +183,7 @@ router.post('/checkin', auth, async (req, res) => {
         checkIn: checkInData,
         wageType: 'daily',
         wageMultiplier: 1,
-        projectId: projectId || undefined,
+        projectId: projectId,
         status: 'Present',
       });
     }
@@ -164,6 +194,55 @@ router.post('/checkin', auth, async (req, res) => {
     res.status(201).json(attendance);
   } catch (error) {
     console.error('Check in error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/attendance/permit - Create permit request
+router.post('/permit', auth, uploadLimiter, upload.single('evidence'), async (req, res) => {
+  try {
+    const { reason } = req.body;
+    
+    if (!reason || !req.file) {
+      return res.status(400).json({ msg: 'Reason and evidence photo are required' });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if record exists
+    let attendance = await Attendance.findOne({
+      userId: req.user._id,
+      date: today,
+    });
+
+    if (attendance) {
+      if (attendance.checkIn?.time) {
+        return res.status(400).json({ msg: 'Cannot request permit, you are already checked in.' });
+      }
+      attendance.status = 'Permit';
+      attendance.permit = {
+        reason,
+        evidence: req.file.path,
+        status: 'Pending',
+      };
+    } else {
+      attendance = new Attendance({
+        userId: req.user._id,
+        date: today,
+        status: 'Permit',
+        permit: {
+          reason,
+          evidence: req.file.path,
+          status: 'Pending',
+        },
+      });
+    }
+
+    await attendance.save();
+    res.status(201).json(attendance);
+  } catch (error) {
+    console.error('Permit request error:', error);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -209,35 +288,80 @@ router.put('/checkout', auth, uploadLimiter, upload.single('photo'), async (req,
   }
 });
 
-// PUT /api/attendance/:id/wage - Set wage type (supervisor only)
-router.put('/:id/wage', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
+// PUT /api/attendance/:id/rate - Update rate/wage (supervisor only)
+router.put('/:id/rate', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
   try {
-    const { wageType } = req.body;
+    const { dailyRate, wageType, overtimePay } = req.body;
     
-    const wageMultipliers = {
-      'daily': 1,
-      'overtime_1.5': 1.5,
-      'overtime_2': 2,
-    };
+    const updates = {};
     
-    const attendance = await Attendance.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          wageType: wageType || 'daily',
-          wageMultiplier: wageMultipliers[wageType] || 1,
-        }
-      },
-      { new: true }
-    ).populate('userId', 'fullName role');
-    
-    if (!attendance) {
-      return res.status(404).json({ msg: 'Attendance record not found' });
+    // Basic Wage Type update
+    if (wageType) {
+      const wageMultipliers = {
+        'daily': 1,
+        'overtime_1.5': 1.5,
+        'overtime_2': 2,
+      };
+      updates.wageType = wageType;
+      updates.wageMultiplier = wageMultipliers[wageType] || 1;
+    }
+
+    // Rate calculation
+    if (dailyRate !== undefined) {
+      const rate = Number(dailyRate);
+      updates.dailyRate = rate;
+      updates.hourlyRate = rate / 8; // Auto-calculate hourly
     }
     
+    // We need to fetch the record first to calculate overtime pay correctly based on existing data + updates
+    let attendance = await Attendance.findById(req.params.id);
+    if (!attendance) return res.status(404).json({ msg: 'Record not found' });
+
+    // Merge updates
+    Object.assign(attendance, updates);
+    
+    // Calculate Overtime Pay
+    // Priority: 1. Manual Override (from body) 2. Auto-calculation (if wageType is overtime)
+    if (overtimePay !== undefined) {
+       attendance.overtimePay = Number(overtimePay);
+    } else if (attendance.wageType.startsWith('overtime') && attendance.checkIn?.time && attendance.checkOut?.time) {
+       const hours = Math.max(0, (new Date(attendance.checkOut.time) - new Date(attendance.checkIn.time)) / (1000 * 60 * 60));
+       attendance.overtimePay = Math.round(hours * attendance.hourlyRate * attendance.wageMultiplier);
+    } else {
+       // If not overtime type and no manual override, default to 0
+       attendance.overtimePay = 0;
+    }
+
+    await attendance.save();
     res.json(attendance);
   } catch (error) {
-    console.error('Update wage error:', error);
+    console.error('Update rate error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/attendance/pay - Mark records as Paid (supervisor only)
+router.post('/pay', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
+  try {
+    const { attendanceIds } = req.body; // Array of IDs
+    
+    if (!attendanceIds || !Array.isArray(attendanceIds) || attendanceIds.length === 0) {
+      return res.status(400).json({ msg: 'No records selected' });
+    }
+
+    await Attendance.updateMany(
+      { _id: { $in: attendanceIds } },
+      { 
+        $set: { 
+          paymentStatus: 'Paid', 
+          paidAt: new Date() 
+        } 
+      }
+    );
+
+    res.json({ msg: 'Payment status updated' });
+  } catch (error) {
+    console.error('Payment update error:', error);
     res.status(500).json({ msg: 'Server error' });
   }
 });

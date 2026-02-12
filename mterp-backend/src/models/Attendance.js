@@ -36,6 +36,24 @@ const attendanceSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  dailyRate: {
+    type: Number,
+    default: 0,
+  },
+  hourlyRate: {
+    type: Number,
+    default: 0,
+  },
+  overtimePay: {
+    type: Number,
+    default: 0,
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Unpaid', 'Paid'],
+    default: 'Unpaid',
+  },
+  paidAt: Date,
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
@@ -43,8 +61,17 @@ const attendanceSchema = new mongoose.Schema({
   notes: String,
   status: {
     type: String,
-    enum: ['Present', 'Absent', 'Late', 'Half-day'],
+    enum: ['Present', 'Absent', 'Late', 'Half-day', 'Permit'],
     default: 'Present',
+  },
+  permit: {
+    reason: String,
+    evidence: String,
+    status: {
+      type: String,
+      enum: ['Pending', 'Approved', 'Rejected'],
+      default: 'Pending',
+    }
   },
   createdAt: {
     type: Date,

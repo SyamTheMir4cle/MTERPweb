@@ -300,7 +300,7 @@ export default function Tasks() {
                   {task.dueDate && (
                     <span className="task-meta-item">
                       <Calendar size={14} />
-                      {new Date(task.dueDate).toLocaleDateString()}
+                      {new Date(task.dueDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </span>
                   )}
                 </div>

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Calendar, User, Clock, Filter, 
-  ChevronDown, DollarSign, X, Check
+  ChevronDown, DollarSign, X, Check, Building
 } from 'lucide-react';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, Badge, Button, EmptyState } from '../components/shared';
+import { Card, Badge, Button, EmptyState, CostInput } from '../components/shared';
 import './AttendanceLogs.css';
 
 interface UserOption {
@@ -23,6 +23,12 @@ interface AttendanceRecord {
   checkOut?: { time: string; photo?: string };
   wageType: string;
   wageMultiplier: number;
+  dailyRate: number;
+  hourlyRate: number;
+  overtimePay: number;
+  paymentStatus: 'Unpaid' | 'Paid';
+  paidAt?: string;
+  projectId?: { _id: string; nama: string };
   status: string;
 }
 
@@ -33,6 +39,7 @@ interface RecapSummary {
   absent: number;
   totalHours: number;
   wageMultiplierTotal: number;
+  totalPayment: number;
 }
 
 const WAGE_OPTIONS = [
@@ -55,12 +62,16 @@ export default function AttendanceLogs() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState<'All' | 'Unpaid' | 'Paid'>('Unpaid');
   
   // Wage modal
   const [wageModal, setWageModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [newWageType, setNewWageType] = useState('daily');
+  const [newDailyRate, setNewDailyRate] = useState<number>(0);
+  const [newOvertimePay, setNewOvertimePay] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   const isSupervisor = user?.role && ['owner', 'director', 'supervisor'].includes(user.role);
 
@@ -79,7 +90,10 @@ export default function AttendanceLogs() {
     if (startDate && endDate) {
       fetchRecords();
     }
-  }, [startDate, endDate, selectedUser]);
+    if (startDate && endDate) {
+      fetchRecords();
+    }
+  }, [startDate, endDate, selectedUser, paymentStatus]);
 
   const fetchUsers = async () => {
     try {
@@ -97,7 +111,17 @@ export default function AttendanceLogs() {
       if (selectedUser) params.userId = selectedUser;
       
       const response = await api.get('/attendance/recap', { params });
-      setRecords(response.data.records);
+      
+      let fetchedRecords = response.data.records;
+      
+      // Client-side filter for payment status if backend doesn't support it directly yet
+      if (paymentStatus !== 'All') {
+        fetchedRecords = fetchedRecords.filter((r: AttendanceRecord) => 
+          (r.paymentStatus || 'Unpaid') === paymentStatus
+        );
+      }
+
+      setRecords(fetchedRecords);
       setSummary(response.data.summary);
     } catch (err) {
       console.error('Failed to fetch attendance', err);
@@ -126,7 +150,35 @@ export default function AttendanceLogs() {
   const openWageModal = (record: AttendanceRecord) => {
     setSelectedRecord(record);
     setNewWageType(record.wageType);
+    setNewDailyRate(record.dailyRate || 0);
+    setNewOvertimePay(record.overtimePay || 0);
     setWageModal(true);
+  };
+
+  const calculateAutoOvertime = (rate: number, type: string) => {
+    if (!selectedRecord?.checkIn?.time || !selectedRecord?.checkOut?.time) return 0;
+    if (!type.startsWith('overtime')) return 0;
+    
+    const start = new Date(selectedRecord.checkIn.time).getTime();
+    const end = new Date(selectedRecord.checkOut.time).getTime();
+    const durationHours = Math.max(0, (end - start) / (1000 * 60 * 60));
+    
+    const hourlyRate = rate / 8;
+    const multiplier = type === 'overtime_1.5' ? 1.5 : (type === 'overtime_2' ? 2 : 1);
+    
+    return Math.round(durationHours * hourlyRate * multiplier);
+  };
+
+  const handleRateChange = (val: number) => {
+    setNewDailyRate(val);
+    const newOvertime = calculateAutoOvertime(val, newWageType);
+    setNewOvertimePay(newOvertime);
+  };
+
+  const handleTypeChange = (val: string) => {
+    setNewWageType(val);
+    const newOvertime = calculateAutoOvertime(newDailyRate, val);
+    setNewOvertimePay(newOvertime);
   };
 
   const handleSaveWage = async () => {
@@ -134,7 +186,11 @@ export default function AttendanceLogs() {
     
     setSubmitting(true);
     try {
-      await api.put(`/attendance/${selectedRecord._id}/wage`, { wageType: newWageType });
+      await api.put(`/attendance/${selectedRecord._id}/rate`, { 
+        wageType: newWageType,
+        dailyRate: newDailyRate,
+        overtimePay: newOvertimePay,
+      });
       await fetchRecords();
       setWageModal(false);
       setSelectedRecord(null);
@@ -143,6 +199,28 @@ export default function AttendanceLogs() {
       alert('Failed to update wage type');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleMarkAsPaid = async () => {
+    if (records.length === 0) return;
+    const unpaidIds = records.filter(r => r.paymentStatus !== 'Paid').map(r => r._id);
+    if (unpaidIds.length === 0) {
+      alert('No unpaid records to pay.');
+      return;
+    }
+
+    if (!window.confirm(`Mark ${unpaidIds.length} records as PAID? Total: Rp ${new Intl.NumberFormat('id-ID').format(summary?.totalPayment || 0)}`)) return;
+
+    setPaying(true);
+    try {
+      await api.post('/attendance/pay', { attendanceIds: unpaidIds });
+      await fetchRecords(); // Refresh to see updated status
+    } catch (err) {
+      console.error('Payment failed', err);
+      alert('Failed to mark as paid');
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -257,6 +335,22 @@ export default function AttendanceLogs() {
             </div>
           </div>
         )}
+
+        <div className="filter-group">
+          <label className="filter-label">Payment Status</label>
+          <div className="select-wrapper">
+            <select 
+              value={paymentStatus}
+              onChange={(e) => setPaymentStatus(e.target.value as any)}
+              className="form-select"
+            >
+              <option value="Unpaid">Unpaid</option>
+              <option value="Paid">Paid</option>
+              <option value="All">All</option>
+            </select>
+            <ChevronDown size={16} className="select-icon" />
+          </div>
+        </div>
       </Card>
 
       {/* Summary */}
@@ -280,7 +374,26 @@ export default function AttendanceLogs() {
               <span className="summary-value">{summary.wageMultiplierTotal.toFixed(1)}x</span>
               <span className="summary-label">Wage Total</span>
             </div>
+            
+            <div className="summary-item" style={{ borderLeft: '4px solid var(--primary)' }}>
+              <span className="summary-value" style={{ color: 'var(--primary)', fontSize: '1.2em' }}>
+                Rp {new Intl.NumberFormat('id-ID').format(summary.totalPayment || 0)}
+              </span>
+              <span className="summary-label">Total Payment</span>
+            </div>
           </div>
+
+          {isSupervisor && paymentStatus === 'Unpaid' && (summary.totalPayment || 0) > 0 && (
+            <div className="pay-action" style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                title="Mark All as Paid"
+                icon={Check}
+                onClick={handleMarkAsPaid}
+                loading={paying}
+                variant="primary"
+              />
+            </div>
+          )}
         </Card>
       )}
 
@@ -322,6 +435,27 @@ export default function AttendanceLogs() {
                 <div className="time-item">
                   <Clock size={14} />
                   <span>Out: {record.checkOut?.time ? formatTime(record.checkOut.time) : '--:--'}</span>
+                </div>
+                </div>
+
+              {/* Rate & Payment Info */}
+              <div className="record-financials" style={{ marginTop: 8, fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Daily: Rp {new Intl.NumberFormat('id-ID').format(record.dailyRate || 0)}</span>
+                  <span>Overtime: Rp {new Intl.NumberFormat('id-ID').format(record.overtimePay || 0)}</span>
+                </div>
+                {record.projectId && (
+                  <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Building size={12} />
+                    <span>{record.projectId.nama}</span>
+                  </div>
+                )}
+                <div style={{ marginTop: 4 }}>
+                  <Badge 
+                    label={record.paymentStatus || 'Unpaid'} 
+                    variant={record.paymentStatus === 'Paid' ? 'success' : 'warning'} 
+                    size="small" 
+                  />
                 </div>
               </div>
 
@@ -365,13 +499,42 @@ export default function AttendanceLogs() {
                   <button
                     key={opt.value}
                     className={`wage-option ${newWageType === opt.value ? 'active' : ''}`}
-                    onClick={() => setNewWageType(opt.value)}
+                    onClick={() => handleTypeChange(opt.value)}
                   >
                     {newWageType === opt.value && <Check size={16} />}
                     <span>{opt.label}</span>
                     <span className="wage-multiplier">{opt.multiplier}x</span>
                   </button>
                 ))}
+              </div>
+
+              <div className="rate-input-section" style={{ marginTop: 24 }}>
+                <CostInput
+                  label="Rate per Day (Rp)"
+                  value={newDailyRate}
+                  onChange={handleRateChange}
+                  placeholder="e.g. 150000"
+                />
+                
+                {newWageType.startsWith('overtime') && (
+                  <div style={{ marginTop: 16 }}>
+                    <CostInput
+                      label="Overtime Pay (Rp)"
+                      value={newOvertimePay}
+                      onChange={setNewOvertimePay}
+                      placeholder="Auto-calculated or Manual Override"
+                    />
+                    {selectedRecord.checkIn?.time && selectedRecord.checkOut?.time && (
+                      <p className="helper-text" style={{ fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: 4 }}>
+                        Duration: {((new Date(selectedRecord.checkOut.time).getTime() - new Date(selectedRecord.checkIn.time).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <p className="helper-text" style={{ fontSize: '0.8em', color: 'var(--text-muted)', marginTop: 12 }}>
+                  Hourly rate is auto-calculated (Daily / 8). Overtime is calculated based on duration, but can be manually overridden above.
+                </p>
               </div>
             </div>
             

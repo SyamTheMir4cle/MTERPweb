@@ -140,19 +140,64 @@ router.put('/:id/progress', auth, authorize('owner', 'director', 'supervisor'), 
   }
 });
 
-// POST /api/projects/:id/daily-report - Add daily report
+// POST /api/projects/:id/daily-report - Add daily report with per-item progress
 router.post('/:id/daily-report', auth, authorize('supervisor', 'owner', 'director'), async (req, res) => {
   try {
-    const { progressPercent, weather, materials, workforce, notes, date } = req.body;
+    const { workItemUpdates, supplyUpdates, weather, materials, workforce, notes, date } = req.body;
     
     const project = await Project.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ msg: 'Project not found' });
     }
     
+    // Process per-workitem updates
+    const processedWorkUpdates = [];
+    if (workItemUpdates && Array.isArray(workItemUpdates)) {
+      for (const update of workItemUpdates) {
+        const workItem = project.workItems.id(update.workItemId);
+        if (workItem) {
+          const snapshot = {
+            workItemId: workItem._id,
+            name: workItem.name,
+            previousProgress: workItem.progress || 0,
+            newProgress: Math.min(100, Math.max(0, Number(update.newProgress) || 0)),
+            actualCost: Number(update.actualCost) || 0,
+          };
+          workItem.progress = snapshot.newProgress;
+          workItem.actualCost = snapshot.actualCost;
+          processedWorkUpdates.push(snapshot);
+        }
+      }
+    }
+    
+    // Process supply status updates
+    const processedSupplyUpdates = [];
+    if (supplyUpdates && Array.isArray(supplyUpdates)) {
+      for (const update of supplyUpdates) {
+        const supply = project.supplies.id(update.supplyId);
+        if (supply) {
+          const snapshot = {
+            supplyId: supply._id,
+            item: supply.item,
+            previousStatus: supply.status,
+            newStatus: update.newStatus || supply.status,
+            actualCost: Number(update.actualCost) || 0,
+          };
+          if (update.newStatus) supply.status = update.newStatus;
+          supply.actualCost = Number(update.actualCost) || supply.actualCost || 0;
+          processedSupplyUpdates.push(snapshot);
+        }
+      }
+    }
+    
+    // Recalculate overall progress (cost-weighted, includes supplies)
+    project.progress = project.calculateProgress();
+    
     const report = {
       date: date ? new Date(date) : new Date(),
-      progressPercent: Number(progressPercent) || 0,
+      progressPercent: project.progress,
+      workItemUpdates: processedWorkUpdates,
+      supplyUpdates: processedSupplyUpdates,
       weather,
       materials,
       workforce,
@@ -162,12 +207,9 @@ router.post('/:id/daily-report', auth, authorize('supervisor', 'owner', 'directo
     
     project.dailyReports.push(report);
     
-    // Update overall progress
-    const newProgress = Math.min(100, (project.progress || 0) + Number(progressPercent));
-    project.progress = newProgress;
-    if (newProgress >= 100) {
+    if (project.progress >= 100) {
       project.status = 'Completed';
-    } else {
+    } else if (project.progress > 0) {
       project.status = 'In Progress';
     }
     
@@ -191,6 +233,44 @@ router.delete('/:id', auth, authorize('owner'), async (req, res) => {
     res.json({ msg: 'Project deleted' });
   } catch (error) {
     console.error('Delete project error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// PUT /api/projects/:id/work-items/:itemId/progress - Update individual work item progress
+router.put('/:id/work-items/:itemId/progress', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
+  try {
+    const { progress, actualCost } = req.body;
+    
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ msg: 'Project not found' });
+    }
+    
+    const workItem = project.workItems.id(req.params.itemId);
+    if (!workItem) {
+      return res.status(404).json({ msg: 'Work item not found' });
+    }
+    
+    if (progress !== undefined) {
+      workItem.progress = Math.min(100, Math.max(0, Number(progress)));
+    }
+    if (actualCost !== undefined) {
+      workItem.actualCost = Number(actualCost) || 0;
+    }
+    
+    // Recalculate overall project progress (cost-weighted)
+    project.progress = project.calculateProgress();
+    if (project.progress >= 100) {
+      project.status = 'Completed';
+    } else if (project.progress > 0) {
+      project.status = 'In Progress';
+    }
+    
+    await project.save();
+    res.json(project);
+  } catch (error) {
+    console.error('Update work item progress error:', error);
     res.status(500).json({ msg: 'Server error' });
   }
 });

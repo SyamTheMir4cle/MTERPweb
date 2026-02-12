@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Clock, DollarSign, AlertCircle, Check, LogOut, FileText } from 'lucide-react';
+import { Upload, Clock, DollarSign, AlertCircle, Check, LogOut, FileText, Building, CalendarOff } from 'lucide-react';
 import api from '../api/api';
-import { Card, Button, Input, Alert } from '../components/shared';
+import { Card, Button, Input, Alert, CostInput } from '../components/shared';
 import { useAuth } from '../contexts/AuthContext';
 import './Attendance.css';
 
@@ -35,11 +35,29 @@ export default function Attendance() {
   const [kasbonAmount, setKasbonAmount] = useState('');
   const [kasbonReason, setKasbonReason] = useState('');
 
+  // Project & Permit
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [permitModal, setPermitModal] = useState(false);
+  const [permitReason, setPermitReason] = useState('');
+  const [permitPhoto, setPermitPhoto] = useState<File | null>(null);
+  const [permitPhotoPreview, setPermitPhotoPreview] = useState<string | null>(null);
+
   const isSupervisor = user?.role && ['owner', 'director', 'supervisor'].includes(user.role);
 
   useEffect(() => {
     fetchTodayAttendance();
+    fetchProjects();
   }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const response = await api.get('/projects');
+      setProjects(response.data);
+    } catch (err) {
+      console.error('Failed to fetch projects', err);
+    }
+  };
 
   const fetchTodayAttendance = async () => {
     try {
@@ -60,10 +78,28 @@ export default function Attendance() {
     }
   };
 
+  const handlePermitFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPermitPhoto(file);
+      setPermitPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleCheckIn = async () => {
+    if (!selectedProjectId) {
+      setAlertData({
+        visible: true,
+        type: 'error',
+        title: 'Project Required',
+        message: 'Please select a project before checking in.',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.post('/attendance/checkin', {});
+      await api.post('/attendance/checkin', { projectId: selectedProjectId });
 
       setAlertData({
         visible: true,
@@ -152,12 +188,60 @@ export default function Attendance() {
     }
   };
 
+  const handlePermitSubmit = async () => {
+    if (!permitReason || !permitPhoto) {
+      alert('Reason and photo evidence are required');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('reason', permitReason);
+      formData.append('evidence', permitPhoto);
+
+      await api.post('/attendance/permit', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setAlertData({
+        visible: true,
+        type: 'success',
+        title: 'Permit Sent',
+        message: 'Your permit request has been submitted.',
+      });
+      setPermitModal(false);
+      setPermitReason('');
+      setPermitPhoto(null);
+      setPermitPhotoPreview(null);
+      await fetchTodayAttendance();
+    } catch (err: any) {
+      console.error('Permit failed', err);
+      setAlertData({
+        visible: true,
+        type: 'error',
+        title: 'Request Failed',
+        message: err.response?.data?.msg || 'Failed to submit permit.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatTime = (dateStr: string) => {
     return new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   };
 
   const hasCheckedIn = todayRecord?.checkIn?.time;
   const hasCheckedOut = todayRecord?.checkOut?.time;
+  const isPermit = todayRecord?.status === 'Permit';
+
+  // Time Validation
+  const now = new Date();
+  const currentHour = now.getHours();
+  // 08:00 to 16:00 means 8 <= hour < 16. So 15:59 is ok, 16:00 is not.
+  const isWorkingHours = currentHour >= 8 && currentHour < 16;
+  const checkInDisabled = !isWorkingHours && user?.role === 'worker'; // Only strict for workers
 
   return (
     <div className="attendance-container">
@@ -221,6 +305,37 @@ export default function Attendance() {
             size="large"
             loading={loading}
             fullWidth
+            disabled={checkInDisabled}
+          />
+          
+          <div className="form-group" style={{ marginTop: 16 }}>
+            <label className="form-label">Work Location / Project</label>
+            <select
+              className="form-input"
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+            >
+              <option value="">-- Select Project --</option>
+              {projects.map((p) => (
+                <option key={p._id} value={p._id}>{p.nama || p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {!isWorkingHours && user?.role === 'worker' && (
+            <p className="error-text" style={{ marginTop: 8, textAlign: 'center' }}>
+              Check-in only available between 08:00 - 16:00
+            </p>
+          )}
+
+          <Button
+            title="Request Permit / Leave"
+            icon={CalendarOff}
+            onClick={() => setPermitModal(true)}
+            variant="outline"
+            size="medium"
+            fullWidth
+            style={{ marginTop: 12 }}
           />
         </Card>
       )}
@@ -303,6 +418,51 @@ export default function Attendance() {
         )}
       </div>
 
+      {/* Permit Modal */}
+      {permitModal && (
+        <div className="modal-overlay" onClick={() => setPermitModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Request Permit / Leave</h3>
+            <p className="section-desc">Upload evidence (e.g. medical letter) and reason.</p>
+
+            <Input
+              label="Reason"
+              placeholder="Why are you unable to work?"
+              value={permitReason}
+              onChangeText={setPermitReason}
+              multiline
+            />
+
+            <div className="photo-upload">
+              {permitPhotoPreview ? (
+                <div className="photo-preview">
+                  <img src={permitPhotoPreview} alt="Preview" />
+                  <button className="photo-remove" onClick={() => { setPermitPhoto(null); setPermitPhotoPreview(null); }}>
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="photo-input">
+                  <Upload size={32} color="var(--text-muted)" />
+                  <span>Click to upload evidence</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePermitFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              )}
+            </div>
+
+            <div className="modal-actions">
+              <Button title="Cancel" onClick={() => setPermitModal(false)} variant="outline" />
+              <Button title="Submit Request" onClick={handlePermitSubmit} loading={loading} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Kasbon Modal */}
       {kasbonOpen && (
         <div className="modal-overlay" onClick={() => setKasbonOpen(false)}>
@@ -313,12 +473,11 @@ export default function Attendance() {
               <span>Kasbon akan dipotong dari gaji bulanan Anda</span>
             </div>
 
-            <Input
+            <CostInput
               label="Amount (Rp)"
-              type="number"
               placeholder="e.g. 500000"
-              value={kasbonAmount}
-              onChangeText={setKasbonAmount}
+              value={Number(kasbonAmount) || 0}
+              onChange={(v) => setKasbonAmount(v.toString())}
             />
 
             <Input
