@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
+  BarChart3,
   Briefcase,
   Wrench,
   Clock,
@@ -14,6 +15,7 @@ import {
   LogOut,
   User,
   DollarSign,
+  Receipt,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './MobileNav.css';
@@ -37,6 +39,15 @@ const NAV_ITEMS: NavItem[] = [
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'worker', 'mandor', 'tukang', 'logistik'],
     color: '#6366F1',
     bg: '#EEF2FF',
+  },
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: BarChart3,
+    route: '/dashboard',
+    roles: ['owner', 'director', 'supervisor'],
+    color: '#312E59',
+    bg: '#F0EDF6',
   },
   {
     id: 'profile',
@@ -119,6 +130,15 @@ const NAV_ITEMS: NavItem[] = [
     color: '#EF4444',
     bg: '#FEE2E2',
   },
+  {
+    id: 'slip-gaji',
+    label: 'Slip Gaji',
+    icon: Receipt,
+    route: '/slip-gaji',
+    roles: ['owner', 'director', 'supervisor'],
+    color: '#0D9488',
+    bg: '#CCFBF1',
+  },
 ];
 
 export default function MobileNav() {
@@ -145,7 +165,7 @@ export default function MobileNav() {
   return (
     <>
       {/* Overlay */}
-      <div 
+      <div
         className={`mobile-nav-overlay ${isOpen ? 'open' : ''}`}
         onClick={() => setIsOpen(false)}
       />
@@ -155,15 +175,15 @@ export default function MobileNav() {
         <div className="mobile-nav-items">
           {filteredItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.route || 
+            const isActive = location.pathname === item.route ||
               location.pathname.startsWith(item.route + '/');
-            
+
             return (
               <button
                 key={item.id}
                 className={`mobile-nav-item ${isActive ? 'active' : ''}`}
                 onClick={() => handleNavigation(item.route)}
-                style={{ 
+                style={{
                   animationDelay: `${index * 50}ms`,
                   '--item-color': item.color,
                   '--item-bg': item.bg,
@@ -176,7 +196,7 @@ export default function MobileNav() {
               </button>
             );
           })}
-          
+
           {/* Logout Button */}
           <button
             className="mobile-nav-item logout"
@@ -192,7 +212,7 @@ export default function MobileNav() {
       </div>
 
       {/* FAB Button */}
-      <button 
+      <button
         className={`mobile-nav-fab ${isOpen ? 'open' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Navigation menu"

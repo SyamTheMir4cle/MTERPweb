@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react';
-import { DollarSign, Clock, TrendingUp, Plus, ChevronDown, ChevronUp, AlertCircle, Inbox, User, Wallet } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  DollarSign, Clock, TrendingUp, Plus, ChevronDown, ChevronUp, AlertCircle,
+  Inbox, User, Wallet, Receipt, X, Calendar, CreditCard, Shield,
+  CheckCircle2, Lock, Unlock, FileText, Briefcase, Download,
+} from 'lucide-react';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Badge, Button, EmptyState, CostInput } from '../components/shared';
 import { Alert } from '../components/shared';
+import { exportSlipToPdf } from '../utils/exportSlipPdf';
 import './MyPayments.css';
 
 interface KasbonRecord {
@@ -38,13 +43,64 @@ interface WageSummary {
   totalPayment?: number;
 }
 
+interface MySlip {
+  _id: string;
+  slipNumber: string;
+  workerId: { fullName: string; role: string };
+  period: { startDate?: string; endDate?: string; month?: number; year?: number };
+  attendanceSummary: {
+    totalDays: number;
+    presentDays: number;
+    lateDays: number;
+    absentDays: number;
+    permitDays: number;
+    totalHours: number;
+  };
+  earnings: {
+    dailyRate: number;
+    totalDailyWage: number;
+    totalOvertime: number;
+    bonus: number;
+    deductions: number;
+    kasbonDeduction: number;
+    netPay: number;
+  };
+  workerPaymentInfo: { bankAccount: string; bankPlatform: string; accountName: string };
+  authorization: {
+    directorName: string;
+    directorSignedAt: string;
+    ownerName: string;
+    ownerSignedAt: string;
+    directorPassphrase: string;
+    ownerPassphrase: string;
+  };
+  status: string;
+  notes: string;
+  createdAt: string;
+}
+
+const formatRp = (v: number) => `Rp ${new Intl.NumberFormat('id-ID').format(v || 0)}`;
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const fmtPeriod = (p: { startDate?: string; endDate?: string; month?: number; year?: number }) => {
+  if (p.startDate && p.endDate) return `${fmtDate(p.startDate)} — ${fmtDate(p.endDate)}`;
+  if (p.month && p.year) return `${MONTHS_SHORT[(p.month || 1) - 1]} ${p.year}`;
+  return 'N/A';
+};
+
 export default function MyPayments() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'kasbon' | 'wages'>('kasbon');
+  const [activeTab, setActiveTab] = useState<'kasbon' | 'wages' | 'slip'>('kasbon');
   const [kasbons, setKasbons] = useState<KasbonRecord[]>([]);
   const [wageRecords, setWageRecords] = useState<WageRecord[]>([]);
   const [wageSummary, setWageSummary] = useState<WageSummary | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Slip gaji state
+  const [mySlips, setMySlips] = useState<MySlip[]>([]);
+  const [slipLoading, setSlipLoading] = useState(false);
+  const [selectedSlip, setSelectedSlip] = useState<MySlip | null>(null);
+  const [slipDetailOpen, setSlipDetailOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Kasbon form
@@ -88,6 +144,20 @@ export default function MyPayments() {
       setLoading(false);
     }
   };
+
+  // Fetch my slips when tab is active
+  const fetchMySlips = useCallback(async () => {
+    setSlipLoading(true);
+    try {
+      const res = await api.get('/slipgaji/my');
+      setMySlips(res.data);
+    } catch { /* empty */ }
+    setSlipLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'slip') fetchMySlips();
+  }, [activeTab, fetchMySlips]);
 
   const handleSubmitKasbon = async () => {
     if (!amount || Number(amount) <= 0) return;
@@ -205,6 +275,13 @@ export default function MyPayments() {
         >
           <TrendingUp size={16} />
           Add Request
+        </button>
+        <button
+          className={`mypayments-tab ${activeTab === 'slip' ? 'active' : ''}`}
+          onClick={() => setActiveTab('slip')}
+        >
+          <Receipt size={16} />
+          Slip Gaji
         </button>
       </div>
 
@@ -402,6 +479,226 @@ export default function MyPayments() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ===== SLIP GAJI TAB ===== */}
+      {!loading && !error && activeTab === 'slip' && (
+        <div className="mypayments-content">
+          {slipLoading ? (
+            <div className="mypayments-loading">
+              <div className="spinner"></div>
+              <span>Loading slips…</span>
+            </div>
+          ) : mySlips.length === 0 ? (
+            <EmptyState
+              icon={Receipt}
+              title="No Salary Slips"
+              description="No authorized salary slips have been issued to you yet."
+            />
+          ) : (
+            <div className="records-list">
+              {mySlips.map((slip) => (
+                <Card
+                  key={slip._id}
+                  className="record-card slip-card"
+                  onClick={() => { setSelectedSlip(slip); setSlipDetailOpen(true); }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="record-header">
+                    <span className="record-date">
+                      <Calendar size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                      {fmtPeriod(slip.period)}
+                    </span>
+                    <Badge
+                      label={slip.status.toUpperCase()}
+                      variant={slip.status === 'authorized' ? 'success' : 'primary'}
+                      size="small"
+                    />
+                  </div>
+                  <div className="record-amount">{formatRp(slip.earnings.netPay)}</div>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+                    <span className="record-meta">
+                      <Clock size={12} style={{ marginRight: 3, verticalAlign: 'middle' }} />
+                      {slip.attendanceSummary.presentDays} days
+                    </span>
+                    <span className="record-meta" style={{ fontFamily: 'monospace', fontSize: '0.75em' }}>
+                      {slip.slipNumber}
+                    </span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ===== SLIP DETAIL MODAL ===== */}
+      {slipDetailOpen && selectedSlip && (
+        <div className="modal-overlay" onClick={() => setSlipDetailOpen(false)}>
+          <div className="sg-modal sg-modal-detail" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-white)', borderRadius: 16, width: '92%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.18)', animation: 'sg-modal-in 0.25s ease-out' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '20px 20px 0' }}>
+              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #059669, #34D399)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={20} color="white" />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.1em', fontWeight: 700, margin: 0 }}>Salary Slip</h3>
+                <p style={{ fontSize: '0.75em', color: 'var(--text-muted)', margin: 0 }}>{selectedSlip.slipNumber}</p>
+              </div>
+              <button
+                onClick={() => setSlipDetailOpen(false)}
+                style={{ marginLeft: 'auto', width: 32, height: 32, border: 'none', background: 'var(--bg-secondary)', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Worker Info */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #6366F1, #818CF8)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1em' }}>
+                  {selectedSlip.workerId?.fullName?.[0]?.toUpperCase() || 'W'}
+                </div>
+                <div>
+                  <span style={{ fontWeight: 700, fontSize: '1em' }}>{selectedSlip.workerId?.fullName}</span><br />
+                  <span style={{ fontSize: '0.75em', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{selectedSlip.workerId?.role}</span>
+                </div>
+              </div>
+
+              {/* Period */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85em', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '8px 14px', borderRadius: 8 }}>
+                <Calendar size={14} />
+                Period: {fmtPeriod(selectedSlip.period)}
+              </div>
+
+              {/* Payment Info */}
+              {selectedSlip.workerPaymentInfo?.bankPlatform && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85em', color: 'var(--text-secondary)', background: '#F0F9FF', padding: '8px 14px', borderRadius: 8 }}>
+                  <CreditCard size={14} />
+                  {selectedSlip.workerPaymentInfo.bankPlatform} — {selectedSlip.workerPaymentInfo.bankAccount}
+                  <span style={{ marginLeft: 'auto', fontStyle: 'italic', color: 'var(--text-muted)' }}>a/n {selectedSlip.workerPaymentInfo.accountName}</span>
+                </div>
+              )}
+
+              {/* Attendance Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                {[
+                  { val: selectedSlip.attendanceSummary.totalDays, label: 'Total Days', color: '' },
+                  { val: selectedSlip.attendanceSummary.presentDays, label: 'Present', color: '#059669' },
+                  { val: selectedSlip.attendanceSummary.lateDays, label: 'Late', color: '#D97706' },
+                  { val: selectedSlip.attendanceSummary.absentDays, label: 'Absent', color: '#DC2626' },
+                  { val: selectedSlip.attendanceSummary.permitDays, label: 'Permit', color: '#7C3AED' },
+                  { val: `${selectedSlip.attendanceSummary.totalHours}h`, label: 'Hours', color: '' },
+                ].map((s, i) => (
+                  <div key={i} style={{ textAlign: 'center', padding: 10, background: 'var(--bg-secondary)', borderRadius: 8 }}>
+                    <span style={{ display: 'block', fontSize: '1.1em', fontWeight: 700, color: s.color || 'var(--text-primary)' }}>{s.val}</span>
+                    <span style={{ fontSize: '0.6em', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.3 }}>{s.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Earnings Table */}
+              <div style={{ background: 'var(--bg-secondary)', borderRadius: 8, padding: 16 }}>
+                <h4 style={{ fontSize: '0.7em', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 10px 0' }}>Earnings Breakdown</h4>
+                {[
+                  { label: 'Daily Rate', value: formatRp(selectedSlip.earnings.dailyRate) },
+                  { label: `Daily Wages (${selectedSlip.attendanceSummary.presentDays + selectedSlip.attendanceSummary.lateDays} days)`, value: formatRp(selectedSlip.earnings.totalDailyWage) },
+                  { label: 'Overtime', value: formatRp(selectedSlip.earnings.totalOvertime), color: '#059669' },
+                  ...(selectedSlip.earnings.bonus > 0 ? [{ label: 'Bonus', value: formatRp(selectedSlip.earnings.bonus), color: '#059669' }] : []),
+                ].map((row, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                    <span>{row.label}</span>
+                    <span style={{ color: row.color || 'inherit' }}>{row.value}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px dashed var(--border)', margin: '6px 0' }} />
+                {selectedSlip.earnings.deductions > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '0.85em', color: '#DC2626' }}>
+                    <span>Deductions</span><span>-{formatRp(selectedSlip.earnings.deductions)}</span>
+                  </div>
+                )}
+                {selectedSlip.earnings.kasbonDeduction > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '0.85em', color: '#DC2626' }}>
+                    <span>Kasbon</span><span>-{formatRp(selectedSlip.earnings.kasbonDeduction)}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, borderTop: '2px solid var(--text-primary)', fontSize: '1em', fontWeight: 800 }}>
+                  <span>Net Pay</span><span>{formatRp(selectedSlip.earnings.netPay)}</span>
+                </div>
+              </div>
+
+              {/* Authorization Signatures */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {[
+                  { role: 'Director', name: selectedSlip.authorization.directorName, date: selectedSlip.authorization.directorSignedAt, signed: !!selectedSlip.authorization.directorPassphrase },
+                  { role: 'Owner', name: selectedSlip.authorization.ownerName, date: selectedSlip.authorization.ownerSignedAt, signed: !!selectedSlip.authorization.ownerPassphrase },
+                ].map((sig, i) => (
+                  <div key={i} style={{
+                    border: `1px ${sig.signed ? 'solid #D1FAE5' : 'dashed var(--border-light)'}`,
+                    background: sig.signed ? '#F0FDF4' : 'var(--bg-secondary)',
+                    borderRadius: 8, padding: 14, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: sig.signed ? '#D1FAE5' : 'var(--border-light)', color: sig.signed ? '#059669' : 'var(--text-muted)',
+                    }}>
+                      {sig.signed ? <Unlock size={16} /> : <Lock size={16} />}
+                    </div>
+                    <span style={{ fontSize: '0.7em', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}>{sig.role}</span>
+                    {sig.signed ? (
+                      <>
+                        <span style={{ fontSize: '0.8em', fontWeight: 600 }}>{sig.name}</span>
+                        <span style={{ fontSize: '0.65em', color: 'var(--text-muted)' }}>
+                          {new Date(sig.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                        <CheckCircle2 size={12} color="#059669" />
+                      </>
+                    ) : (
+                      <span style={{ fontSize: '0.75em', color: 'var(--text-muted)', fontStyle: 'italic' }}>Pending</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {selectedSlip.notes && (
+                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', padding: 12, background: 'var(--bg-secondary)', borderRadius: 8 }}>
+                  <strong>Notes:</strong> {selectedSlip.notes}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '0 20px 20px' }}>
+              <button
+                onClick={() => setSlipDetailOpen(false)}
+                style={{ padding: '10px 20px', border: '1px solid var(--border)', background: 'var(--bg-white)', borderRadius: 8, fontSize: '0.85em', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' }}
+              >
+                Close
+              </button>
+              <button
+                onClick={() => exportSlipToPdf({
+                  slipNumber: selectedSlip.slipNumber,
+                  workerName: selectedSlip.workerId?.fullName || 'Worker',
+                  workerRole: selectedSlip.workerId?.role || '',
+                  periodStart: selectedSlip.period.startDate || '',
+                  periodEnd: selectedSlip.period.endDate || '',
+                  attendance: selectedSlip.attendanceSummary,
+                  earnings: selectedSlip.earnings,
+                  paymentInfo: selectedSlip.workerPaymentInfo,
+                  authorization: {
+                    directorName: selectedSlip.authorization.directorName || undefined,
+                    directorSignedAt: selectedSlip.authorization.directorSignedAt || undefined,
+                    ownerName: selectedSlip.authorization.ownerName || undefined,
+                    ownerSignedAt: selectedSlip.authorization.ownerSignedAt || undefined,
+                  },
+                  notes: selectedSlip.notes,
+                })}
+                style={{ padding: '10px 20px', border: 'none', background: 'linear-gradient(135deg, #059669, #34D399)', borderRadius: 8, fontSize: '0.85em', fontWeight: 600, color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <Download size={14} /> Export PDF
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -13,8 +13,10 @@ const {
   attendanceRoutes,
   kasbonRoutes,
   taskRoutes,
+  slipGajiRoutes,
 } = require('./routes');
 const updatesRoutes = require('./routes/updates');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
@@ -34,12 +36,14 @@ app.use('/api/tools', toolRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/kasbon', kasbonRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/slipgaji', slipGajiRoutes);
 app.use('/api/updates', updatesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
@@ -48,19 +52,19 @@ app.get('/api/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
-  
+
   if (err.name === 'ValidationError') {
     return res.status(400).json({ msg: err.message });
   }
-  
+
   if (err.name === 'CastError') {
     return res.status(400).json({ msg: 'Invalid ID format' });
   }
-  
+
   if (err.code === 11000) {
     return res.status(400).json({ msg: 'Duplicate entry' });
   }
-  
+
   res.status(500).json({ msg: 'Server error' });
 });
 
@@ -77,7 +81,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB');
     console.log(`   Database: ${mongoose.connection.name}`);
-    
+
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`   API: http://localhost:${PORT}/api`);

@@ -5,6 +5,7 @@ const Tool = require('./Tool');
 const Attendance = require('./Attendance');
 const Kasbon = require('./Kasbon');
 const Task = require('./Task');
+const SlipGaji = require('./SlipGaji');
 
 module.exports = {
   User,
@@ -14,4 +15,5 @@ module.exports = {
   Attendance,
   Kasbon,
   Task,
+  SlipGaji,
 };

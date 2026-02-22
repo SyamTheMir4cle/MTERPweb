@@ -190,24 +190,29 @@ router.get('/me', async (req, res) => {
 // PUT /api/auth/profile - Update user profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { fullName, email, phone, address } = req.body;
-    
+    const { fullName, email, phone, address, paymentInfo } = req.body;
+
     const updateData = {};
     if (fullName) updateData.fullName = fullName;
     if (email) updateData.email = email;
     if (phone) updateData.phone = phone;
     if (address) updateData.address = address;
-    
+    if (paymentInfo) {
+      if (paymentInfo.bankAccount !== undefined) updateData['paymentInfo.bankAccount'] = paymentInfo.bankAccount;
+      if (paymentInfo.bankPlatform !== undefined) updateData['paymentInfo.bankPlatform'] = paymentInfo.bankPlatform;
+      if (paymentInfo.accountName !== undefined) updateData['paymentInfo.accountName'] = paymentInfo.accountName;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { $set: updateData },
       { new: true }
     );
-    
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
-    
+
     res.json(user);
   } catch (error) {
     console.error('Update profile error:', error);
@@ -221,19 +226,19 @@ router.put('/profile/photo', auth, uploadLimiter, upload.single('photo'), async 
     if (!req.file) {
       return res.status(400).json({ msg: 'No photo uploaded' });
     }
-    
+
     const photoUrl = req.file.path;
-    
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { $set: { profilePhoto: photoUrl } },
       { new: true }
     );
-    
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
-    
+
     res.json(user);
   } catch (error) {
     console.error('Update photo error:', error);
@@ -249,11 +254,11 @@ router.delete('/profile/photo', auth, async (req, res) => {
       { $unset: { profilePhoto: 1 } },
       { new: true }
     );
-    
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
-    
+
     res.json(user);
   } catch (error) {
     console.error('Delete photo error:', error);

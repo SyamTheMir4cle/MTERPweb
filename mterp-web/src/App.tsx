@@ -19,6 +19,8 @@ import AttendanceLogs from './pages/AttendanceLogs';
 import DailyReport from './pages/DailyReport';
 import Profile from './pages/Profile';
 import MyPayments from './pages/MyPayments';
+import Dashboard from './pages/Dashboard';
+import SlipGaji from './pages/SlipGaji';
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="/home" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/project-tools/:id" element={<ProjectTools />} />
@@ -45,6 +48,7 @@ function App() {
             <Route path="/daily-report" element={<DailyReport />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-payments" element={<MyPayments />} />
+            <Route path="/slip-gaji" element={<SlipGaji />} />
           </Route>
 
           {/* Fallback */}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Calendar, User, Clock, Filter, 
-  ChevronDown, DollarSign, X, Check, Building
+import {
+  ArrowLeft, Calendar, User, Clock, Filter,
+  ChevronDown, DollarSign, X, Check, Building, Users,
+  Wallet, TrendingUp, Loader,
 } from 'lucide-react';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -48,22 +49,30 @@ const WAGE_OPTIONS = [
   { label: 'Lembur 2x', value: 'overtime_2', multiplier: 2 },
 ];
 
+const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
+  Present: { color: '#059669', bg: '#D1FAE5' },
+  Late: { color: '#D97706', bg: '#FEF3C7' },
+  Absent: { color: '#DC2626', bg: '#FEE2E2' },
+  Permit: { color: '#7C3AED', bg: '#EDE9FE' },
+  'Half-day': { color: '#6366F1', bg: '#EEF2FF' },
+};
+
 export default function AttendanceLogs() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [summary, setSummary] = useState<RecapSummary | null>(null);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filters
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'custom'>('week');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [paymentStatus, setPaymentStatus] = useState<'All' | 'Unpaid' | 'Paid'>('Unpaid');
-  
+
   // Wage modal
   const [wageModal, setWageModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
@@ -76,32 +85,23 @@ export default function AttendanceLogs() {
   const isSupervisor = user?.role && ['owner', 'director', 'supervisor'].includes(user.role);
 
   useEffect(() => {
-    // Set default date range (this week)
     const now = new Date();
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - now.getDay());
     setStartDate(weekStart.toISOString().split('T')[0]);
     setEndDate(now.toISOString().split('T')[0]);
-    
     fetchUsers();
   }, []);
 
   useEffect(() => {
-    if (startDate && endDate) {
-      fetchRecords();
-    }
-    if (startDate && endDate) {
-      fetchRecords();
-    }
+    if (startDate && endDate) fetchRecords();
   }, [startDate, endDate, selectedUser, paymentStatus]);
 
   const fetchUsers = async () => {
     try {
       const response = await api.get('/attendance/users');
       setUsers(response.data);
-    } catch (err) {
-      console.error('Failed to fetch users', err);
-    }
+    } catch (err) { console.error('Failed to fetch users', err); }
   };
 
   const fetchRecords = async () => {
@@ -109,31 +109,22 @@ export default function AttendanceLogs() {
     try {
       const params: any = { startDate, endDate };
       if (selectedUser) params.userId = selectedUser;
-      
       const response = await api.get('/attendance/recap', { params });
-      
       let fetchedRecords = response.data.records;
-      
-      // Client-side filter for payment status if backend doesn't support it directly yet
       if (paymentStatus !== 'All') {
-        fetchedRecords = fetchedRecords.filter((r: AttendanceRecord) => 
+        fetchedRecords = fetchedRecords.filter((r: AttendanceRecord) =>
           (r.paymentStatus || 'Unpaid') === paymentStatus
         );
       }
-
       setRecords(fetchedRecords);
       setSummary(response.data.summary);
-    } catch (err) {
-      console.error('Failed to fetch attendance', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error('Failed to fetch attendance', err); }
+    finally { setLoading(false); }
   };
 
   const handleDateRangeChange = (range: 'week' | 'month' | 'custom') => {
     setDateRange(range);
     const now = new Date();
-    
     if (range === 'week') {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - now.getDay());
@@ -144,7 +135,6 @@ export default function AttendanceLogs() {
       setStartDate(monthStart.toISOString().split('T')[0]);
       setEndDate(now.toISOString().split('T')[0]);
     }
-    // For custom, user sets dates manually
   };
 
   const openWageModal = (record: AttendanceRecord) => {
@@ -158,108 +148,73 @@ export default function AttendanceLogs() {
   const calculateAutoOvertime = (rate: number, type: string) => {
     if (!selectedRecord?.checkIn?.time || !selectedRecord?.checkOut?.time) return 0;
     if (!type.startsWith('overtime')) return 0;
-    
     const start = new Date(selectedRecord.checkIn.time).getTime();
     const end = new Date(selectedRecord.checkOut.time).getTime();
     const durationHours = Math.max(0, (end - start) / (1000 * 60 * 60));
-    
     const hourlyRate = rate / 8;
     const multiplier = type === 'overtime_1.5' ? 1.5 : (type === 'overtime_2' ? 2 : 1);
-    
     return Math.round(durationHours * hourlyRate * multiplier);
   };
 
   const handleRateChange = (val: number) => {
     setNewDailyRate(val);
-    const newOvertime = calculateAutoOvertime(val, newWageType);
-    setNewOvertimePay(newOvertime);
+    setNewOvertimePay(calculateAutoOvertime(val, newWageType));
   };
 
   const handleTypeChange = (val: string) => {
     setNewWageType(val);
-    const newOvertime = calculateAutoOvertime(newDailyRate, val);
-    setNewOvertimePay(newOvertime);
+    setNewOvertimePay(calculateAutoOvertime(newDailyRate, val));
   };
 
   const handleSaveWage = async () => {
     if (!selectedRecord) return;
-    
     setSubmitting(true);
     try {
-      await api.put(`/attendance/${selectedRecord._id}/rate`, { 
-        wageType: newWageType,
-        dailyRate: newDailyRate,
-        overtimePay: newOvertimePay,
+      await api.put(`/attendance/${selectedRecord._id}/rate`, {
+        wageType: newWageType, dailyRate: newDailyRate, overtimePay: newOvertimePay,
       });
       await fetchRecords();
-      setWageModal(false);
-      setSelectedRecord(null);
-    } catch (err) {
-      console.error('Failed to update wage', err);
-      alert('Failed to update wage type');
-    } finally {
-      setSubmitting(false);
-    }
+      setWageModal(false); setSelectedRecord(null);
+    } catch (err) { console.error('Failed to update wage', err); alert('Failed to update wage type'); }
+    finally { setSubmitting(false); }
   };
 
   const handleMarkAsPaid = async () => {
     if (records.length === 0) return;
     const unpaidIds = records.filter(r => r.paymentStatus !== 'Paid').map(r => r._id);
-    if (unpaidIds.length === 0) {
-      alert('No unpaid records to pay.');
-      return;
-    }
-
+    if (unpaidIds.length === 0) { alert('No unpaid records to pay.'); return; }
     if (!window.confirm(`Mark ${unpaidIds.length} records as PAID? Total: Rp ${new Intl.NumberFormat('id-ID').format(summary?.totalPayment || 0)}`)) return;
-
     setPaying(true);
     try {
       await api.post('/attendance/pay', { attendanceIds: unpaidIds });
-      await fetchRecords(); // Refresh to see updated status
-    } catch (err) {
-      console.error('Payment failed', err);
-      alert('Failed to mark as paid');
-    } finally {
-      setPaying(false);
-    }
+      await fetchRecords();
+    } catch (err) { console.error('Payment failed', err); alert('Failed to mark as paid'); }
+    finally { setPaying(false); }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('id-ID', { 
-      weekday: 'short', 
-      day: 'numeric', 
-      month: 'short' 
-    });
-  };
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
 
-  const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString('id-ID', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  };
+  const formatTime = (dateStr: string) =>
+    new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
   const getWageLabel = (wageType: string) => {
     const option = WAGE_OPTIONS.find(o => o.value === wageType);
     return option?.label || wageType;
   };
 
-  const getWageBadge = (wageType: string) => {
-    const variants: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
-      'daily': 'neutral',
-      'overtime_1.5': 'warning',
-      'overtime_2': 'danger',
-    };
-    return <Badge label={getWageLabel(wageType)} variant={variants[wageType] || 'neutral'} size="small" />;
-  };
+  const formatRp = (val: number) => `Rp ${new Intl.NumberFormat('id-ID').format(val)}`;
 
   return (
     <div className="logs-container">
       {/* Header */}
       <div className="logs-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={20} />
+        <button className="logs-back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} />
         </button>
+        <div className="logs-header-icon">
+          <Users size={20} color="white" />
+        </div>
         <div>
           <h1 className="logs-title">Attendance Logs</h1>
           <p className="logs-subtitle">View and manage attendance records</p>
@@ -267,289 +222,263 @@ export default function AttendanceLogs() {
       </div>
 
       {/* Filters */}
-      <Card className="filters-card">
-        <div className="filters-row">
-          <div className="filter-group">
-            <label className="filter-label">Date Range</label>
-            <div className="date-range-tabs">
-              <button 
-                className={`tab ${dateRange === 'week' ? 'active' : ''}`}
-                onClick={() => handleDateRangeChange('week')}
-              >
-                This Week
-              </button>
-              <button 
-                className={`tab ${dateRange === 'month' ? 'active' : ''}`}
-                onClick={() => handleDateRangeChange('month')}
-              >
-                This Month
-              </button>
-              <button 
-                className={`tab ${dateRange === 'custom' ? 'active' : ''}`}
-                onClick={() => handleDateRangeChange('custom')}
-              >
-                Custom
-              </button>
+      <Card className="logs-filters-card">
+        <div className="logs-filter-row">
+          <div className="logs-filter-group">
+            <label className="logs-filter-label">Date Range</label>
+            <div className="logs-tabs">
+              {(['week', 'month', 'custom'] as const).map(r => (
+                <button
+                  key={r}
+                  className={`logs-tab ${dateRange === r ? 'active' : ''}`}
+                  onClick={() => handleDateRangeChange(r)}
+                >
+                  {r === 'week' ? 'This Week' : r === 'month' ? 'This Month' : 'Custom'}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         {dateRange === 'custom' && (
-          <div className="custom-dates">
-            <div className="date-input-group">
-              <label>Start Date</label>
-              <input 
-                type="date" 
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="date-input"
-              />
+          <div className="logs-custom-dates">
+            <div className="logs-date-field">
+              <label>Start</label>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="logs-date-input" />
             </div>
-            <div className="date-input-group">
-              <label>End Date</label>
-              <input 
-                type="date" 
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="date-input"
-              />
+            <div className="logs-date-field">
+              <label>End</label>
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="logs-date-input" />
             </div>
           </div>
         )}
 
-        {users.length > 0 && (
-          <div className="filter-group" style={{ marginTop: 'var(--space-4)' }}>
-            <label className="filter-label">Filter by User</label>
-            <div className="select-wrapper">
-              <select 
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                className="form-select"
-              >
-                <option value="">All Users</option>
-                {users.map(u => (
-                  <option key={u._id} value={u._id}>{u.fullName} ({u.role})</option>
-                ))}
+        <div className="logs-selects-row">
+          {users.length > 0 && (
+            <div className="logs-select-group">
+              <label className="logs-filter-label">Worker</label>
+              <div className="logs-select-wrapper">
+                <User size={14} className="logs-select-pre" />
+                <select value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)} className="logs-select">
+                  <option value="">All Workers</option>
+                  {users.map(u => <option key={u._id} value={u._id}>{u.fullName} ({u.role})</option>)}
+                </select>
+                <ChevronDown size={14} className="logs-select-icon" />
+              </div>
+            </div>
+          )}
+
+          <div className="logs-select-group">
+            <label className="logs-filter-label">Payment</label>
+            <div className="logs-select-wrapper">
+              <Wallet size={14} className="logs-select-pre" />
+              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value as any)} className="logs-select">
+                <option value="Unpaid">Unpaid</option>
+                <option value="Paid">Paid</option>
+                <option value="All">All</option>
               </select>
-              <ChevronDown size={16} className="select-icon" />
+              <ChevronDown size={14} className="logs-select-icon" />
             </div>
-          </div>
-        )}
-
-        <div className="filter-group">
-          <label className="filter-label">Payment Status</label>
-          <div className="select-wrapper">
-            <select 
-              value={paymentStatus}
-              onChange={(e) => setPaymentStatus(e.target.value as any)}
-              className="form-select"
-            >
-              <option value="Unpaid">Unpaid</option>
-              <option value="Paid">Paid</option>
-              <option value="All">All</option>
-            </select>
-            <ChevronDown size={16} className="select-icon" />
           </div>
         </div>
       </Card>
 
       {/* Summary */}
       {summary && (
-        <Card className="summary-card">
-          <h3 className="summary-title">Summary</h3>
-          <div className="summary-grid">
-            <div className="summary-item">
-              <span className="summary-value">{summary.total}</span>
-              <span className="summary-label">Total Days</span>
-            </div>
-            <div className="summary-item success">
-              <span className="summary-value">{summary.present}</span>
-              <span className="summary-label">Present</span>
-            </div>
-            <div className="summary-item warning">
-              <span className="summary-value">{summary.totalHours.toFixed(1)}</span>
-              <span className="summary-label">Total Hours</span>
-            </div>
-            <div className="summary-item info">
-              <span className="summary-value">{summary.wageMultiplierTotal.toFixed(1)}x</span>
-              <span className="summary-label">Wage Total</span>
-            </div>
-            
-            <div className="summary-item" style={{ borderLeft: '4px solid var(--primary)' }}>
-              <span className="summary-value" style={{ color: 'var(--primary)', fontSize: '1.2em' }}>
-                Rp {new Intl.NumberFormat('id-ID').format(summary.totalPayment || 0)}
-              </span>
-              <span className="summary-label">Total Payment</span>
-            </div>
-          </div>
-
-          {isSupervisor && paymentStatus === 'Unpaid' && (summary.totalPayment || 0) > 0 && (
-            <div className="pay-action" style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                title="Mark All as Paid"
-                icon={Check}
-                onClick={handleMarkAsPaid}
-                loading={paying}
-                variant="primary"
-              />
-            </div>
-          )}
-        </Card>
+        <div className="logs-summary-grid">
+          <Card className="logs-summary-item">
+            <Calendar size={16} color="#6366F1" />
+            <span className="logs-sum-val">{summary.total}</span>
+            <span className="logs-sum-label">Total Days</span>
+          </Card>
+          <Card className="logs-summary-item logs-sum-green">
+            <Check size={16} color="#059669" />
+            <span className="logs-sum-val">{summary.present}</span>
+            <span className="logs-sum-label">Present</span>
+          </Card>
+          <Card className="logs-summary-item logs-sum-amber">
+            <Clock size={16} color="#D97706" />
+            <span className="logs-sum-val">{summary.totalHours.toFixed(1)}h</span>
+            <span className="logs-sum-label">Total Hours</span>
+          </Card>
+          <Card className="logs-summary-item logs-sum-primary">
+            <DollarSign size={16} color="var(--primary)" />
+            <span className="logs-sum-val logs-sum-highlight">{formatRp(summary.totalPayment || 0)}</span>
+            <span className="logs-sum-label">Total Payment</span>
+          </Card>
+        </div>
       )}
 
-      {/* Records List */}
+      {/* Pay All button */}
+      {isSupervisor && paymentStatus === 'Unpaid' && (summary?.totalPayment || 0) > 0 && (
+        <div className="logs-pay-row">
+          <Button
+            title={`Mark All as Paid (${formatRp(summary?.totalPayment || 0)})`}
+            icon={Check}
+            onClick={handleMarkAsPaid}
+            loading={paying}
+            variant="primary"
+            fullWidth
+          />
+        </div>
+      )}
+
+      {/* Records */}
       {loading ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
+        <div className="logs-loading">
+          <Loader size={24} className="dashboard-spinner" />
           <span>Loading records...</span>
         </div>
       ) : records.length === 0 ? (
         <EmptyState
           icon={Calendar}
           title="No Records Found"
-          description="No attendance records found for the selected date range."
+          description="No attendance records found for the selected filters."
         />
       ) : (
-        <div className="records-list">
-          {records.map((record) => (
-            <Card key={record._id} className="record-card">
-              <div className="record-header">
-                <div className="record-date">
-                  <Calendar size={16} />
-                  <span>{formatDate(record.date)}</span>
-                </div>
-                {getWageBadge(record.wageType)}
-              </div>
-              
-              <div className="record-user">
-                <User size={16} />
-                <span>{record.userId.fullName}</span>
-                <Badge label={record.userId.role} variant="neutral" size="small" />
-              </div>
-
-              <div className="record-times">
-                <div className="time-item">
-                  <Clock size={14} />
-                  <span>In: {record.checkIn?.time ? formatTime(record.checkIn.time) : '--:--'}</span>
-                </div>
-                <div className="time-item">
-                  <Clock size={14} />
-                  <span>Out: {record.checkOut?.time ? formatTime(record.checkOut.time) : '--:--'}</span>
-                </div>
-                </div>
-
-              {/* Rate & Payment Info */}
-              <div className="record-financials" style={{ marginTop: 8, fontSize: '0.9em', color: 'var(--text-secondary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Daily: Rp {new Intl.NumberFormat('id-ID').format(record.dailyRate || 0)}</span>
-                  <span>Overtime: Rp {new Intl.NumberFormat('id-ID').format(record.overtimePay || 0)}</span>
-                </div>
-                {record.projectId && (
-                  <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Building size={12} />
-                    <span>{record.projectId.nama}</span>
+        <div className="logs-records">
+          {records.map((record) => {
+            const statusStyle = STATUS_STYLES[record.status] || STATUS_STYLES.Present;
+            const totalPay = (record.dailyRate || 0) + (record.overtimePay || 0);
+            return (
+              <Card key={record._id} className="logs-record">
+                {/* Top row: Date + Status + Wage badge */}
+                <div className="logs-rec-top">
+                  <div className="logs-rec-date">
+                    <Calendar size={14} />
+                    <span>{formatDate(record.date)}</span>
                   </div>
-                )}
-                <div style={{ marginTop: 4 }}>
-                  <Badge 
-                    label={record.paymentStatus || 'Unpaid'} 
-                    variant={record.paymentStatus === 'Paid' ? 'success' : 'warning'} 
-                    size="small" 
-                  />
+                  <div className="logs-rec-badges">
+                    <span className="logs-rec-status" style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}>
+                      {record.status}
+                    </span>
+                    <Badge label={getWageLabel(record.wageType)} variant={record.wageType === 'daily' ? 'neutral' : record.wageType === 'overtime_1.5' ? 'warning' : 'danger'} size="small" />
+                  </div>
                 </div>
-              </div>
 
-              {isSupervisor && (
-                <div className="record-actions">
-                  <Button
-                    title="Set Wage Type"
-                    icon={DollarSign}
-                    onClick={() => openWageModal(record)}
-                    variant="outline"
-                    size="small"
-                  />
+                {/* Worker info */}
+                <div className="logs-rec-worker">
+                  <div className="logs-rec-avatar" style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}>
+                    {record.userId.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="logs-rec-worker-info">
+                    <span className="logs-rec-name">{record.userId.fullName}</span>
+                    <span className="logs-rec-role">{record.userId.role}</span>
+                  </div>
+                  <div className="logs-rec-times">
+                    <span className="logs-rec-time">{record.checkIn?.time ? formatTime(record.checkIn.time) : '--:--'}</span>
+                    <span className="logs-rec-sep">→</span>
+                    <span className="logs-rec-time">{record.checkOut?.time ? formatTime(record.checkOut.time) : '--:--'}</span>
+                  </div>
                 </div>
-              )}
-            </Card>
-          ))}
+
+                {/* Financials row */}
+                <div className="logs-rec-finance">
+                  <div className="logs-rec-fin-item">
+                    <span className="logs-rec-fin-label">Daily</span>
+                    <span className="logs-rec-fin-val">{formatRp(record.dailyRate || 0)}</span>
+                  </div>
+                  {record.overtimePay > 0 && (
+                    <div className="logs-rec-fin-item">
+                      <span className="logs-rec-fin-label">Overtime</span>
+                      <span className="logs-rec-fin-val">{formatRp(record.overtimePay)}</span>
+                    </div>
+                  )}
+                  <div className="logs-rec-fin-total">
+                    <span>{formatRp(totalPay)}</span>
+                    <Badge
+                      label={record.paymentStatus || 'Unpaid'}
+                      variant={record.paymentStatus === 'Paid' ? 'success' : 'warning'}
+                      size="small"
+                    />
+                  </div>
+                </div>
+
+                {/* Project + Action */}
+                <div className="logs-rec-bottom">
+                  {record.projectId && (
+                    <div className="logs-rec-project">
+                      <Building size={12} />
+                      <span>{record.projectId.nama}</span>
+                    </div>
+                  )}
+                  {isSupervisor && (
+                    <Button
+                      title="Set Wage"
+                      icon={DollarSign}
+                      onClick={() => openWageModal(record)}
+                      variant="outline"
+                      size="small"
+                    />
+                  )}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
 
       {/* Wage Modal */}
       {wageModal && selectedRecord && (
         <div className="modal-overlay" onClick={() => setWageModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Set Wage Type</h2>
-              <button className="modal-close" onClick={() => setWageModal(false)}>
-                <X size={24} />
-              </button>
+          <div className="att-modal" onClick={e => e.stopPropagation()}>
+            <div className="att-modal-title-row">
+              <DollarSign size={20} color="#F59E0B" />
+              <h3>Set Wage Type</h3>
             </div>
-            
-            <div className="modal-body">
-              <div className="selected-record-info">
-                <User size={16} />
-                <span>{selectedRecord.userId.fullName}</span>
-                <span>•</span>
-                <span>{formatDate(selectedRecord.date)}</span>
-              </div>
 
-              <div className="wage-options">
-                {WAGE_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    className={`wage-option ${newWageType === opt.value ? 'active' : ''}`}
-                    onClick={() => handleTypeChange(opt.value)}
-                  >
-                    {newWageType === opt.value && <Check size={16} />}
-                    <span>{opt.label}</span>
-                    <span className="wage-multiplier">{opt.multiplier}x</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="rate-input-section" style={{ marginTop: 24 }}>
-                <CostInput
-                  label="Rate per Day (Rp)"
-                  value={newDailyRate}
-                  onChange={handleRateChange}
-                  placeholder="e.g. 150000"
-                />
-                
-                {newWageType.startsWith('overtime') && (
-                  <div style={{ marginTop: 16 }}>
-                    <CostInput
-                      label="Overtime Pay (Rp)"
-                      value={newOvertimePay}
-                      onChange={setNewOvertimePay}
-                      placeholder="Auto-calculated or Manual Override"
-                    />
-                    {selectedRecord.checkIn?.time && selectedRecord.checkOut?.time && (
-                      <p className="helper-text" style={{ fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: 4 }}>
-                        Duration: {((new Date(selectedRecord.checkOut.time).getTime() - new Date(selectedRecord.checkIn.time).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <p className="helper-text" style={{ fontSize: '0.8em', color: 'var(--text-muted)', marginTop: 12 }}>
-                  Hourly rate is auto-calculated (Daily / 8). Overtime is calculated based on duration, but can be manually overridden above.
-                </p>
-              </div>
+            <div className="logs-wage-info">
+              <User size={14} />
+              <span>{selectedRecord.userId.fullName}</span>
+              <span className="logs-wage-sep">•</span>
+              <span>{formatDate(selectedRecord.date)}</span>
             </div>
-            
-            <div className="modal-footer">
-              <Button
-                title="Cancel"
-                onClick={() => setWageModal(false)}
-                variant="outline"
+
+            <div className="logs-wage-options">
+              {WAGE_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  className={`logs-wage-opt ${newWageType === opt.value ? 'active' : ''}`}
+                  onClick={() => handleTypeChange(opt.value)}
+                >
+                  {newWageType === opt.value && <Check size={16} />}
+                  <span className="logs-wage-opt-label">{opt.label}</span>
+                  <span className="logs-wage-opt-mult">{opt.multiplier}x</span>
+                </button>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <CostInput
+                label="Rate per Day (Rp)"
+                value={newDailyRate}
+                onChange={handleRateChange}
+                placeholder="e.g. 150000"
               />
-              <Button
-                title="Save"
-                onClick={handleSaveWage}
-                loading={submitting}
-                variant="primary"
-              />
+
+              {newWageType.startsWith('overtime') && (
+                <div style={{ marginTop: 16 }}>
+                  <CostInput
+                    label="Overtime Pay (Rp)"
+                    value={newOvertimePay}
+                    onChange={setNewOvertimePay}
+                    placeholder="Auto-calculated or Manual Override"
+                  />
+                  {selectedRecord.checkIn?.time && selectedRecord.checkOut?.time && (
+                    <p className="logs-helper">
+                      Duration: {((new Date(selectedRecord.checkOut.time).getTime() - new Date(selectedRecord.checkIn.time).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours
+                    </p>
+                  )}
+                </div>
+              )}
+              <p className="logs-helper" style={{ marginTop: 12 }}>
+                Hourly rate is auto-calculated (Daily / 8). Overtime is calculated based on duration.
+              </p>
+            </div>
+
+            <div className="att-modal-actions">
+              <Button title="Cancel" onClick={() => setWageModal(false)} variant="outline" />
+              <Button title="Save" onClick={handleSaveWage} loading={submitting} variant="primary" />
             </div>
           </div>
         </div>

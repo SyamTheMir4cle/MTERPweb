@@ -14,6 +14,8 @@ import {
   HelpCircle,
   Info,
   Trash2,
+  Wallet,
+  CreditCard,
 } from 'lucide-react';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,7 +35,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const { user, updateUser, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,6 +43,11 @@ export default function Profile() {
     email: user?.email || '',
     phone: user?.phone || '',
     address: user?.address || '',
+    paymentInfo: {
+      bankPlatform: (user as any)?.paymentInfo?.bankPlatform || '',
+      bankAccount: (user as any)?.paymentInfo?.bankAccount || '',
+      accountName: (user as any)?.paymentInfo?.accountName || '',
+    },
   });
   const [saving, setSaving] = useState(false);
   const [alertData, setAlertData] = useState<{ visible: boolean; type: 'success' | 'error'; title: string; message: string }>({
@@ -89,7 +96,7 @@ export default function Profile() {
 
   const handleRemovePhoto = async () => {
     if (!user?.profilePhoto) return;
-    
+
     try {
       await api.delete('/auth/profile/photo');
       updateUser({ profilePhoto: undefined });
@@ -107,7 +114,13 @@ export default function Profile() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      const response = await api.put('/auth/profile', formData);
+      const response = await api.put('/auth/profile', {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        paymentInfo: formData.paymentInfo,
+      });
       updateUser(response.data);
       setEditing(false);
       setAlertData({
@@ -156,9 +169,9 @@ export default function Profile() {
   };
 
   const settingsItems: SettingsItem[] = [
-    { id: 'notifications', icon: Bell, label: 'Notifications', onClick: () => {} },
-    { id: 'privacy', icon: Shield, label: 'Privacy & Security', onClick: () => {} },
-    { id: 'help', icon: HelpCircle, label: 'Help & Support', onClick: () => {} },
+    { id: 'notifications', icon: Bell, label: 'Notifications', onClick: () => { } },
+    { id: 'privacy', icon: Shield, label: 'Privacy & Security', onClick: () => { } },
+    { id: 'help', icon: HelpCircle, label: 'Help & Support', onClick: () => { } },
     { id: 'about', icon: Info, label: 'About', value: 'v1.0.0' },
   ];
 
@@ -178,8 +191,8 @@ export default function Profile() {
           <ArrowLeft size={20} />
         </button>
         <h1 className="profile-title">Profile</h1>
-        <button 
-          className="edit-btn" 
+        <button
+          className="edit-btn"
           onClick={() => editing ? handleSaveProfile() : setEditing(true)}
           disabled={saving}
         >
@@ -303,6 +316,72 @@ export default function Profile() {
                 />
               ) : (
                 <span className="settings-item-value">{user?.address || 'Not set'}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Information */}
+      <div className="settings-section">
+        <h2 className="section-title">PAYMENT INFORMATION</h2>
+        <div className="settings-group">
+          <div className="settings-item">
+            <div className="settings-item-icon">
+              <Wallet size={20} color="#F59E0B" />
+            </div>
+            <div className="settings-item-content">
+              <span className="settings-item-label">Payment Platform</span>
+              {editing ? (
+                <input
+                  type="text"
+                  className="settings-input"
+                  value={formData.paymentInfo.bankPlatform}
+                  onChange={(e) => setFormData({ ...formData, paymentInfo: { ...formData.paymentInfo, bankPlatform: e.target.value } })}
+                  placeholder="e.g. BCA, Mandiri, GoPay, Dana"
+                />
+              ) : (
+                <span className="settings-item-value">{(user as any)?.paymentInfo?.bankPlatform || 'Not set'}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="settings-item">
+            <div className="settings-item-icon">
+              <CreditCard size={20} color="#6366F1" />
+            </div>
+            <div className="settings-item-content">
+              <span className="settings-item-label">Account Number</span>
+              {editing ? (
+                <input
+                  type="text"
+                  className="settings-input"
+                  value={formData.paymentInfo.bankAccount}
+                  onChange={(e) => setFormData({ ...formData, paymentInfo: { ...formData.paymentInfo, bankAccount: e.target.value } })}
+                  placeholder="Enter your account number"
+                />
+              ) : (
+                <span className="settings-item-value">{(user as any)?.paymentInfo?.bankAccount || 'Not set'}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="settings-item">
+            <div className="settings-item-icon">
+              <User size={20} color="#10B981" />
+            </div>
+            <div className="settings-item-content">
+              <span className="settings-item-label">Account Name</span>
+              {editing ? (
+                <input
+                  type="text"
+                  className="settings-input"
+                  value={formData.paymentInfo.accountName}
+                  onChange={(e) => setFormData({ ...formData, paymentInfo: { ...formData.paymentInfo, accountName: e.target.value } })}
+                  placeholder="Account holder name"
+                />
+              ) : (
+                <span className="settings-item-value">{(user as any)?.paymentInfo?.accountName || 'Not set'}</span>
               )}
             </div>
           </div>

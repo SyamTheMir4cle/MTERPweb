@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
+  BarChart3,
   Briefcase,
   Wrench,
   Clock,
@@ -13,6 +14,7 @@ import {
   User,
   LogOut,
   ChevronRight,
+  Receipt,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './Sidebar.css';
@@ -32,6 +34,13 @@ const NAV_ITEMS: NavItem[] = [
     icon: Home,
     route: '/home',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'worker', 'mandor', 'tukang', 'logistik'],
+  },
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: BarChart3,
+    route: '/dashboard',
+    roles: ['owner', 'director', 'supervisor'],
   },
   {
     id: 'projects',
@@ -89,6 +98,13 @@ const NAV_ITEMS: NavItem[] = [
     route: '/approvals',
     roles: ['owner', 'director', 'supervisor', 'admin_project'],
   },
+  {
+    id: 'slip-gaji',
+    label: 'Slip Gaji',
+    icon: Receipt,
+    route: '/slip-gaji',
+    roles: ['owner', 'director', 'supervisor'],
+  },
 ];
 
 export default function Sidebar() {
@@ -122,7 +138,7 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         {filteredItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.route || 
+          const isActive = location.pathname === item.route ||
             location.pathname.startsWith(item.route + '/');
 
           return (
