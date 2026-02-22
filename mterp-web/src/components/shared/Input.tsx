@@ -8,7 +8,7 @@ interface InputProps {
   value: string;
   onChangeText?: (text: string) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  type?: 'text' | 'password' | 'email' | 'number';
+  type?: 'text' | 'password' | 'email' | 'number' | 'date';
   icon?: LucideIcon;
   error?: string;
   disabled?: boolean;

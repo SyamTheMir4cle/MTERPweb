@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Calendar, DollarSign, FileText, Wrench, ArrowLeft, 
+import {
+  Calendar, DollarSign, FileText, Wrench, ArrowLeft,
   TrendingUp, Package, BarChart3, Layers,
+  AlertTriangle, CheckCircle2, Clock, Target,
 } from 'lucide-react';
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import gsap from 'gsap';
@@ -15,16 +16,20 @@ import { ProjectData, WorkItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import './ProjectDetail.css';
 
+/* ─── Types ─── */
+
 interface SCurveDataPoint {
-  name: string;
-  index: number;
-  planned: number;      // Cumulative planned cost %
-  actual: number;        // Cumulative actual cost %
-  plannedCost: number;   // Absolute planned cost
-  actualCost: number;    // Absolute actual cost
-  weight: number;        // Individual weight %
-  progress: number;      // Item progress %
+  date: string;           // "Jan 24", "Feb 24" etc.
+  timestamp: number;      // ms for sorting
+  planned: number;        // Cumulative planned cost %
+  actual: number;         // Cumulative actual cost %
+  plannedCost: number;    // Absolute cumulative planned cost
+  actualCost: number;     // Absolute cumulative actual cost
+  deviation: number;      // actual - planned %
+  isToday: boolean;       // Is this the current month?
 }
+
+/* ─── Helpers ─── */
 
 const formatRupiah = (num: number) => {
   if (num >= 1_000_000_000) return `Rp ${(num / 1_000_000_000).toFixed(1)}B`;
@@ -33,16 +38,70 @@ const formatRupiah = (num: number) => {
   return `Rp ${num}`;
 };
 
-// Custom tooltip for the S-Curve chart
+const fmtDate = (d: string | Date | undefined) => {
+  if (!d) return '-';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const fmtShort = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+
+/** Generate an array of first-of-month Date objects from start to end (inclusive). */
+function monthRange(start: Date, end: Date): Date[] {
+  const months: Date[] = [];
+  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+  while (cur <= last) {
+    months.push(new Date(cur));
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return months;
+}
+
+/**
+ * For a given item with [itemStart, itemEnd] and a given month,
+ * return the fraction of the item's cost that falls in that month.
+ * We spread cost evenly across the item's months.
+ */
+function costInMonth(
+  itemStart: Date, itemEnd: Date, totalCost: number, month: Date
+): number {
+  const iStart = new Date(itemStart.getFullYear(), itemStart.getMonth(), 1);
+  const iEnd = new Date(itemEnd.getFullYear(), itemEnd.getMonth(), 1);
+  const mStart = new Date(month.getFullYear(), month.getMonth(), 1);
+
+  if (mStart < iStart || mStart > iEnd) return 0;
+
+  // Count total months this item spans
+  let totalMonths = 0;
+  const tmp = new Date(iStart);
+  while (tmp <= iEnd) {
+    totalMonths++;
+    tmp.setMonth(tmp.getMonth() + 1);
+  }
+  if (totalMonths === 0) totalMonths = 1;
+
+  return totalCost / totalMonths;
+}
+
+/* ─── Tooltip ─── */
+
 const SCurveTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || payload.length === 0) return null;
-
   const data = payload[0]?.payload as SCurveDataPoint;
   if (!data) return null;
 
+  const dev = data.deviation;
+  const devColor = dev >= 0 ? '#10B981' : '#EF4444';
+  const devLabel = dev >= 0 ? 'Ahead' : 'Behind';
+
   return (
     <div className="scurve-tooltip">
-      <div className="scurve-tooltip-title">{data.name}</div>
+      <div className="scurve-tooltip-title">
+        {data.date}
+        {data.isToday && <span className="scurve-tooltip-today-badge">TODAY</span>}
+      </div>
       <div className="scurve-tooltip-divider" />
       <div className="scurve-tooltip-row">
         <span className="scurve-tooltip-dot planned" />
@@ -54,11 +113,16 @@ const SCurveTooltip = ({ active, payload, label }: any) => {
         <span>Actual</span>
         <span className="scurve-tooltip-value">{data.actual.toFixed(1)}%</span>
       </div>
+      {data.actual > 0 && (
+        <div className="scurve-tooltip-row">
+          <span className="scurve-tooltip-dot" style={{ backgroundColor: devColor }} />
+          <span>Deviation</span>
+          <span className="scurve-tooltip-value" style={{ color: devColor }}>
+            {dev >= 0 ? '+' : ''}{dev.toFixed(1)}% ({devLabel})
+          </span>
+        </div>
+      )}
       <div className="scurve-tooltip-divider" />
-      <div className="scurve-tooltip-detail">
-        <span>Weight: {data.weight.toFixed(1)}%</span>
-        <span>Progress: {data.progress}%</span>
-      </div>
       <div className="scurve-tooltip-detail">
         <span>Plan: {formatRupiah(data.plannedCost)}</span>
         <span>Act: {formatRupiah(data.actualCost)}</span>
@@ -66,6 +130,8 @@ const SCurveTooltip = ({ active, payload, label }: any) => {
     </div>
   );
 };
+
+/* ─── Component ─── */
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -106,11 +172,10 @@ export default function ProjectDetail() {
     try {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      // Animate stat cards
       if (statsRef.current) {
         const cards = statsRef.current.querySelectorAll('.card-component');
         if (cards.length > 0) {
-          tl.fromTo(cards, 
+          tl.fromTo(cards,
             { y: 30, opacity: 0 },
             { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, clearProps: 'all' },
             0
@@ -118,7 +183,6 @@ export default function ProjectDetail() {
         }
       }
 
-      // Animate chart
       if (chartRef.current) {
         tl.fromTo(chartRef.current,
           { y: 40, opacity: 0 },
@@ -126,7 +190,6 @@ export default function ProjectDetail() {
           0.2
         );
 
-        // Animate the SVG paths (S-curve lines) with draw effect
         setTimeout(() => {
           try {
             const paths = chartRef.current?.querySelectorAll('.recharts-area-curve');
@@ -149,7 +212,6 @@ export default function ProjectDetail() {
         }, 300);
       }
 
-      // Animate tables
       if (tableRef.current) {
         const rows = tableRef.current.querySelectorAll('.table-row, .detail-table-card');
         if (rows.length > 0) {
@@ -182,51 +244,125 @@ export default function ProjectDetail() {
   const workItems = project.workItems || [];
   const supplies = project.supplies || [];
 
-  // Calculate S-Curve data
-  const totalPlannedCost = workItems.reduce((s, w) => s + (w.cost || 0), 0);
-  const totalActualCost = workItems.reduce((s, w) => s + ((w as any).actualCost || 0), 0);
+  /* ─── S-Curve Data: Time-based ─── */
+
+  const totalPlannedCost =
+    workItems.reduce((s, w) => s + (w.cost || 0), 0) +
+    supplies.reduce((s: number, sup: any) => s + (sup.cost || 0), 0);
+
+  const totalActualCost =
+    workItems.reduce((s, w) => s + ((w as any).actualCost || 0), 0) +
+    supplies.reduce((s: number, sup: any) => s + (sup.actualCost || 0), 0);
 
   const scurveData: SCurveDataPoint[] = (() => {
-    if (workItems.length === 0) return [];
-    
-    // Start point
-    const points: SCurveDataPoint[] = [{
-      name: 'Start',
-      index: 0,
-      planned: 0,
-      actual: 0,
-      plannedCost: 0,
-      actualCost: 0,
-      weight: 0,
-      progress: 0,
-    }];
+    // Need global dates to construct X-axis
+    const globalStart = project.startDate || (project.globalDates as any)?.planned?.start;
+    const globalEnd = project.endDate || (project.globalDates as any)?.planned?.end;
 
-    let cumulativePlanned = 0;
-    let cumulativeActual = 0;
+    if (!globalStart || !globalEnd) return [];
+    if (workItems.length === 0 && supplies.length === 0) return [];
 
-    workItems.forEach((item, i) => {
-      const weight = totalPlannedCost > 0 ? ((item.cost || 0) / totalPlannedCost) * 100 : 0;
-      cumulativePlanned += weight;
-      
-      const actualWeight = totalPlannedCost > 0 
-        ? ((item as any).actualCost || 0) / totalPlannedCost * 100 
-        : 0;
-      cumulativeActual += actualWeight;
+    const start = new Date(globalStart);
+    const end = new Date(globalEnd);
+    const months = monthRange(start, end);
+    if (months.length === 0) return [];
+
+    // Collect all items (work + supply) with their dates and costs
+    interface ScheduleItem {
+      startDate: Date;
+      endDate: Date;
+      plannedCost: number;
+      actualCost: number;
+    }
+
+    const allItems: ScheduleItem[] = [];
+
+    for (const wi of workItems) {
+      const wiAny = wi as any;
+      const s = wiAny.startDate || wiAny.dates?.plannedStart;
+      const e = wiAny.endDate || wiAny.dates?.plannedEnd;
+      if (s && e) {
+        allItems.push({
+          startDate: new Date(s),
+          endDate: new Date(e),
+          plannedCost: wi.cost || 0,
+          actualCost: wiAny.actualCost || 0,
+        });
+      }
+    }
+
+    for (const sup of supplies as any[]) {
+      const s = sup.startDate || sup.deadline;
+      const e = sup.endDate || sup.deadline;
+      if (s && e) {
+        allItems.push({
+          startDate: new Date(s),
+          endDate: new Date(e),
+          plannedCost: sup.cost || 0,
+          actualCost: sup.actualCost || 0,
+        });
+      }
+    }
+
+    if (allItems.length === 0) return [];
+
+    const totalCost = allItems.reduce((s, i) => s + i.plannedCost, 0);
+    if (totalCost === 0) return [];
+
+    let cumPlanned = 0;
+    let cumActual = 0;
+
+    const now = new Date();
+    const nowMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const points: SCurveDataPoint[] = [];
+
+    for (const month of months) {
+      let monthPlanned = 0;
+      let monthActual = 0;
+
+      for (const item of allItems) {
+        const plannedInMonth = costInMonth(item.startDate, item.endDate, item.plannedCost, month);
+        monthPlanned += plannedInMonth;
+
+        const actualInMonth = costInMonth(item.startDate, item.endDate, item.actualCost, month);
+        monthActual += actualInMonth;
+      }
+
+      cumPlanned += monthPlanned;
+      cumActual += monthActual;
+
+      const pPct = Math.min((cumPlanned / totalCost) * 100, 100);
+      const aPct = Math.min((cumActual / totalCost) * 100, 100);
 
       points.push({
-        name: item.name || `Item ${i + 1}`,
-        index: i + 1,
-        planned: Math.min(cumulativePlanned, 100),
-        actual: Math.min(cumulativeActual, 100),
-        plannedCost: item.cost || 0,
-        actualCost: (item as any).actualCost || 0,
-        weight,
-        progress: (item as any).progress || 0,
+        date: fmtShort(month),
+        timestamp: month.getTime(),
+        planned: pPct,
+        actual: aPct,
+        plannedCost: cumPlanned,
+        actualCost: cumActual,
+        deviation: aPct - pPct,
+        isToday: month.getTime() === nowMonth.getTime(),
       });
-    });
+    }
 
     return points;
   })();
+
+  // ─── Derive "today" label for the chart reference line ───
+  const todayLabel = fmtShort(new Date());
+  const todayDataPoint = scurveData.find((d) => d.isToday);
+  const hasTodayOnChart = scurveData.some((d) => d.isToday);
+
+  // ─── Performance Metrics ───
+  const latestActualPoint = [...scurveData].reverse().find((d) => d.actual > 0);
+  const costVariance = totalPlannedCost > 0 ? ((totalActualCost - totalPlannedCost) / totalPlannedCost) * 100 : 0;
+  const cpi = totalActualCost > 0 && totalPlannedCost > 0
+    ? (totalPlannedCost * (progress / 100)) / totalActualCost
+    : 0;
+  const scheduleDeviation = todayDataPoint ? todayDataPoint.deviation : 0;
+  const isAheadOfSchedule = scheduleDeviation >= 0;
+  const isUnderBudget = costVariance <= 0;
 
   return (
     <div className="project-detail-container">
@@ -258,11 +394,19 @@ export default function ProjectDetail() {
           <Card className="stat-card">
             <Calendar size={24} color="var(--primary)" />
             <div className="stat-content">
-              <span className="stat-label">Timeline</span>
+              <span className="stat-label">Start</span>
               <span className="stat-value">
-                {project.startDate || project.globalDates?.planned?.start
-                  ? new Date(project.startDate || project.globalDates?.planned?.start || '').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-                  : 'TBD'}
+                {fmtDate(project.startDate || (project.globalDates as any)?.planned?.start)}
+              </span>
+            </div>
+          </Card>
+
+          <Card className="stat-card">
+            <Calendar size={24} color="var(--danger, #EF4444)" />
+            <div className="stat-content">
+              <span className="stat-label">End</span>
+              <span className="stat-value">
+                {fmtDate(project.endDate || (project.globalDates as any)?.planned?.end)}
               </span>
             </div>
           </Card>
@@ -297,14 +441,14 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      {/* S-Curve Chart — Only for privileged roles */}
+      {/* S-Curve Chart — Time-based */}
       {canSeeFinancials && scurveData.length > 1 && (
         <div ref={chartRef}>
           <Card className="scurve-card">
             <div className="scurve-header">
               <div>
                 <h3 className="scurve-title">S-Curve Progress</h3>
-                <p className="scurve-subtitle">Planned vs Actual cumulative cost (%)</p>
+                <p className="scurve-subtitle">Planned vs Actual cumulative cost (%) — monthly timeline</p>
               </div>
               <div className="scurve-legend">
                 <span className="legend-item">
@@ -313,6 +457,11 @@ export default function ProjectDetail() {
                 <span className="legend-item">
                   <span className="legend-dot actual" /> Actual
                 </span>
+                {hasTodayOnChart && (
+                  <span className="legend-item">
+                    <span className="legend-dot today" /> Today
+                  </span>
+                )}
               </div>
             </div>
             <div className="scurve-chart-wrapper">
@@ -329,17 +478,17 @@ export default function ProjectDetail() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
-                  <XAxis 
-                    dataKey="name" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
                     tickLine={false}
                     axisLine={{ stroke: 'var(--border)' }}
-                    interval={0}
+                    interval={scurveData.length > 12 ? Math.floor(scurveData.length / 8) : 0}
                     angle={-30}
                     textAnchor="end"
                     height={60}
                   />
-                  <YAxis 
+                  <YAxis
                     domain={[0, 100]}
                     tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
                     tickLine={false}
@@ -348,6 +497,16 @@ export default function ProjectDetail() {
                   />
                   <Tooltip content={<SCurveTooltip />} />
                   <ReferenceLine y={50} stroke="var(--border)" strokeDasharray="5 5" opacity={0.4} />
+                  {/* Today marker line */}
+                  {hasTodayOnChart && (
+                    <ReferenceLine
+                      x={todayLabel}
+                      stroke="#F59E0B"
+                      strokeWidth={2}
+                      strokeDasharray="6 4"
+                      label={{ value: 'Today', position: 'top', fill: '#F59E0B', fontSize: 11, fontWeight: 700 }}
+                    />
+                  )}
                   <Area
                     type="monotone"
                     dataKey="planned"
@@ -371,11 +530,64 @@ export default function ProjectDetail() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+
+            {/* Performance Summary below chart */}
+            <div className="scurve-performance">
+              <div className={`perf-card ${isAheadOfSchedule ? 'perf-good' : 'perf-bad'}`}>
+                <div className="perf-icon">
+                  {isAheadOfSchedule ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                </div>
+                <div className="perf-info">
+                  <span className="perf-label">Schedule</span>
+                  <span className="perf-value">
+                    {Math.abs(scheduleDeviation).toFixed(1)}% {isAheadOfSchedule ? 'Ahead' : 'Behind'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={`perf-card ${isUnderBudget ? 'perf-good' : 'perf-bad'}`}>
+                <div className="perf-icon">
+                  {isUnderBudget ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                </div>
+                <div className="perf-info">
+                  <span className="perf-label">Cost Variance</span>
+                  <span className="perf-value">
+                    {costVariance >= 0 ? '+' : ''}{costVariance.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="perf-card perf-neutral">
+                <div className="perf-icon"><Target size={18} /></div>
+                <div className="perf-info">
+                  <span className="perf-label">CPI</span>
+                  <span className="perf-value">{cpi > 0 ? cpi.toFixed(2) : 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="perf-card perf-neutral">
+                <div className="perf-icon"><Clock size={18} /></div>
+                <div className="perf-info">
+                  <span className="perf-label">Elapsed</span>
+                  <span className="perf-value">
+                    {(() => {
+                      const gs = project.startDate || (project.globalDates as any)?.planned?.start;
+                      const ge = project.endDate || (project.globalDates as any)?.planned?.end;
+                      if (!gs || !ge) return 'N/A';
+                      const total = new Date(ge).getTime() - new Date(gs).getTime();
+                      const elapsed = Date.now() - new Date(gs).getTime();
+                      const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+                      return `${pct.toFixed(0)}%`;
+                    })()}
+                  </span>
+                </div>
+              </div>
+            </div>
           </Card>
         </div>
       )}
 
-      {/* Work Items Table — Financial details only for privileged roles */}
+      {/* Work Items Table */}
       {workItems.length > 0 && (
         <div ref={tableRef}>
           <Card className="detail-table-card">
@@ -390,6 +602,8 @@ export default function ProjectDetail() {
                   <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Start</th>
+                    <th>End</th>
                     <th>Qty</th>
                     <th>Unit</th>
                     {canSeeFinancials && <th>Cost (Rp)</th>}
@@ -403,12 +617,15 @@ export default function ProjectDetail() {
                     const weight = totalPlannedCost > 0
                       ? ((item.cost || 0) / totalPlannedCost * 100).toFixed(1)
                       : '0';
+                    const wiAny = item as any;
                     return (
-                      <tr key={(item as any)._id || i} className="table-row">
+                      <tr key={wiAny._id || i} className="table-row">
                         <td className="table-num">{i + 1}</td>
                         <td className="table-name">{item.name}</td>
+                        <td className="table-date">{fmtDate(wiAny.startDate || wiAny.dates?.plannedStart)}</td>
+                        <td className="table-date">{fmtDate(wiAny.endDate || wiAny.dates?.plannedEnd)}</td>
                         <td>{item.qty || 0}</td>
-                        <td>{(item as any).unit || item.volume || '-'}</td>
+                        <td>{wiAny.unit || item.volume || '-'}</td>
                         {canSeeFinancials && <td className="table-cost">{formatRupiah(item.cost || 0)}</td>}
                         {canSeeFinancials && (
                           <td>
@@ -418,15 +635,15 @@ export default function ProjectDetail() {
                         <td>
                           <div className="table-progress">
                             <div className="table-progress-bar">
-                              <div 
-                                className="table-progress-fill" 
-                                style={{ width: `${(item as any).progress || 0}%` }} 
+                              <div
+                                className="table-progress-fill"
+                                style={{ width: `${wiAny.progress || 0}%` }}
                               />
                             </div>
-                            <span className="table-progress-text">{(item as any).progress || 0}%</span>
+                            <span className="table-progress-text">{wiAny.progress || 0}%</span>
                           </div>
                         </td>
-                        {canSeeFinancials && <td className="table-cost">{formatRupiah((item as any).actualCost || 0)}</td>}
+                        {canSeeFinancials && <td className="table-cost">{formatRupiah(wiAny.actualCost || 0)}</td>}
                       </tr>
                     );
                   })}
@@ -449,22 +666,27 @@ export default function ProjectDetail() {
                     <tr>
                       <th>#</th>
                       <th>Item</th>
+                      <th>Start</th>
+                      <th>End</th>
                       <th>Qty</th>
                       <th>Unit</th>
                       <th>Cost (Rp)</th>
                       <th>Weight</th>
                       <th>Status</th>
+                      <th>Actual Cost</th>
                     </tr>
                   </thead>
                   <tbody>
                     {supplies.map((s: any, i: number) => {
-                      const supplyWeight = budget > 0
-                        ? ((s.cost || 0) / budget * 100).toFixed(1)
+                      const supplyWeight = totalPlannedCost > 0
+                        ? ((s.cost || 0) / totalPlannedCost * 100).toFixed(1)
                         : '0';
                       return (
                         <tr key={s._id || i} className="table-row">
                           <td className="table-num">{i + 1}</td>
                           <td className="table-name">{s.item}</td>
+                          <td className="table-date">{fmtDate(s.startDate)}</td>
+                          <td className="table-date">{fmtDate(s.endDate)}</td>
                           <td>{s.qty || 0}</td>
                           <td>{s.unit || '-'}</td>
                           <td className="table-cost">{formatRupiah(s.cost || 0)}</td>
@@ -472,16 +694,17 @@ export default function ProjectDetail() {
                             <Badge label={`${supplyWeight}%`} variant="warning" size="small" />
                           </td>
                           <td>
-                            <Badge 
-                              label={s.status || 'Pending'} 
+                            <Badge
+                              label={s.status || 'Pending'}
                               variant={
-                                s.status === 'Delivered' ? 'success' 
-                                : s.status === 'Ordered' ? 'primary' 
-                                : 'neutral'
-                              } 
-                              size="small" 
+                                s.status === 'Delivered' ? 'success'
+                                  : s.status === 'Ordered' ? 'primary'
+                                    : 'neutral'
+                              }
+                              size="small"
                             />
                           </td>
+                          <td className="table-cost">{formatRupiah(s.actualCost || 0)}</td>
                         </tr>
                       );
                     })}

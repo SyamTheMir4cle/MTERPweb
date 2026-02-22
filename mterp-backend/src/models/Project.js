@@ -8,6 +8,8 @@ const workItemSchema = new mongoose.Schema({
   cost: { type: Number, default: 0 },
   progress: { type: Number, default: 0 },
   actualCost: { type: Number, default: 0 },
+  startDate: Date,
+  endDate: Date,
 });
 
 const supplySchema = new mongoose.Schema({
@@ -22,6 +24,8 @@ const supplySchema = new mongoose.Schema({
     default: 'Pending',
   },
   deliveryDate: Date,
+  startDate: Date,
+  endDate: Date,
 });
 
 const dailyReportSchema = new mongoose.Schema({
@@ -79,7 +83,7 @@ const projectSchema = new mongoose.Schema({
   },
   startDate: Date,
   endDate: Date,
-  
+
   // Documents
   documents: {
     shopDrawing: String,
@@ -87,11 +91,11 @@ const projectSchema = new mongoose.Schema({
     manPowerList: String,
     materialList: String,
   },
-  
+
   workItems: [workItemSchema],
   supplies: [supplySchema],
   dailyReports: [dailyReportSchema],
-  
+
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -100,7 +104,7 @@ const projectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   }],
-  
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -112,43 +116,43 @@ const projectSchema = new mongoose.Schema({
 });
 
 // Update progress based on work items + supplies (cost-weighted)
-projectSchema.methods.calculateProgress = function() {
+projectSchema.methods.calculateProgress = function () {
   const workItems = this.workItems || [];
   const supplies = this.supplies || [];
-  
+
   if (workItems.length === 0 && supplies.length === 0) return 0;
-  
+
   // Map supply status to progress percentage
   const supplyStatusProgress = { 'Pending': 0, 'Ordered': 50, 'Delivered': 100 };
-  
+
   // Combine all items into a unified cost-weighted list
   const allItems = [];
-  
+
   for (const item of workItems) {
     allItems.push({ cost: item.cost || 0, progress: item.progress || 0 });
   }
   for (const supply of supplies) {
     allItems.push({ cost: supply.cost || 0, progress: supplyStatusProgress[supply.status] || 0 });
   }
-  
+
   const totalCost = allItems.reduce((s, i) => s + i.cost, 0);
-  
+
   if (totalCost === 0) {
     // Fallback to simple average if no costs defined
     const totalProgress = allItems.reduce((s, i) => s + i.progress, 0);
     return Math.round(totalProgress / allItems.length);
   }
-  
+
   const weightedProgress = allItems.reduce((s, i) => {
     const weight = i.cost / totalCost;
     return s + weight * i.progress;
   }, 0);
-  
+
   return Math.round(weightedProgress);
 };
 
 // Update timestamps
-projectSchema.pre('save', function(next) {
+projectSchema.pre('save', function (next) {
   this.updatedAt = new Date();
   next();
 });

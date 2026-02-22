@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ChevronRight, 
-  ChevronLeft, 
-  Check, 
-  Upload, 
-  Plus, 
+import {
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Upload,
+  Plus,
   Trash2,
   FileText,
   Calendar,
@@ -112,7 +112,7 @@ export default function AddProject() {
   };
 
   const addSupply = () => {
-    setSupplies([...supplies, { id: Date.now().toString(), item: '', qty: 0, unit: 'pcs', cost: 0, status: 'Pending' }]);
+    setSupplies([...supplies, { id: Date.now().toString(), item: '', qty: 0, unit: 'pcs', cost: 0, status: 'Pending', deadline: '', actualPurchaseDate: '' }]);
   };
 
   const updateSupply = (index: number, field: string, value: any) => {
@@ -122,7 +122,7 @@ export default function AddProject() {
   };
 
   const addWorkItem = () => {
-    setWorkItems([...workItems, { id: Date.now(), name: '', qty: 0, volume: 'M2', unit: 'M2', cost: 0 }]);
+    setWorkItems([...workItems, { id: Date.now(), name: '', qty: 0, volume: 'M2', unit: 'M2', cost: 0, dates: { plannedStart: '', plannedEnd: '' } } as any]);
   };
 
   const updateWorkItem = (index: number, field: string, value: any) => {
@@ -257,10 +257,10 @@ export default function AddProject() {
                 <div className="item-card-header">
                   <span className="item-card-number">#{i + 1}</span>
                   {totalBudget > 0 && (Number(s.cost) || 0) > 0 && (
-                    <Badge 
-                      label={`${getWeight(Number(s.cost) || 0)}%`} 
-                      variant="primary" 
-                      size="small" 
+                    <Badge
+                      label={`${getWeight(Number(s.cost) || 0)}%`}
+                      variant="primary"
+                      size="small"
                     />
                   )}
                   <button
@@ -310,6 +310,28 @@ export default function AddProject() {
                       />
                     </div>
                   </div>
+                  <div className="item-field-row">
+                    <div className="item-field">
+                      <Input
+                        label="Start Date"
+                        type="date"
+                        placeholder="YYYY-MM-DD"
+                        value={(s as any).startDate || ''}
+                        onChangeText={(t) => updateSupply(i, 'startDate', t)}
+                        icon={Calendar}
+                      />
+                    </div>
+                    <div className="item-field">
+                      <Input
+                        label="End Date"
+                        type="date"
+                        placeholder="YYYY-MM-DD"
+                        value={(s as any).endDate || ''}
+                        onChangeText={(t) => updateSupply(i, 'endDate', t)}
+                        icon={Calendar}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -341,10 +363,10 @@ export default function AddProject() {
                 <div className="item-card-header">
                   <span className="item-card-number">#{i + 1}</span>
                   {totalBudget > 0 && (Number(w.cost) || 0) > 0 && (
-                    <Badge 
-                      label={`${getWeight(Number(w.cost) || 0)}%`} 
-                      variant="warning" 
-                      size="small" 
+                    <Badge
+                      label={`${getWeight(Number(w.cost) || 0)}%`}
+                      variant="warning"
+                      size="small"
                     />
                   )}
                   <button
@@ -394,6 +416,28 @@ export default function AddProject() {
                         placeholder="0"
                         value={Number(w.cost) || 0}
                         onChange={(v) => updateWorkItem(i, 'cost', v)}
+                      />
+                    </div>
+                  </div>
+                  <div className="item-field-row">
+                    <div className="item-field">
+                      <Input
+                        label="Start Date"
+                        type="date"
+                        placeholder="YYYY-MM-DD"
+                        value={(w as any).startDate || (w as any).dates?.plannedStart || ''}
+                        onChangeText={(t) => updateWorkItem(i, 'startDate', t)}
+                        icon={Calendar}
+                      />
+                    </div>
+                    <div className="item-field">
+                      <Input
+                        label="End Date"
+                        type="date"
+                        placeholder="YYYY-MM-DD"
+                        value={(w as any).endDate || (w as any).dates?.plannedEnd || ''}
+                        onChangeText={(t) => updateWorkItem(i, 'endDate', t)}
+                        icon={Calendar}
                       />
                     </div>
                   </div>

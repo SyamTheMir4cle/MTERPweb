@@ -76,15 +76,69 @@ const seedData = async () => {
         createdBy: users[0]._id,
         assignedTo: [users[2]._id, users[4]._id],
         workItems: [
-          { name: 'Pondasi', qty: 1, volume: 'LS', cost: 5000000000, progress: 100 },
-          { name: 'Struktur Kolom', qty: 120, volume: 'M3', cost: 15000000000, progress: 60 },
-          { name: 'Struktur Balok', qty: 80, volume: 'M3', cost: 12000000000, progress: 30 },
-          { name: 'Plat Lantai', qty: 2000, volume: 'M2', cost: 8000000000, progress: 20 },
+          {
+            name: 'Pondasi',
+            qty: 1, volume: 'LS', unit: 'LS',
+            cost: 5000000000, progress: 100, actualCost: 4800000000,
+            startDate: new Date('2024-01-15'), endDate: new Date('2024-04-30'),
+          },
+          {
+            name: 'Struktur Kolom',
+            qty: 120, volume: 'M3', unit: 'M3',
+            cost: 15000000000, progress: 60, actualCost: 9500000000,
+            startDate: new Date('2024-03-01'), endDate: new Date('2024-10-31'),
+          },
+          {
+            name: 'Struktur Balok',
+            qty: 80, volume: 'M3', unit: 'M3',
+            cost: 12000000000, progress: 30, actualCost: 4000000000,
+            startDate: new Date('2024-06-01'), endDate: new Date('2025-01-31'),
+          },
+          {
+            name: 'Plat Lantai',
+            qty: 2000, volume: 'M2', unit: 'M2',
+            cost: 8000000000, progress: 20, actualCost: 1800000000,
+            startDate: new Date('2024-08-01'), endDate: new Date('2025-03-31'),
+          },
+          {
+            name: 'Dinding & Partisi',
+            qty: 1500, volume: 'M2', unit: 'M2',
+            cost: 4000000000, progress: 0, actualCost: 0,
+            startDate: new Date('2025-01-01'), endDate: new Date('2025-04-30'),
+          },
+          {
+            name: 'Finishing & MEP',
+            qty: 1, volume: 'LS', unit: 'LS',
+            cost: 6000000000, progress: 0, actualCost: 0,
+            startDate: new Date('2025-03-01'), endDate: new Date('2025-06-30'),
+          },
         ],
         supplies: [
-          { item: 'Besi 16mm', cost: 500000000, status: 'Delivered' },
-          { item: 'Semen 50kg', cost: 200000000, status: 'Ordered' },
-          { item: 'Keramik 60x60', cost: 150000000, status: 'Pending' },
+          {
+            item: 'Besi 16mm', qty: 5000, unit: 'btg',
+            cost: 500000000, actualCost: 480000000, status: 'Delivered',
+            startDate: new Date('2024-01-15'), endDate: new Date('2024-03-15'),
+          },
+          {
+            item: 'Semen 50kg', qty: 10000, unit: 'sak',
+            cost: 200000000, actualCost: 150000000, status: 'Ordered',
+            startDate: new Date('2024-03-01'), endDate: new Date('2024-08-31'),
+          },
+          {
+            item: 'Keramik 60x60', qty: 2000, unit: 'M2',
+            cost: 150000000, actualCost: 0, status: 'Pending',
+            startDate: new Date('2025-02-01'), endDate: new Date('2025-05-31'),
+          },
+          {
+            item: 'Besi 12mm', qty: 3000, unit: 'btg',
+            cost: 300000000, actualCost: 290000000, status: 'Delivered',
+            startDate: new Date('2024-02-01'), endDate: new Date('2024-05-31'),
+          },
+          {
+            item: 'Cat Interior & Eksterior', qty: 500, unit: 'ltr',
+            cost: 100000000, actualCost: 0, status: 'Pending',
+            startDate: new Date('2025-04-01'), endDate: new Date('2025-06-30'),
+          },
         ],
       },
       {
@@ -99,9 +153,24 @@ const seedData = async () => {
         createdBy: users[0]._id,
         assignedTo: [users[2]._id],
         workItems: [
-          { name: 'Fondasi Pier', qty: 4, volume: 'LS', cost: 2000000000, progress: 100 },
-          { name: 'Struktur Baja', qty: 1, volume: 'LS', cost: 4000000000, progress: 80 },
-          { name: 'Lantai Jembatan', qty: 200, volume: 'M2', cost: 1500000000, progress: 40 },
+          {
+            name: 'Fondasi Pier',
+            qty: 4, volume: 'LS', unit: 'LS',
+            cost: 2000000000, progress: 100, actualCost: 1900000000,
+            startDate: new Date('2024-06-01'), endDate: new Date('2024-08-31'),
+          },
+          {
+            name: 'Struktur Baja',
+            qty: 1, volume: 'LS', unit: 'LS',
+            cost: 4000000000, progress: 80, actualCost: 3200000000,
+            startDate: new Date('2024-08-01'), endDate: new Date('2024-12-31'),
+          },
+          {
+            name: 'Lantai Jembatan',
+            qty: 200, volume: 'M2', unit: 'M2',
+            cost: 1500000000, progress: 40, actualCost: 650000000,
+            startDate: new Date('2024-11-01'), endDate: new Date('2025-02-28'),
+          },
         ],
       },
       {
