@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './Header.css';
 
 interface HeaderProps {
@@ -19,6 +20,7 @@ export default function Header({
   style,
 }: HeaderProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <header className="header" style={style}>

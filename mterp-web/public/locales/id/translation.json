@@ -1,0 +1,1029 @@
+{
+  "sidebar": {
+    "dashboard": "Dasbor",
+    "projects": "Proyek",
+    "tools": "Peralatan",
+    "materials": "Permintaan Material",
+    "approvals": "Persetujuan",
+    "tasks": "Tugas",
+    "attendance": "Kehadiran",
+    "payments": "Pembayaran Saya",
+    "payroll": "Slip Gaji",
+    "logout": "Keluar"
+  },
+  "header": {
+    "search": "Cari proyek, alat...",
+    "language": "ID"
+  },
+  "dashboard": {
+    "welcome": "Selamat Datang,",
+    "activeProjects": "Proyek Aktif",
+    "toolsInUse": "Alat Digunakan",
+    "pendingApprovals": "Persetujuan Tertunda",
+    "totalWorkers": "Total Pekerja Aktif",
+    "quickActions": "Aksi Cepat",
+    "newProject": "Proyek Baru",
+    "reqMaterial": "Minta Material",
+    "createTask": "Buat Tugas",
+    "recentActivity": "Aktivitas Terkini",
+    "viewAll": "Lihat Semua",
+    "projectProgress": "Kemajuan Proyek",
+    "overall": "Keseluruhan",
+    "onTrack": "Sesuai Jadwal",
+    "delayed": "Terlambat",
+    "progressChart": "Grafik Penyelesaian Proyek"
+  },
+  "auth": {
+    "login": {
+      "title": "mterp.",
+      "subtitle": "Perencanaan & Manajemen Sumber Daya Konstruksi",
+      "usernameRequired": "Isi username dan password",
+      "networkError": "Cek koneksi atau username/password.",
+      "usernameLabel": "USERNAME",
+      "usernamePlaceholder": "Masukan username",
+      "passwordLabel": "PASSWORD",
+      "passwordPlaceholder": "Masukan password",
+      "signIn": "Masuk",
+      "noAccount": "Belum punya akses? Daftar Akun"
+    },
+    "register": {
+      "missingData": "Mohon lengkapi semua data",
+      "serverError": "Terjadi kesalahan server",
+      "accountActive": "Akun Anda aktif! Silakan Login.",
+      "invalidOtp": "OTP Salah",
+      "verifyEmailTitle": "Verifikasi Email",
+      "verifyEmailSubtitle": "Masukkan 6 digit kode yang dikirim ke",
+      "verifyButton": "Verifikasi & Aktifkan",
+      "createAccountTitle": "Buat Akun Baru",
+      "createAccountSubtitle": "Daftar untuk akses sistem ERP",
+      "fullNamePlaceholder": "Nama Lengkap",
+      "roleLabel": "DAFTAR SEBAGAI:",
+      "companyEmailPlaceholder": "Email Perusahaan",
+      "usernamePlaceholder": "Username Login",
+      "passwordPlaceholder": "Password",
+      "startVerifyButton": "Mulai Verifikasi E-mail",
+      "hasAccount": "Sudah punya akun? Login"
+    }
+  },
+  "home": {
+    "greeting": {
+      "morning": "Selamat Pagi",
+      "afternoon": "Selamat Siang",
+      "evening": "Selamat Malam"
+    },
+    "time": {
+      "minsAgo": "m lalu",
+      "hoursAgo": "j lalu",
+      "daysAgo": "h lalu"
+    },
+    "updates": {
+      "title": "PEMBARUAN SITUS",
+      "viewAll": "Lihat Semua",
+      "loading": "Memuat pembaruan...",
+      "empty": "Tidak ada pembaruan terkini"
+    },
+    "cards": {
+      "projectsTitle": "Proyek",
+      "projectsSub": "Kelola Proyek",
+      "toolsTitle": "Pelacakan Alat",
+      "toolsSub": "Kelola Inventaris",
+      "attendanceTitle": "Kehadiran",
+      "attendanceSub": "Check In/Out",
+      "tasksTitle": "Tugas Saya",
+      "tasksSub": "Lihat Tugas",
+      "paymentsTitle": "Pembayaran Saya",
+      "paymentsSub": "Kasbon & Gaji",
+      "materialsTitle": "Material",
+      "materialsSub": "Permintaan Barang",
+      "approvalsTitle": "Persetujuan",
+      "approvalsSub": "Tinjau Permintaan",
+      "reportTitle": "Laporan Harian",
+      "reportSub": "Kirim Laporan"
+    }
+  },
+  "projects": {
+    "title": "Proyek",
+    "add": "Tambah",
+    "summary": {
+      "totalProjects": "Total Proyek",
+      "avgProgress": "Rata-rata Kemajuan"
+    },
+    "empty": {
+      "title": "Tidak Ada Proyek",
+      "desc": "Proyek akan muncul di sini setelah ditambahkan."
+    },
+    "status": {
+      "completed": "Selesai",
+      "inProgress": "Sedang Berjalan",
+      "pending": "Tertunda",
+      "complete": "Selesai"
+    },
+    "actions": {
+      "update": "Perbarui",
+      "deleteConfirm": "Hapus proyek ini?",
+      "cancel": "Batal",
+      "save": "Simpan",
+      "updateProgress": "Perbarui Kemajuan"
+    },
+    "form": {
+      "progressPlaceholder": "Progress %"
+    }
+  },
+  "addProject": {
+    "title": "Buat Proyek",
+    "steps": {
+      "basicInfo": "Info Dasar",
+      "documents": "Dokumen",
+      "supplyPlan": "Rencana Suplai",
+      "workItems": "Item Pekerjaan"
+    },
+    "errors": {
+      "fillNameLocation": "Harap isi nama dan lokasi proyek.",
+      "success": "Proyek berhasil dibuat!",
+      "failed": "Gagal membuat proyek."
+    },
+    "form": {
+      "projectName": "Nama Proyek",
+      "projectNamePlaceholder": "Masukkan nama proyek",
+      "location": "Lokasi",
+      "locationPlaceholder": "Lokasi proyek",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Deskripsi singkat proyek",
+      "totalBudget": "Total Anggaran (Rp)",
+      "totalBudgetPlaceholder": "misal 500000000",
+      "startDate": "Tanggal Mulai",
+      "endDate": "Tanggal Selesai",
+      "uploadDocs": "Unggah Dokumen",
+      "chooseFile": "Pilih data",
+      "addSupply": "Tambah Suplai",
+      "totalSupplyCost": "Total Biaya Suplai",
+      "ofBudget": "% dari anggaran",
+      "itemName": "Nama Barang",
+      "itemNamePlaceholder": "misal Semen Tiga Roda",
+      "qty": "Jumlah",
+      "unit": "Satuan",
+      "cost": "Biaya (Rp)",
+      "noSupplies": "Belum ada suplai ditambahkan.",
+      "addWorkItem": "Tambah Pekerjaan",
+      "totalWorkItemCost": "Total Biaya Pekerjaan",
+      "workItemName": "Nama Pekerjaan",
+      "workItemNamePlaceholder": "misal Pekerjaan Pondasi",
+      "noWorkItems": "Belum ada item pekerjaan ditambahkan."
+    },
+    "actions": {
+      "add": "Tambah",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "create": "Buat Proyek"
+    }
+  },
+  "projectDetail": {
+    "notFound": "Proyek tidak ditemukan",
+    "tooltip": {
+      "today": "HARI INI",
+      "planned": "Direncanakan",
+      "actual": "Aktual",
+      "deviation": "Deviasi",
+      "ahead": "Lebih Awal",
+      "behind": "Terlambat",
+      "plan": "Rencana",
+      "act": "Aktual"
+    },
+    "progress": {
+      "overall": "Kemajuan Keseluruhan"
+    },
+    "stats": {
+      "start": "Mulai",
+      "end": "Selesai",
+      "budget": "Anggaran",
+      "plannedCost": "Biaya Rencana",
+      "actualCost": "Biaya Aktual"
+    },
+    "scurve": {
+      "title": "S-Curve Progress",
+      "subtitle": "Akumulasi biaya Rencana vs Aktual (%) — bulanan",
+      "planned": "Rencana",
+      "actual": "Aktual",
+      "today": "Hari Ini",
+      "performance": {
+        "schedule": "Jadwal",
+        "ahead": "Lebih Awal",
+        "behind": "Terlambat",
+        "costVariance": "Variasi Biaya",
+        "cpi": "CPI",
+        "elapsed": "Berlalu",
+        "na": "N/A"
+      }
+    },
+    "workItems": {
+      "title": "Item Pekerjaan",
+      "items": "item",
+      "headers": {
+        "num": "#",
+        "name": "Nama",
+        "start": "Mulai",
+        "end": "Selesai",
+        "qty": "Jml",
+        "unit": "Satuan",
+        "cost": "Biaya (Rp)",
+        "weight": "Bobot",
+        "progress": "Progres",
+        "actualCost": "Biaya Aktual"
+      }
+    },
+    "supplyPlan": {
+      "title": "Rencana Suplai",
+      "items": "item",
+      "headers": {
+        "num": "#",
+        "item": "Barang",
+        "start": "Mulai",
+        "end": "Selesai",
+        "qty": "Jml",
+        "unit": "Satuan",
+        "cost": "Biaya (Rp)",
+        "weight": "Bobot",
+        "status": "Status",
+        "actualCost": "Biaya Aktual"
+      }
+    },
+    "actions": {
+      "title": "Aksi Cepat",
+      "dailyReport": "Laporan Harian",
+      "toolInventory": "Inventaris Alat",
+      "materialPlan": "Rencana Material"
+    },
+    "description": {
+      "title": "Deskripsi"
+    }
+  },
+  "tools": {
+    "title": "Inventaris Alat",
+    "subtitle": "Kelola dan lacak semua peralatan",
+    "stats": {
+      "total": "Total Alat",
+      "available": "Tersedia",
+      "inUse": "Digunakan",
+      "needsAttention": "Perlu Perhatian"
+    },
+    "filter": {
+      "all": "Semua",
+      "available": "Tersedia",
+      "inUse": "Digunakan",
+      "service": "Servis",
+      "damaged": "Rusak"
+    },
+    "condition": {
+      "good": "Baik",
+      "service": "Servis",
+      "damaged": "Rusak",
+      "na": "N/A"
+    },
+    "searchPlaceholder": "Cari alat...",
+    "overview": "Ringkasan",
+    "empty": {
+      "title": "Alat Tidak Ditemukan",
+      "filtered": "Tidak ada alat yang sesuai dengan filter ini. Coba kategori lain.",
+      "default": "Alat akan muncul di sini setelah ditambahkan ke inventaris."
+    },
+    "actions": {
+      "add": "Tambah Alat",
+      "edit": "Edit",
+      "delete": "Hapus",
+      "cancel": "Batal",
+      "saveChanges": "Simpan Perubahan"
+    },
+    "messages": {
+      "deleteConfirm": "Hapus \"{{name}}\"? Tindakan ini tidak dapat dibatalkan.",
+      "saveFailed": "Gagal menyimpan alat",
+      "deleteFailed": "Gagal menghapus alat"
+    },
+    "modal": {
+      "addTitle": "Tambah Alat Baru",
+      "editTitle": "Edit Alat",
+      "name": "Nama Alat *",
+      "namePlaceholder": "misal Mesin Bor",
+      "category": "Kategori",
+      "categoryPlaceholder": "misal Perkakas Listrik",
+      "location": "Lokasi",
+      "locationPlaceholder": "misal Gudang",
+      "stock": "Stok",
+      "unit": "Satuan",
+      "unitPlaceholder": "misal unit, pcs, set",
+      "condition": "Kondisi"
+    }
+  },
+  "materials": {
+    "title": "Permintaan Material",
+    "subtitle": "Kelola permintaan bahan baku dan suplai proyek",
+    "stats": {
+      "total": "Total Permintaan",
+      "pending": "Tertunda",
+      "approved": "Disetujui",
+      "rejected": "Ditolak"
+    },
+    "searchPlaceholder": "Cari barang, proyek, atau peminta...",
+    "empty": {
+      "title": "Tidak Ada Permintaan Ditemukan",
+      "filtered": "Tidak ada material yang cocok dengan \"{{search}}\"",
+      "default": "Anda belum membuat permintaan material apa pun."
+    },
+    "card": {
+      "highPriority": "Prioritas Tinggi",
+      "project": "Proyek",
+      "requester": "Peminta",
+      "quantity": "Jumlah",
+      "dateNeeded": "Tanggal Dibutuhkan",
+      "costEstimate": "Estimasi Biaya",
+      "reviewedBy": "Ditinjau Oleh",
+      "purpose": "Tujuan/Catatan:",
+      "rejectionReason": "Alasan Penolakan:"
+    },
+    "actions": {
+      "newRequest": "Permintaan Baru",
+      "approve": "Setujui",
+      "reject": "Tolak",
+      "delete": "Hapus Permintaan",
+      "cancel": "Batal",
+      "submit": "Kirim Permintaan",
+      "confirmRejection": "Konfirmasi Penolakan"
+    },
+    "modal": {
+      "addTitle": "Permintaan Material Baru",
+      "rejectTitle": "Tolak Permintaan",
+      "itemName": "Nama Barang",
+      "itemNamePlaceholder": "misal Semen",
+      "quantity": "Jumlah",
+      "quantityPlaceholder": "misal 50 sak",
+      "dateNeeded": "Tanggal Dibutuhkan",
+      "costEstimate": "Estimasi Biaya (Rp)",
+      "costEstimatePlaceholder": "Keluarkan biaya...",
+      "urgency": "Urgensi",
+      "urgencyOptions": {
+        "low": "Rendah",
+        "normal": "Normal",
+        "high": "Tinggi"
+      },
+      "assignProject": "Tetapkan ke Proyek (Opsional)",
+      "noProject": "-- Tidak Ada Proyek --",
+      "purpose": "Tujuan / Catatan",
+      "purposePlaceholder": "Jelaskan mengapa ini dibutuhkan...",
+      "rejectionReason": "Alasan Penolakan",
+      "rejectionPlaceholder": "Berikan alasan penolakan..."
+    },
+    "messages": {
+      "fillRequired": "Harap isi Nama Barang, Jumlah, dan Tanggal Dibutuhkan",
+      "fetchFailed": "Gagal mengambil data",
+      "createFailed": "Gagal membuat permintaan",
+      "submitFailed": "Gagal mengirim permintaan",
+      "updateStatusFailed": "Gagal memperbarui status",
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus permintaan untuk \"{{name}}\"?",
+      "deleteFailed": "Gagal menghapus permintaan",
+      "reasonRequired": "Alasan wajib diisi"
+    }
+  },
+  "projectTools": {
+    "title": "Inventaris Alat",
+    "fallbackProject": "Proyek",
+    "loading": "Memuat...",
+    "searchPlaceholder": "Cari alat...",
+    "stats": {
+      "total": "Total",
+      "good": "Baik",
+      "attention": "Perhatian",
+      "assigned": "Ditugaskan"
+    },
+    "empty": {
+      "error": "Kesalahan",
+      "noAssignedTools": "Tidak Ada Alat yang Ditugaskan",
+      "addFromWarehouse": "Tambahkan alat dari gudang ke proyek ini.",
+      "noAssignedWait": "Belum ada alat yang ditugaskan ke proyek ini.",
+      "noResults": "Tidak Ada Hasil",
+      "noMatch": "Tidak ada alat yang cocok dengan \"{{search}}\"",
+      "noToolsAvailable": "Tidak Ada Alat Tersedia",
+      "allAssigned": "Semua alat saat ini telah ditugaskan ke proyek."
+    },
+    "actions": {
+      "addTool": "Tambah Alat",
+      "reassign": "Tugaskan Ulang",
+      "assign": "Tugaskan",
+      "return": "Kembalikan",
+      "cancel": "Batal",
+      "addToProject": "Tambah ke Proyek",
+      "saveAssignment": "Simpan Penugasan"
+    },
+    "modal": {
+      "addTitle": "Tambah Alat dari Gudang",
+      "assignTitle": "Tugaskan Pengguna ke Alat",
+      "selectTool": "Pilih Alat",
+      "chooseTool": "Pilih alat...",
+      "assignTo": "Tugaskan Kepada",
+      "unassigned": "Belum Ditugaskan (Penggunaan Tim)"
+    },
+    "messages": {
+      "fetchFailed": "Gagal memuat data",
+      "addFailed": "Gagal menambahkan alat",
+      "assignFailed": "Gagal menugaskan pengguna",
+      "returnConfirm": "Kembalikan \"{{name}}\" ke gudang?",
+      "returnFailed": "Gagal mengembalikan alat"
+    }
+  },
+  "projectMaterials": {
+    "title": "Material Proyek",
+    "fallbackProject": "Material Proyek",
+    "searchPlaceholder": "Cari material...",
+    "stats": {
+      "total": "Total Item",
+      "pending": "Tertunda",
+      "ordered": "Dipesan",
+      "delivered": "Terkirim"
+    },
+    "empty": {
+      "noMaterials": "Belum Ada Material",
+      "trackDesc": "Lacak pasokan dan material untuk proyek ini.",
+      "noResults": "Tidak Ada Hasil",
+      "noMatch": "Tidak ada material yang cocok dengan \"{{search}}\""
+    },
+    "actions": {
+      "addMaterial": "Tambah Material",
+      "editMaterial": "Edit Material",
+      "cancel": "Batal",
+      "saveMaterial": "Simpan Material",
+      "markOrdered": "Tandai sebagai Dipesan",
+      "markDelivered": "Tandai sebagai Terkirim"
+    },
+    "labels": {
+      "estCost": "Est: {{cost}}",
+      "ordered": "Dipesan",
+      "delivered": "Terkirim"
+    },
+    "modal": {
+      "itemName": "Nama Barang",
+      "itemNamePlaceholder": "mis. Semen Tiga Roda",
+      "quantity": "Kuantitas",
+      "unit": "Satuan",
+      "unitPlaceholder": "mis. sak",
+      "estimatedCost": "Estimasi Biaya (per {{unit}})",
+      "costPlaceholder": "Rp...",
+      "startDate": "Tanggal Mulai",
+      "endDate": "Tanggal Selesai",
+      "status": "Status",
+      "statusOptions": {
+        "pending": "Tertunda",
+        "ordered": "Dipesan",
+        "delivered": "Terkirim"
+      }
+    },
+    "messages": {
+      "validationRequired": "Nama barang dan kuantitas wajib diisi",
+      "saveFailed": "Gagal menyimpan material",
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus \"{{name}}\"?",
+      "deleteFailed": "Gagal menghapus material",
+      "updateFailed": "Gagal memperbarui status"
+    }
+  },
+  "attendance": {
+    "title": "Kehadiran",
+    "workingHours": "Jam Kerja",
+    "outsideHours": "Di Luar Jam Kerja",
+    "loading": "Memuat...",
+    "steps": {
+      "checkIn": "Masuk",
+      "working": "Bekerja",
+      "checkOut": "Keluar",
+      "permit": "Izin"
+    },
+    "statusRibbon": {
+      "status": "Status: {{status}}",
+      "present": "Hadir",
+      "late": "Terlambat",
+      "absent": "Absen",
+      "permit": "Izin",
+      "halfDay": "Setengah Hari"
+    },
+    "actions": {
+      "readyToWork": "Siap Bekerja?",
+      "selectProject": "Pilih proyek Anda dan lakukan check-in",
+      "selectProjectPlaceholder": "-- Pilih Proyek --",
+      "checkInNow": "Check-In Sekarang",
+      "checkInWarning": "Check-in hanya tersedia antara pukul 08:00 – 16:00",
+      "requestPermit": "Tidak bisa bekerja hari ini? Ajukan Izin",
+      "readyToLeave": "Siap Pulang?",
+      "uploadSelfie": "Unggah foto selfie untuk check-out",
+      "removePhoto": "✕ Hapus",
+      "tapToUpload": "Ketuk untuk mengunggah selfie",
+      "checkOutNow": "Check-Out"
+    },
+    "allDone": {
+      "title": "Selesai Untuk Hari Ini!",
+      "desc": "Bekerja selama",
+      "descDetail": "• {{start}} – {{end}}"
+    },
+    "permitRequested": {
+      "title": "Izin Diajukan",
+      "desc": "Anda telah mengajukan izin untuk hari ini."
+    },
+    "quickActions": {
+      "requestKasbon": "Ajukan Kasbon",
+      "attendanceLogs": "Log Kehadiran"
+    },
+    "recentHistory": {
+      "title": "Riwayat Terbaru",
+      "hint": "7 hari terakhir",
+      "noRecords": "Tidak ada riwayat terbaru"
+    },
+    "modals": {
+      "permit": {
+        "title": "Ajukan Izin / Cuti",
+        "desc": "Unggah bukti (misal surat keterangan dokter) dan alasan.",
+        "reasonLabel": "Alasan",
+        "reasonPlaceholder": "Mengapa Anda tidak dapat bekerja?",
+        "uploadEvidence": "Unggah foto bukti"
+      },
+      "kasbon": {
+        "title": "Ajukan Kasbon",
+        "warning": "Kasbon akan dipotong dari gaji bulanan Anda.",
+        "amountLabel": "Jumlah (Rp)",
+        "amountPlaceholder": "mis. 500000",
+        "reasonLabel": "Alasan",
+        "reasonPlaceholder": "Mengapa Anda membutuhkan kasbon ini?"
+      },
+      "common": {
+        "cancel": "Batal",
+        "submitRequest": "Kirim Pengajuan"
+      }
+    },
+    "messages": {
+      "projectRequiredTitle": "Proyek Diperlukan",
+      "projectRequired": "Silakan pilih proyek sebelum check-in.",
+      "checkInSuccessTitle": "Berhasil Check-In!",
+      "checkInSuccess": "Anda telah check-in pada pukul {{time}}",
+      "checkInFailedTitle": "Gagal Check-in",
+      "checkInFailedDefault": "Tidak dapat melakukan check-in.",
+      "photoRequiredTitle": "Foto Diperlukan",
+      "photoRequired": "Silakan unggah foto selfie untuk check-out.",
+      "checkOutSuccessTitle": "Berhasil Check-Out!",
+      "checkOutSuccess": "Anda telah check-out pada pukul {{time}}",
+      "checkOutFailedTitle": "Gagal Check-Out",
+      "checkOutFailedDefault": "Tidak dapat melakukan check-out.",
+      "kasbonSuccessTitle": "Pengajuan Terkirim",
+      "kasbonSuccess": "Pengajuan kasbon Anda telah dikirim.",
+      "permitMissingInfoTitle": "Info Kosong",
+      "permitMissingInfo": "Alasan dan foto bukti diperlukan.",
+      "permitSuccessTitle": "Izin Terkirim",
+      "permitSuccess": "Pengajuan izin Anda telah dikirim.",
+      "permitFailedTitle": "Pengajuan Gagal",
+      "permitFailedDefault": "Gagal mengirim izin."
+    }
+  },
+  "attendanceLogs": {
+    "title": "Log Kehadiran",
+    "subtitle": "Lihat dan kelola catatan kehadiran",
+    "filters": {
+      "dateRange": "Rentang Waktu",
+      "tabs": {
+        "week": "Minggu Ini",
+        "month": "Bulan Ini",
+        "custom": "Kustom"
+      },
+      "customStart": "Mulai",
+      "customEnd": "Selesai",
+      "worker": "Pekerja",
+      "allWorkers": "Semua Pekerja",
+      "payment": "Pembayaran",
+      "paymentOptions": {
+        "unpaid": "Belum Dibayar",
+        "paid": "Lunas",
+        "all": "Semua"
+      }
+    },
+    "summary": {
+      "totalDays": "Total Hari",
+      "present": "Hadir",
+      "totalHours": "Total Jam",
+      "totalPayment": "Total Pembayaran"
+    },
+    "actions": {
+      "markAllPaid": "Tandai Semua Lunas ({{amount}})",
+      "setWage": "Atur Gaji",
+      "cancel": "Batal",
+      "save": "Simpan"
+    },
+    "loading": "Memuat data...",
+    "empty": {
+      "title": "Tidak Ada Data",
+      "desc": "Tidak ditemukan catatan kehadiran untuk filter yang dipilih."
+    },
+    "record": {
+      "daily": "Harian",
+      "overtime": "Lembur"
+    },
+    "wageModal": {
+      "title": "Atur Tipe Gaji",
+      "ratePerDay": "Gaji per Hari (Rp)",
+      "ratePlaceholder": "mis. 150000",
+      "overtimePay": "Uang Lembur (Rp)",
+      "overtimePlaceholder": "Otomatis dihitung atau ketik manual",
+      "duration": "Durasi: {{hours}} jam",
+      "helper": "Gaji per jam otomatis dihitung (Harian / 8). Lembur dihitung berdasarkan durasi waktu."
+    },
+    "messages": {
+      "noUnpaid": "Tidak ada data yang belum dibayar.",
+      "confirmPay": "Tandai {{count}} data sebagai LUNAS? Total: {{amount}}",
+      "payFailed": "Gagal menandai lunas",
+      "updateWageFailed": "Gagal memperbarui tipe gaji"
+    },
+    "wageOptions": {
+      "daily": "Harian Biasa",
+      "overtime15": "Lembur 1.5x",
+      "overtime2": "Lembur 2x"
+    }
+  },
+  "tasks": {
+    "title": "Tugas",
+    "subtitle": "Kelola dan lacak penugasan kerja",
+    "actions": {
+      "addTask": "Tambah Tugas",
+      "assign": "Tugaskan",
+      "start": "Mulai",
+      "done": "Selesai",
+      "createTask": "Buat Tugas",
+      "saveAssignment": "Simpan Penugasan",
+      "cancel": "Batal"
+    },
+    "stats": {
+      "pending": "Tertunda",
+      "inProgress": "Berjalan",
+      "completed": "Selesai"
+    },
+    "loading": "Memuat tugas...",
+    "errorLoading": "Gagal Memuat",
+    "empty": {
+      "title": "Belum Ada Tugas",
+      "descManager": "Buat tugas pertama Anda untuk memulai.",
+      "descWorker": "Belum ada tugas yang ditugaskan kepada Anda."
+    },
+    "status": {
+      "completed": "SELESAI"
+    },
+    "modal": {
+      "createTitle": "Buat Tugas",
+      "assignTitle": "Tugaskan Tugas",
+      "taskTitle": "Judul Tugas",
+      "taskTitlePlaceholder": "Masukkan judul tugas",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Masukkan deskripsi (opsional)",
+      "project": "Proyek *",
+      "selectProject": "Pilih proyek",
+      "priority": "Prioritas",
+      "priorityOptions": {
+        "low": "Rendah",
+        "normal": "Normal",
+        "high": "Tinggi",
+        "urgent": "Mendesak"
+      },
+      "dueDate": "Tenggat Waktu",
+      "assignTo": "Tugaskan Kepada",
+      "assignToOptional": "Tugaskan Kepada (opsional)",
+      "unassigned": "Tidak Ada"
+    },
+    "messages": {
+      "loadFailed": "Gagal memuat tugas",
+      "saveFailed": "Gagal menyimpan"
+    }
+  },
+  "dailyReport": {
+    "title": "Laporan Harian",
+    "projectSelector": {
+      "title": "Pilih Proyek",
+      "placeholder": "— Pilih proyek —",
+      "progress": "{{progress}}% progres"
+    },
+    "loadingProject": "Memuat data proyek...",
+    "workItem": {
+      "title": "Progres Item Pekerjaan",
+      "progress": "Progres",
+      "actualCost": "Biaya Aktual (Rp)"
+    },
+    "supplyPlan": {
+      "title": "Status Rencana Suplai",
+      "status": "Status",
+      "actualCost": "Biaya Aktual (Rp)"
+    },
+    "emptyProject": "Proyek ini belum memiliki item pekerjaan atau suplai.",
+    "weather": {
+      "title": "Kondisi Cuaca",
+      "options": {
+        "sunny": "Cerah",
+        "cloudy": "Berawan",
+        "rainy": "Hujan"
+      }
+    },
+    "materials": {
+      "title": "Material Terpakai",
+      "placeholder": "Daftar material yang digunakan hari ini"
+    },
+    "workforce": {
+      "title": "Tenaga Kerja",
+      "placeholder": "Jumlah pekerja, peran, dll."
+    },
+    "notes": {
+      "title": "Catatan Tambahan",
+      "placeholder": "Kendala, kabar terbaru, atau komentar"
+    },
+    "actions": {
+      "submit": "Kirim Laporan"
+    },
+    "messages": {
+      "selectProject": "Silakan pilih proyek terlebih dahulu.",
+      "submitSuccess": "Laporan Terkirim",
+      "submitSuccessDesc": "Laporan harian disimpan. Progres keseluruhan: {{progress}}%",
+      "submitFailed": "Gagal",
+      "submitFailedDesc": "Tidak dapat mengirim laporan.",
+      "error": "Error"
+    },
+    "status": {
+      "pending": "Pending",
+      "ordered": "Ordered",
+      "delivered": "Delivered"
+    }
+  },
+  "approvals": {
+    "title": "Menunggu Persetujuan",
+    "itemsCount": "{{count}} ITEM",
+    "loading": "Memuat data persetujuan...",
+    "errorLoading": "Gagal Memuat",
+    "empty": {
+      "title": "Semua Selesai!",
+      "desc": "Tidak ada persetujuan yang tertunda saat ini."
+    },
+    "materialRequests": {
+      "title": "Permintaan Material",
+      "requester": "Peminta",
+      "role": "Peran",
+      "item": "Item",
+      "qty": "Jumlah",
+      "dateNeeded": "Tanggal Dibutuhkan",
+      "project": "Proyek",
+      "urgency": {
+        "urgent": "MENDESAK",
+        "low": "RENDAH",
+        "normal": "NORMAL"
+      }
+    },
+    "kasbon": {
+      "title": "Kasbon",
+      "empty": "Tidak ada pengajuan kasbon tertunda.",
+      "amount": "Jumlah",
+      "reason": "Alasan",
+      "requested": "Diajukan Pada",
+      "badge": "KASBON"
+    },
+    "actions": {
+      "reject": "Tolak",
+      "approve": "Setujui"
+    },
+    "messages": {
+      "loadFailed": "Gagal memuat persetujuan"
+    }
+  },
+  "myPayments": {
+    "title": "Pembayaran Saya",
+    "tabs": {
+      "kasbon": "Kasbon",
+      "addRequest": "Pengajuan",
+      "slipGaji": "Slip Gaji"
+    },
+    "summary": {
+      "period": "Periode: Bulan Ini",
+      "totalEarnings": "Total Pendapatan"
+    },
+    "loading": "Memuat...",
+    "loadingSlips": "Memuat slip gaji...",
+    "error": "Error",
+    "kasbon": {
+      "pending": "Tertunda",
+      "approvedPaid": "Disetujui / Dibayar",
+      "btnRequest": "Ajukan Kasbon",
+      "btnCancel": "Batal",
+      "form": {
+        "title": "Pengajuan Kasbon Baru",
+        "amount": "Nominal (Rp)",
+        "amountPlaceholder": "Contoh: 500000",
+        "reason": "Alasan",
+        "reasonPlaceholder": "Mengapa Anda membutuhkan kasbon ini?",
+        "btnSubmit": "Kirim Pengajuan",
+        "btnSubmitting": "Mengirim..."
+      },
+      "history": "Riwayat Pengajuan",
+      "emptyTitle": "Tidak Ada Kasbon",
+      "emptyDesc": "Anda belum pernah mengajukan kasbon.",
+      "rejected": "Ditolak:",
+      "approvedBy": "Disetujui oleh {{name}}",
+      "paidOn": "Dibayar pada {{date}}"
+    },
+    "wages": {
+      "daysWorked": "Hari Kerja",
+      "totalHours": "Total Jam",
+      "multiplier": "Pengali Upah",
+      "title": "Rekap Kehadiran",
+      "emptyTitle": "Tidak Ada Data",
+      "emptyDesc": "Belum ada riwayat kehadiran untuk bulan ini.",
+      "checkIn": "Masuk",
+      "checkOut": "Keluar"
+    },
+    "slip": {
+      "emptyTitle": "Tidak Ada Slip Gaji",
+      "emptyDesc": "Belum ada slip gaji yang dibuat untuk Anda.",
+      "days": "hari",
+      "detail": {
+        "title": "Slip Gaji",
+        "period": "Periode:",
+        "attendance": {
+          "totalDays": "Total Hari",
+          "present": "Hadir",
+          "late": "Terlambat",
+          "absent": "Alpa",
+          "permit": "Izin",
+          "hours": "Jam"
+        },
+        "earnings": {
+          "title": "Rincian Pendapatan",
+          "dailyRate": "Upah Harian",
+          "dailyWages": "Kehadiran ({{days}} hari)",
+          "overtime": "Lembur",
+          "bonus": "Bonus",
+          "deductions": "Potongan",
+          "kasbon": "Kasbon",
+          "netPay": "Gaji Bersih"
+        },
+        "authorization": {
+          "pending": "Menunggu"
+        },
+        "notes": "Catatan:",
+        "btnClose": "Tutup",
+        "btnExport": "Ekspor PDF"
+      }
+    },
+    "messages": {
+      "kasbonSuccess": "Kasbon Terkirim",
+      "kasbonSuccessDesc": "Pengajuan kasbon berhasil dikirim untuk disetujui.",
+      "kasbonFailed": "Pengajuan Gagal",
+      "kasbonFailedDesc": "Gagal mengirim pengajuan kasbon.",
+      "loadFailed": "Gagal memuat data"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "paid": "Paid"
+    },
+    "wageType": {
+      "daily": "Harian Umum",
+      "overtime_1.5": "Lembur 1.5x",
+      "overtime_2": "Lembur 2x"
+    }
+  },
+  "slipGaji": {
+    "title": "Slip Gaji",
+    "subtitle": "Slip gaji mingguan · Pembayaran setiap Sabtu",
+    "loading": "Memuat slip...",
+    "empty": {
+      "title": "Tidak ada slip gaji untuk periode ini",
+      "btnGenerate": "Buat Slip Pertama"
+    },
+    "actions": {
+      "generate": "Buat Slip"
+    },
+    "card": {
+      "worker": "Pekerja",
+      "days": "hari"
+    },
+    "status": {
+      "draft": "Draf",
+      "authorized": "Disetujui",
+      "issued": "Terbit"
+    },
+    "modals": {
+      "generate": {
+        "title": "Buat Slip Gaji",
+        "desc": "Periode mingguan · Pembayaran hari Sabtu",
+        "worker": "Pilih Pekerja",
+        "workerPlaceholder": "-- Pilih pekerja --",
+        "startDate": "Tanggal Mulai",
+        "endDate": "Tanggal Selesai (Sabtu)",
+        "bonus": "Bonus",
+        "deductions": "Potongan",
+        "notes": "Catatan",
+        "notesPlaceholder": "Catatan opsional...",
+        "btnCancel": "Batal",
+        "btnGenerate": "Buat Slip",
+        "btnGenerating": "Membuat..."
+      },
+      "detail": {
+        "title": "Slip Gaji",
+        "period": "Periode:",
+        "totalDays": "Total Hari",
+        "present": "Hadir",
+        "late": "Terlambat",
+        "absent": "Alpa",
+        "permit": "Izin",
+        "totalHours": "Total Jam",
+        "earnings": {
+          "title": "Rincian Pendapatan",
+          "dailyRate": "Upah Harian",
+          "totalDailyWages": "Total Upah Harian ({{days}} hari)",
+          "overtime": "Lembur",
+          "bonus": "Bonus",
+          "deductions": "Potongan",
+          "kasbon": "Potongan Kasbon",
+          "netPay": "Gaji Bersih"
+        },
+        "digitalAuth": {
+          "title": "Otorisasi Digital",
+          "director": "Direktur",
+          "owner": "Pemilik",
+          "awaiting": "Menunggu tanda tangan",
+          "btnSign": "Tandatangani"
+        },
+        "notes": "Catatan:",
+        "btnClose": "Tutup",
+        "btnExport": "Ekspor PDF",
+        "btnAuthorize": "Setujui"
+      },
+      "auth": {
+        "title": "Kata Sandi Digital",
+        "desc": "Masukkan kata sandi aman Anda untuk menyetujui slip gaji ini sebagai",
+        "placeholder": "Masukkan kata sandi (min 4 karakter)",
+        "btnCancel": "Batal",
+        "btnAuthorize": "Setujui",
+        "btnAuthorizing": "Menyetujui..."
+      }
+    },
+    "messages": {
+      "genSuccess": "Slip Dibuat",
+      "genSuccessDesc": "Slip gaji berhasil dibuat sebagai draf.",
+      "genError": "Error",
+      "genErrorDesc": "Gagal membuat slip",
+      "authSuccess": "Disetujui",
+      "authSuccessDesc": "Slip ditandatangani oleh {{name}}",
+      "authError": "Otorisasi Gagal",
+      "authErrorDesc": "Gagal memberikan otorisasi",
+      "delSuccess": "Dihapus",
+      "delSuccessDesc": "Draf slip telah dihapus.",
+      "delError": "Error",
+      "delErrorDesc": "Gagal menghapus"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "btnEdit": "Edit",
+    "btnSave": "Simpan",
+    "btnSaving": "Menyimpan...",
+    "btnChangePhoto": "Ubah Foto",
+    "btnRemovePhoto": "Hapus Foto",
+    "sections": {
+      "personalInfo": "INFORMASI PRIBADI",
+      "paymentInfo": "INFORMASI PEMBAYARAN",
+      "account": "AKUN",
+      "settings": "PENGATURAN"
+    },
+    "fields": {
+      "fullName": "Nama Lengkap",
+      "fullNamePlaceholder": "Masukkan nama Anda",
+      "email": "Email",
+      "emailPlaceholder": "Masukkan email Anda",
+      "phone": "Telepon",
+      "phonePlaceholder": "Masukkan nomor telepon",
+      "address": "Alamat",
+      "addressPlaceholder": "Masukkan alamat Anda",
+      "notSet": "Belum diatur",
+      "paymentPlatform": "Platform Pembayaran",
+      "paymentPlatformPlaceholder": "Contoh: BCA, Mandiri, GoPay, Dana",
+      "accountNumber": "Nomor Rekening",
+      "accountNumberPlaceholder": "Masukkan nomor rekening",
+      "accountName": "Nama Pemilik Rekening",
+      "accountNamePlaceholder": "Nama pemegang akun",
+      "role": "Peran"
+    },
+    "settings": {
+      "notifications": "Notifikasi",
+      "privacy": "Privasi & Keamanan",
+      "help": "Bantuan & Dukungan",
+      "about": "Tentang",
+      "signOut": "Keluar"
+    },
+    "messages": {
+      "photoSuccess": "Foto Diperbarui",
+      "photoSuccessDesc": "Foto profil Anda berhasil diperbarui.",
+      "photoError": "Gagal Mengunggah",
+      "photoErrorDesc": "Gagal memperbarui foto profil. Silakan coba lagi.",
+      "photoRemoved": "Foto Dihapus",
+      "photoRemovedDesc": "Foto profil Anda telah dihapus.",
+      "saveSuccess": "Profil Disimpan",
+      "saveSuccessDesc": "Profil Anda berhasil diperbarui.",
+      "saveError": "Pembaruan Gagal",
+      "saveErrorDesc": "Gagal memperbarui profil. Silakan coba lagi."
+    }
+  }
+}

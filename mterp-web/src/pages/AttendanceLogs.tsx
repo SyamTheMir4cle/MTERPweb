@@ -5,6 +5,7 @@ import {
   ChevronDown, DollarSign, X, Check, Building, Users,
   Wallet, TrendingUp, Loader,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Badge, Button, EmptyState, CostInput } from '../components/shared';
@@ -58,6 +59,7 @@ const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
 };
 
 export default function AttendanceLogs() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -182,13 +184,13 @@ export default function AttendanceLogs() {
   const handleMarkAsPaid = async () => {
     if (records.length === 0) return;
     const unpaidIds = records.filter(r => r.paymentStatus !== 'Paid').map(r => r._id);
-    if (unpaidIds.length === 0) { alert('No unpaid records to pay.'); return; }
-    if (!window.confirm(`Mark ${unpaidIds.length} records as PAID? Total: Rp ${new Intl.NumberFormat('id-ID').format(summary?.totalPayment || 0)}`)) return;
+    if (unpaidIds.length === 0) { alert(t('attendanceLogs.messages.noUnpaid')); return; }
+    if (!window.confirm(t('attendanceLogs.messages.confirmPay', { count: unpaidIds.length, amount: formatRp(summary?.totalPayment || 0) }))) return;
     setPaying(true);
     try {
       await api.post('/attendance/pay', { attendanceIds: unpaidIds });
       await fetchRecords();
-    } catch (err) { console.error('Payment failed', err); alert('Failed to mark as paid'); }
+    } catch (err) { console.error('Payment failed', err); alert(t('attendanceLogs.messages.payFailed')); }
     finally { setPaying(false); }
   };
 
@@ -199,9 +201,19 @@ export default function AttendanceLogs() {
     new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
   const getWageLabel = (wageType: string) => {
-    const option = WAGE_OPTIONS.find(o => o.value === wageType);
-    return option?.label || wageType;
+    let baseLabel = wageType;
+    if (wageType === 'daily') baseLabel = t('attendanceLogs.wageOptions.daily');
+    else if (wageType === 'overtime_1.5') baseLabel = t('attendanceLogs.wageOptions.overtime15');
+    else if (wageType === 'overtime_2') baseLabel = t('attendanceLogs.wageOptions.overtime2');
+    
+    return baseLabel;
   };
+
+  const WAGE_OPTIONS_TRANSLATED = [
+    { label: t('attendanceLogs.wageOptions.daily'), value: 'daily', multiplier: 1 },
+    { label: t('attendanceLogs.wageOptions.overtime15'), value: 'overtime_1.5', multiplier: 1.5 },
+    { label: t('attendanceLogs.wageOptions.overtime2'), value: 'overtime_2', multiplier: 2 },
+  ];
 
   const formatRp = (val: number) => `Rp ${new Intl.NumberFormat('id-ID').format(val)}`;
 
@@ -216,8 +228,8 @@ export default function AttendanceLogs() {
           <Users size={20} color="white" />
         </div>
         <div>
-          <h1 className="logs-title">Attendance Logs</h1>
-          <p className="logs-subtitle">View and manage attendance records</p>
+          <h1 className="logs-title">{t('attendanceLogs.title')}</h1>
+          <p className="logs-subtitle">{t('attendanceLogs.subtitle')}</p>
         </div>
       </div>
 
@@ -225,7 +237,7 @@ export default function AttendanceLogs() {
       <Card className="logs-filters-card">
         <div className="logs-filter-row">
           <div className="logs-filter-group">
-            <label className="logs-filter-label">Date Range</label>
+            <label className="logs-filter-label">{t('attendanceLogs.filters.dateRange')}</label>
             <div className="logs-tabs">
               {(['week', 'month', 'custom'] as const).map(r => (
                 <button
@@ -233,7 +245,7 @@ export default function AttendanceLogs() {
                   className={`logs-tab ${dateRange === r ? 'active' : ''}`}
                   onClick={() => handleDateRangeChange(r)}
                 >
-                  {r === 'week' ? 'This Week' : r === 'month' ? 'This Month' : 'Custom'}
+                  {r === 'week' ? t('attendanceLogs.filters.tabs.week') : r === 'month' ? t('attendanceLogs.filters.tabs.month') : t('attendanceLogs.filters.tabs.custom')}
                 </button>
               ))}
             </div>
@@ -243,11 +255,11 @@ export default function AttendanceLogs() {
         {dateRange === 'custom' && (
           <div className="logs-custom-dates">
             <div className="logs-date-field">
-              <label>Start</label>
+              <label>{t('attendanceLogs.filters.customStart')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="logs-date-input" />
             </div>
             <div className="logs-date-field">
-              <label>End</label>
+              <label>{t('attendanceLogs.filters.customEnd')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="logs-date-input" />
             </div>
           </div>
@@ -256,11 +268,11 @@ export default function AttendanceLogs() {
         <div className="logs-selects-row">
           {users.length > 0 && (
             <div className="logs-select-group">
-              <label className="logs-filter-label">Worker</label>
+              <label className="logs-filter-label">{t('attendanceLogs.filters.worker')}</label>
               <div className="logs-select-wrapper">
                 <User size={14} className="logs-select-pre" />
                 <select value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)} className="logs-select">
-                  <option value="">All Workers</option>
+                  <option value="">{t('attendanceLogs.filters.allWorkers')}</option>
                   {users.map(u => <option key={u._id} value={u._id}>{u.fullName} ({u.role})</option>)}
                 </select>
                 <ChevronDown size={14} className="logs-select-icon" />
@@ -269,13 +281,13 @@ export default function AttendanceLogs() {
           )}
 
           <div className="logs-select-group">
-            <label className="logs-filter-label">Payment</label>
+            <label className="logs-filter-label">{t('attendanceLogs.filters.payment')}</label>
             <div className="logs-select-wrapper">
               <Wallet size={14} className="logs-select-pre" />
               <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value as any)} className="logs-select">
-                <option value="Unpaid">Unpaid</option>
-                <option value="Paid">Paid</option>
-                <option value="All">All</option>
+                <option value="Unpaid">{t('attendanceLogs.filters.paymentOptions.unpaid')}</option>
+                <option value="Paid">{t('attendanceLogs.filters.paymentOptions.paid')}</option>
+                <option value="All">{t('attendanceLogs.filters.paymentOptions.all')}</option>
               </select>
               <ChevronDown size={14} className="logs-select-icon" />
             </div>
@@ -289,22 +301,22 @@ export default function AttendanceLogs() {
           <Card className="logs-summary-item">
             <Calendar size={16} color="#6366F1" />
             <span className="logs-sum-val">{summary.total}</span>
-            <span className="logs-sum-label">Total Days</span>
+            <span className="logs-sum-label">{t('attendanceLogs.summary.totalDays')}</span>
           </Card>
           <Card className="logs-summary-item logs-sum-green">
             <Check size={16} color="#059669" />
             <span className="logs-sum-val">{summary.present}</span>
-            <span className="logs-sum-label">Present</span>
+            <span className="logs-sum-label">{t('attendanceLogs.summary.present')}</span>
           </Card>
           <Card className="logs-summary-item logs-sum-amber">
             <Clock size={16} color="#D97706" />
             <span className="logs-sum-val">{summary.totalHours.toFixed(1)}h</span>
-            <span className="logs-sum-label">Total Hours</span>
+            <span className="logs-sum-label">{t('attendanceLogs.summary.totalHours')}</span>
           </Card>
           <Card className="logs-summary-item logs-sum-primary">
             <DollarSign size={16} color="var(--primary)" />
             <span className="logs-sum-val logs-sum-highlight">{formatRp(summary.totalPayment || 0)}</span>
-            <span className="logs-sum-label">Total Payment</span>
+            <span className="logs-sum-label">{t('attendanceLogs.summary.totalPayment')}</span>
           </Card>
         </div>
       )}
@@ -313,7 +325,7 @@ export default function AttendanceLogs() {
       {isSupervisor && paymentStatus === 'Unpaid' && (summary?.totalPayment || 0) > 0 && (
         <div className="logs-pay-row">
           <Button
-            title={`Mark All as Paid (${formatRp(summary?.totalPayment || 0)})`}
+            title={t('attendanceLogs.actions.markAllPaid', { amount: formatRp(summary?.totalPayment || 0) })}
             icon={Check}
             onClick={handleMarkAsPaid}
             loading={paying}
@@ -327,13 +339,13 @@ export default function AttendanceLogs() {
       {loading ? (
         <div className="logs-loading">
           <Loader size={24} className="dashboard-spinner" />
-          <span>Loading records...</span>
+          <span>{t('attendanceLogs.loading')}</span>
         </div>
       ) : records.length === 0 ? (
         <EmptyState
           icon={Calendar}
-          title="No Records Found"
-          description="No attendance records found for the selected filters."
+          title={t('attendanceLogs.empty.title')}
+          description={t('attendanceLogs.empty.desc')}
         />
       ) : (
         <div className="logs-records">
@@ -375,19 +387,19 @@ export default function AttendanceLogs() {
                 {/* Financials row */}
                 <div className="logs-rec-finance">
                   <div className="logs-rec-fin-item">
-                    <span className="logs-rec-fin-label">Daily</span>
+                    <span className="logs-rec-fin-label">{t('attendanceLogs.record.daily')}</span>
                     <span className="logs-rec-fin-val">{formatRp(record.dailyRate || 0)}</span>
                   </div>
                   {record.overtimePay > 0 && (
                     <div className="logs-rec-fin-item">
-                      <span className="logs-rec-fin-label">Overtime</span>
+                      <span className="logs-rec-fin-label">{t('attendanceLogs.record.overtime')}</span>
                       <span className="logs-rec-fin-val">{formatRp(record.overtimePay)}</span>
                     </div>
                   )}
                   <div className="logs-rec-fin-total">
                     <span>{formatRp(totalPay)}</span>
                     <Badge
-                      label={record.paymentStatus || 'Unpaid'}
+                      label={record.paymentStatus === 'Paid' ? t('attendanceLogs.filters.paymentOptions.paid') : t('attendanceLogs.filters.paymentOptions.unpaid')}
                       variant={record.paymentStatus === 'Paid' ? 'success' : 'warning'}
                       size="small"
                     />
@@ -404,7 +416,7 @@ export default function AttendanceLogs() {
                   )}
                   {isSupervisor && (
                     <Button
-                      title="Set Wage"
+                      title={t('attendanceLogs.actions.setWage')}
                       icon={DollarSign}
                       onClick={() => openWageModal(record)}
                       variant="outline"
@@ -424,7 +436,7 @@ export default function AttendanceLogs() {
           <div className="att-modal" onClick={e => e.stopPropagation()}>
             <div className="att-modal-title-row">
               <DollarSign size={20} color="#F59E0B" />
-              <h3>Set Wage Type</h3>
+              <h3>{t('attendanceLogs.wageModal.title')}</h3>
             </div>
 
             <div className="logs-wage-info">
@@ -435,7 +447,7 @@ export default function AttendanceLogs() {
             </div>
 
             <div className="logs-wage-options">
-              {WAGE_OPTIONS.map(opt => (
+              {WAGE_OPTIONS_TRANSLATED.map(opt => (
                 <button
                   key={opt.value}
                   className={`logs-wage-opt ${newWageType === opt.value ? 'active' : ''}`}
@@ -450,35 +462,35 @@ export default function AttendanceLogs() {
 
             <div style={{ marginTop: 20 }}>
               <CostInput
-                label="Rate per Day (Rp)"
+                label={t('attendanceLogs.wageModal.ratePerDay')}
                 value={newDailyRate}
                 onChange={handleRateChange}
-                placeholder="e.g. 150000"
+                placeholder={t('attendanceLogs.wageModal.ratePlaceholder')}
               />
 
               {newWageType.startsWith('overtime') && (
                 <div style={{ marginTop: 16 }}>
                   <CostInput
-                    label="Overtime Pay (Rp)"
+                    label={t('attendanceLogs.wageModal.overtimePay')}
                     value={newOvertimePay}
                     onChange={setNewOvertimePay}
-                    placeholder="Auto-calculated or Manual Override"
+                    placeholder={t('attendanceLogs.wageModal.overtimePlaceholder')}
                   />
                   {selectedRecord.checkIn?.time && selectedRecord.checkOut?.time && (
                     <p className="logs-helper">
-                      Duration: {((new Date(selectedRecord.checkOut.time).getTime() - new Date(selectedRecord.checkIn.time).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours
+                      {t('attendanceLogs.wageModal.duration', { hours: ((new Date(selectedRecord.checkOut.time).getTime() - new Date(selectedRecord.checkIn.time).getTime()) / (1000 * 60 * 60)).toFixed(2) })}
                     </p>
                   )}
                 </div>
               )}
               <p className="logs-helper" style={{ marginTop: 12 }}>
-                Hourly rate is auto-calculated (Daily / 8). Overtime is calculated based on duration.
+                {t('attendanceLogs.wageModal.helper')}
               </p>
             </div>
 
             <div className="att-modal-actions">
-              <Button title="Cancel" onClick={() => setWageModal(false)} variant="outline" />
-              <Button title="Save" onClick={handleSaveWage} loading={submitting} variant="primary" />
+              <Button title={t('attendanceLogs.actions.cancel')} onClick={() => setWageModal(false)} variant="outline" />
+              <Button title={t('attendanceLogs.actions.save')} onClick={handleSaveWage} loading={submitting} variant="primary" />
             </div>
           </div>
         </div>

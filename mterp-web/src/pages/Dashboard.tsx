@@ -13,6 +13,7 @@ import {
     UserCheck,
     Wallet,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
     LineChart,
     Line,
@@ -121,6 +122,7 @@ const formatTime = (dateStr: string | null): string => {
 };
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedProject, setSelectedProject] = useState('');
@@ -175,6 +177,10 @@ export default function Dashboard() {
     }
 
     if (!data) return null;
+
+    // Placeholder for userName and formattedDate, as they are not defined in the original code
+    const userName = "User";
+    const formattedDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     return (
         <div className="dashboard-container">
@@ -232,7 +238,7 @@ export default function Dashboard() {
                     </div>
                     <div className="kpi-info">
                         <span className="kpi-value">{data.totalProjects}</span>
-                        <span className="kpi-label">Total Projects</span>
+                        <span className="db-stat-label">{t('dashboard.activeProjects')}</span>
                     </div>
                     <div className="kpi-tags">
                         {data.statusCounts['In Progress'] > 0 && (
@@ -245,8 +251,8 @@ export default function Dashboard() {
                 </Card>
 
                 <Card className="kpi-card">
-                    <div className="kpi-icon kpi-icon-budget">
-                        <DollarSign size={20} />
+                    <div className="db-actions-header">
+                        <h3>{t('dashboard.quickActions')}</h3>
                     </div>
                     <div className="kpi-info">
                         <span className="kpi-value">{formatCurrency(data.actualSpend)}</span>
@@ -291,7 +297,7 @@ export default function Dashboard() {
                     </div>
                     <div className="kpi-info">
                         <span className="kpi-value">{data.totalTasks}</span>
-                        <span className="kpi-label">Total Tasks</span>
+                        <span className="db-stat-label">{t('dashboard.toolsInUse')}</span>
                     </div>
                     <div className="kpi-tags">
                         {data.taskStatusCounts.in_progress > 0 && (
@@ -309,7 +315,9 @@ export default function Dashboard() {
                 {/* Progress Timeline */}
                 <Card className="chart-card chart-card-wide">
                     <div className="chart-header">
-                        <h3 className="chart-title">Progress Timeline</h3>
+                        <div className="db-header-left">
+                            <h3 className="db-card-title">{t('dashboard.projectProgress')}</h3>
+                        </div>
                         {data.progressTimeline.length === 0 && (
                             <span className="chart-empty-hint">No reports yet</span>
                         )}
@@ -363,8 +371,10 @@ export default function Dashboard() {
 
                 {/* Task Breakdown */}
                 <Card className="chart-card">
-                    <div className="chart-header">
-                        <h3 className="chart-title">Task Breakdown</h3>
+                    <div className="db-card-header">
+                        <div className="db-header-left">
+                            <h3 className="db-card-title">{t('dashboard.progressChart')}</h3>
+                        </div>
                     </div>
                     {taskPieData.length > 0 ? (
                         <div className="chart-body chart-body-pie">
@@ -398,7 +408,7 @@ export default function Dashboard() {
                                 {taskPieData.map((entry, i) => (
                                     <div key={i} className="pie-legend-item">
                                         <span className="pie-legend-dot" style={{ backgroundColor: entry.color }} />
-                                        <span className="pie-legend-label">{entry.name}</span>
+                                        <span className="db-overall-label">{t('dashboard.overall')}</span>
                                         <span className="pie-legend-value">{entry.value}</span>
                                     </div>
                                 ))}
@@ -448,11 +458,11 @@ export default function Dashboard() {
                     <div className="att-status-chips">
                         <div className="att-chip att-chip-green">
                             <span className="att-chip-val">{data.attendanceCounts.Present || 0}</span>
-                            <span className="att-chip-label">Present</span>
+                            <span className="db-action-label">{t('dashboard.newProject')}</span>
                         </div>
                         <div className="att-chip att-chip-yellow">
                             <span className="att-chip-val">{data.attendanceCounts.Late || 0}</span>
-                            <span className="att-chip-label">Late</span>
+                            <span className="db-action-label">{t('dashboard.reqMaterial')}</span>
                         </div>
                         <div className="att-chip att-chip-red">
                             <span className="att-chip-val">{data.attendanceCounts.Absent || 0}</span>
@@ -490,9 +500,9 @@ export default function Dashboard() {
             <div className="att-charts-row">
                 {/* Weekly Attendance Bar Chart */}
                 <Card className="chart-card">
-                    <div className="chart-header">
-                        <h3 className="chart-title">Weekly Attendance</h3>
-                        <span className="chart-empty-hint">Last 7 days</span>
+                    <div className="db-card-header">
+                        <h3 className="db-card-title">{t('dashboard.recentActivity')}</h3>
+                        <button className="db-header-action">{t('dashboard.viewAll')}</button>
                     </div>
                     <div className="chart-body">
                         <ResponsiveContainer width="100%" height={220}>
@@ -543,6 +553,12 @@ export default function Dashboard() {
                                         <div className="att-worker-info">
                                             <div className="att-worker-avatar" style={{ backgroundColor: style.bg, color: style.color }}>
                                                 {w.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="db-greeting-text">
+                                                <h1 className="db-title">
+                                                    {t('dashboard.welcome')} <span className="db-title-highlight">{userName}</span>
+                                                </h1>
+                                                <p className="db-subtitle">{formattedDate}</p>
                                             </div>
                                             <div className="att-worker-details">
                                                 <span className="att-worker-name">{w.name}</span>
@@ -599,7 +615,7 @@ export default function Dashboard() {
                     </div>
                     <div className="quick-stat-info">
                         <span className="quick-stat-value">{data.pendingRequests}</span>
-                        <span className="quick-stat-label">Pending Requests</span>
+                        <span className="db-stat-label">{t('dashboard.pendingApprovals')}</span>
                     </div>
                 </Card>
 

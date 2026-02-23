@@ -14,16 +14,24 @@ import {
   Hash,
   Percent,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { Card, Button, Input, Alert, Badge, CostInput } from '../components/shared';
 import { ProjectData, WorkItem, ProjectSupply } from '../types';
 import './AddProject.css';
 
-const STEPS = ['Basic Info', 'Documents', 'Supply Plan', 'Work Items'];
-
 const UNIT_OPTIONS = ['pcs', 'kg', 'sak', 'btg', 'lbr', 'unit', 'set', 'roll', 'ltr', 'M2', 'M3', 'M1'];
 
 export default function AddProject() {
+  const { t } = useTranslation();
+  
+  const STEPS = [
+    t('addProject.steps.basicInfo'),
+    t('addProject.steps.documents'),
+    t('addProject.steps.supplyPlan'),
+    t('addProject.steps.workItems'),
+  ];
+  
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -66,7 +74,7 @@ export default function AddProject() {
 
   const handleNext = () => {
     if (currentStep === 0 && (!projectData.name || !projectData.location)) {
-      setAlertData({ visible: true, type: 'error', title: 'Error', message: 'Please fill project name and location.' });
+      setAlertData({ visible: true, type: 'error', title: 'Error', message: t('addProject.errors.fillNameLocation') });
       return;
     }
     if (currentStep < STEPS.length - 1) {
@@ -101,11 +109,11 @@ export default function AddProject() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setAlertData({ visible: true, type: 'success', title: 'Success', message: 'Project created successfully!' });
+      setAlertData({ visible: true, type: 'success', title: 'Success', message: t('addProject.errors.success') });
       setTimeout(() => navigate('/projects'), 1500);
     } catch (err) {
       console.error('Failed to create project', err);
-      setAlertData({ visible: true, type: 'error', title: 'Error', message: 'Failed to create project.' });
+      setAlertData({ visible: true, type: 'error', title: 'Error', message: t('addProject.errors.failed') });
     } finally {
       setLoading(false);
     }
@@ -147,7 +155,7 @@ export default function AddProject() {
 
       {/* Header */}
       <div className="add-header">
-        <h1 className="add-title">Create Project</h1>
+        <h1 className="add-title">{t('addProject.title')}</h1>
       </div>
 
       {/* Step Indicator */}
@@ -168,41 +176,41 @@ export default function AddProject() {
         {currentStep === 0 && (
           <div className="form-section">
             <Input
-              label="Project Name"
-              placeholder="Enter project name"
+              label={t('addProject.form.projectName')}
+              placeholder={t('addProject.form.projectNamePlaceholder')}
               value={projectData.name}
               onChangeText={(t) => setProjectData({ ...projectData, name: t })}
             />
             <Input
-              label="Location"
-              placeholder="Project location"
+              label={t('addProject.form.location')}
+              placeholder={t('addProject.form.locationPlaceholder')}
               value={projectData.location}
               onChangeText={(t) => setProjectData({ ...projectData, location: t })}
             />
             <Input
-              label="Description"
-              placeholder="Brief project description"
+              label={t('addProject.form.description')}
+              placeholder={t('addProject.form.descriptionPlaceholder')}
               value={projectData.description}
               onChangeText={(t) => setProjectData({ ...projectData, description: t })}
               multiline
             />
             <CostInput
-              label="Total Budget (Rp)"
-              placeholder="e.g. 500000000"
+              label={t('addProject.form.totalBudget')}
+              placeholder={t('addProject.form.totalBudgetPlaceholder')}
               value={Number(projectData.totalBudget) || 0}
               onChange={(v) => setProjectData({ ...projectData, totalBudget: v.toString() })}
               icon={DollarSign}
             />
             <div className="date-row">
               <Input
-                label="Start Date"
+                label={t('addProject.form.startDate')}
                 placeholder="YYYY-MM-DD"
                 value={projectData.startDate}
                 onChangeText={(t) => setProjectData({ ...projectData, startDate: t })}
                 icon={Calendar}
               />
               <Input
-                label="End Date"
+                label={t('addProject.form.endDate')}
                 placeholder="YYYY-MM-DD"
                 value={projectData.endDate}
                 onChangeText={(t) => setProjectData({ ...projectData, endDate: t })}
@@ -215,13 +223,13 @@ export default function AddProject() {
         {/* Step 1: Documents */}
         {currentStep === 1 && (
           <div className="form-section">
-            <h3>Upload Documents</h3>
+            <h3>{t('addProject.form.uploadDocs')}</h3>
             {['shopDrawing', 'hse', 'manPowerList', 'materialList'].map((docKey) => (
               <div key={docKey} className="doc-upload">
                 <label className="doc-label">{docKey.replace(/([A-Z])/g, ' $1').toUpperCase()}</label>
                 <label className="doc-input">
                   <Upload size={18} />
-                  <span>{documents[docKey]?.name || 'Choose file'}</span>
+                  <span>{documents[docKey]?.name || t('addProject.form.chooseFile')}</span>
                   <input
                     type="file"
                     onChange={(e) => setDocuments({ ...documents, [docKey]: e.target.files?.[0] || null })}
@@ -237,17 +245,17 @@ export default function AddProject() {
         {currentStep === 2 && (
           <div className="form-section">
             <div className="section-header">
-              <h3>Supply Plan</h3>
-              <Button title="Add" icon={Plus} onClick={addSupply} variant="outline" size="small" />
+              <h3>{STEPS[2]}</h3>
+              <Button title={t('addProject.actions.add')} icon={Plus} onClick={addSupply} variant="outline" size="small" />
             </div>
 
             {/* Summary */}
             {supplies.length > 0 && (
               <div className="cost-summary">
-                <span>Total Supply Cost</span>
+                <span>{t('addProject.form.totalSupplyCost')}</span>
                 <span className="cost-summary-value">Rp {formatRupiah(totalSupplyCost)}</span>
                 {totalBudget > 0 && (
-                  <Badge label={`${((totalSupplyCost / totalBudget) * 100).toFixed(1)}% of budget`} variant="primary" size="small" />
+                  <Badge label={`${((totalSupplyCost / totalBudget) * 100).toFixed(1)}${t('addProject.form.ofBudget')}`} variant="primary" size="small" />
                 )}
               </div>
             )}
@@ -273,8 +281,8 @@ export default function AddProject() {
                 <div className="item-card-body">
                   <div className="item-field item-field-full">
                     <Input
-                      label="Item Name"
-                      placeholder="e.g. Semen Tiga Roda"
+                      label={t('addProject.form.itemName')}
+                      placeholder={t('addProject.form.itemNamePlaceholder')}
                       value={s.item || ''}
                       onChangeText={(t) => updateSupply(i, 'item', t)}
                     />
@@ -282,7 +290,7 @@ export default function AddProject() {
                   <div className="item-field-row">
                     <div className="item-field">
                       <Input
-                        label="Qty"
+                        label={t('addProject.form.qty')}
                         type="number"
                         placeholder="0"
                         value={String(s.qty || '')}
@@ -290,7 +298,7 @@ export default function AddProject() {
                       />
                     </div>
                     <div className="item-field">
-                      <label className="form-label-sm">Unit</label>
+                      <label className="form-label-sm">{t('addProject.form.unit')}</label>
                       <select
                         className="form-select-sm"
                         value={s.unit || 'pcs'}
@@ -303,7 +311,7 @@ export default function AddProject() {
                     </div>
                     <div className="item-field">
                       <CostInput
-                        label="Cost (Rp)"
+                        label={t('addProject.form.cost')}
                         placeholder="0"
                         value={Number(s.cost) || 0}
                         onChange={(v) => updateSupply(i, 'cost', v)}
@@ -313,7 +321,7 @@ export default function AddProject() {
                   <div className="item-field-row">
                     <div className="item-field">
                       <Input
-                        label="Start Date"
+                        label={t('addProject.form.startDate')}
                         type="date"
                         placeholder="YYYY-MM-DD"
                         value={(s as any).startDate || ''}
@@ -323,7 +331,7 @@ export default function AddProject() {
                     </div>
                     <div className="item-field">
                       <Input
-                        label="End Date"
+                        label={t('addProject.form.endDate')}
                         type="date"
                         placeholder="YYYY-MM-DD"
                         value={(s as any).endDate || ''}
@@ -335,7 +343,7 @@ export default function AddProject() {
                 </div>
               </div>
             ))}
-            {supplies.length === 0 && <p className="empty-text">No supplies added yet.</p>}
+            {supplies.length === 0 && <p className="empty-text">{t('addProject.form.noSupplies')}</p>}
           </div>
         )}
 
@@ -343,17 +351,17 @@ export default function AddProject() {
         {currentStep === 3 && (
           <div className="form-section">
             <div className="section-header">
-              <h3>Work Items</h3>
-              <Button title="Add" icon={Plus} onClick={addWorkItem} variant="outline" size="small" />
+              <h3>{STEPS[3]}</h3>
+              <Button title={t('addProject.actions.add')} icon={Plus} onClick={addWorkItem} variant="outline" size="small" />
             </div>
 
             {/* Summary */}
             {workItems.length > 0 && (
               <div className="cost-summary">
-                <span>Total Work Item Cost</span>
+                <span>{t('addProject.form.totalWorkItemCost')}</span>
                 <span className="cost-summary-value">Rp {formatRupiah(totalWorkItemCost)}</span>
                 {totalBudget > 0 && (
-                  <Badge label={`${((totalWorkItemCost / totalBudget) * 100).toFixed(1)}% of budget`} variant="primary" size="small" />
+                  <Badge label={`${((totalWorkItemCost / totalBudget) * 100).toFixed(1)}${t('addProject.form.ofBudget')}`} variant="primary" size="small" />
                 )}
               </div>
             )}
@@ -379,8 +387,8 @@ export default function AddProject() {
                 <div className="item-card-body">
                   <div className="item-field item-field-full">
                     <Input
-                      label="Work Item Name"
-                      placeholder="e.g. Pekerjaan Pondasi"
+                      label={t('addProject.form.workItemName')}
+                      placeholder={t('addProject.form.workItemNamePlaceholder')}
                       value={w.name || ''}
                       onChangeText={(t) => updateWorkItem(i, 'name', t)}
                     />
@@ -388,7 +396,7 @@ export default function AddProject() {
                   <div className="item-field-row">
                     <div className="item-field">
                       <Input
-                        label="Qty"
+                        label={t('addProject.form.qty')}
                         type="number"
                         placeholder="0"
                         value={String(w.qty || '')}
@@ -396,7 +404,7 @@ export default function AddProject() {
                       />
                     </div>
                     <div className="item-field">
-                      <label className="form-label-sm">Unit</label>
+                      <label className="form-label-sm">{t('addProject.form.unit')}</label>
                       <select
                         className="form-select-sm"
                         value={w.unit || w.volume || 'M2'}
@@ -412,7 +420,7 @@ export default function AddProject() {
                     </div>
                     <div className="item-field">
                       <CostInput
-                        label="Cost (Rp)"
+                        label={t('addProject.form.cost')}
                         placeholder="0"
                         value={Number(w.cost) || 0}
                         onChange={(v) => updateWorkItem(i, 'cost', v)}
@@ -422,7 +430,7 @@ export default function AddProject() {
                   <div className="item-field-row">
                     <div className="item-field">
                       <Input
-                        label="Start Date"
+                        label={t('addProject.form.startDate')}
                         type="date"
                         placeholder="YYYY-MM-DD"
                         value={(w as any).startDate || (w as any).dates?.plannedStart || ''}
@@ -432,7 +440,7 @@ export default function AddProject() {
                     </div>
                     <div className="item-field">
                       <Input
-                        label="End Date"
+                        label={t('addProject.form.endDate')}
                         type="date"
                         placeholder="YYYY-MM-DD"
                         value={(w as any).endDate || (w as any).dates?.plannedEnd || ''}
@@ -444,7 +452,7 @@ export default function AddProject() {
                 </div>
               </div>
             ))}
-            {workItems.length === 0 && <p className="empty-text">No work items added yet.</p>}
+            {workItems.length === 0 && <p className="empty-text">{t('addProject.form.noWorkItems')}</p>}
           </div>
         )}
       </Card>
@@ -453,7 +461,7 @@ export default function AddProject() {
       <div className="nav-buttons">
         {currentStep > 0 && (
           <Button
-            title="Back"
+            title={t('addProject.actions.back')}
             icon={ChevronLeft}
             onClick={handleBack}
             variant="outline"
@@ -461,7 +469,7 @@ export default function AddProject() {
         )}
         {currentStep < STEPS.length - 1 ? (
           <Button
-            title="Next"
+            title={t('addProject.actions.next')}
             icon={ChevronRight}
             iconPosition="right"
             onClick={handleNext}
@@ -469,7 +477,7 @@ export default function AddProject() {
           />
         ) : (
           <Button
-            title="Create Project"
+            title={t('addProject.actions.create')}
             icon={Check}
             onClick={handleSubmit}
             loading={loading}

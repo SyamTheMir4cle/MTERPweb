@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ChevronRight, Briefcase } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Badge, ProgressBar, Button, Input, EmptyState, LoadingOverlay } from '../components/shared';
@@ -8,6 +9,7 @@ import { ProjectData } from '../types';
 import './Projects.css';
 
 export default function Projects() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userRole = user?.role?.toLowerCase() || 'worker';
@@ -35,7 +37,7 @@ export default function Projects() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Hapus project ini?')) return;
+    if (!confirm(t('projects.actions.deleteConfirm'))) return;
     try {
       await api.delete(`/projects/${id}`);
       setProjects((prev) => prev.filter((p) => p._id !== id));
@@ -69,9 +71,9 @@ export default function Projects() {
   };
 
   const getStatusBadge = (progress: number) => {
-    if (progress >= 100) return <Badge label="Completed" variant="success" />;
-    if (progress > 0) return <Badge label="In Progress" variant="primary" />;
-    return <Badge label="Pending" variant="neutral" />;
+    if (progress >= 100) return <Badge label={t('projects.status.completed')} variant="success" />;
+    if (progress > 0) return <Badge label={t('projects.status.inProgress')} variant="primary" />;
+    return <Badge label={t('projects.status.pending')} variant="neutral" />;
   };
 
   return (
@@ -80,10 +82,10 @@ export default function Projects() {
 
       {/* Header */}
       <div className="projects-header">
-        <h1 className="projects-title">Projects</h1>
+        <h1 className="projects-title">{t('projects.title')}</h1>
         {userRole === 'owner' && (
           <Button
-            title="Add"
+            title={t('projects.add')}
             onClick={() => navigate('/add-project')}
             variant="primary"
             size="small"
@@ -96,11 +98,11 @@ export default function Projects() {
       {['director', 'owner'].includes(userRole) && projects.length > 0 && (
         <Card className="projects-summary">
           <div className="summary-row">
-            <span className="summary-label">Total Projects</span>
+            <span className="summary-label">{t('projects.summary.totalProjects')}</span>
             <span className="summary-value">{projects.length}</span>
           </div>
           <div className="summary-row">
-            <span className="summary-label">Avg Progress</span>
+            <span className="summary-label">{t('projects.summary.avgProgress')}</span>
             <span className="summary-value">
               {Math.round(projects.reduce((a, p) => a + (p.progress || 0), 0) / projects.length)}%
             </span>
@@ -112,8 +114,8 @@ export default function Projects() {
       {projects.length === 0 && !loading ? (
         <EmptyState
           icon={Briefcase}
-          title="No Projects"
-          description="Projects will appear here once added."
+          title={t('projects.empty.title')}
+          description={t('projects.empty.desc')}
         />
       ) : (
         <div className="projects-list">
@@ -134,12 +136,12 @@ export default function Projects() {
                 showLabel={false}
                 style={{ marginTop: 12 }}
               />
-              <span className="project-progress-label">{project.progress || 0}% Complete</span>
+              <span className="project-progress-label">{project.progress || 0}% {t('projects.status.complete')}</span>
 
               <div className="project-footer">
                 {userRole === 'supervisor' && (
                   <Button
-                    title="Update"
+                    title={t('projects.actions.update')}
                     onClick={(e: any) => {
                       e.stopPropagation();
                       openUpdateModal(project);
@@ -171,22 +173,22 @@ export default function Projects() {
       {modalOpen && (
         <div className="modal-overlay" onClick={() => setModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Update Progress</h3>
+            <h3>{t('projects.actions.updateProgress')}</h3>
             <p>{selectedProject?.nama || selectedProject?.name}</p>
             <Input
               type="number"
-              placeholder="Progress %"
+              placeholder={t('projects.form.progressPlaceholder')}
               value={progressInput}
               onChangeText={setProgressInput}
             />
             <div className="modal-actions">
               <Button
-                title="Cancel"
+                title={t('projects.actions.cancel')}
                 onClick={() => setModalOpen(false)}
                 variant="outline"
               />
               <Button
-                title="Save"
+                title={t('projects.actions.save')}
                 onClick={handleUpdateProgress}
                 loading={updating}
               />

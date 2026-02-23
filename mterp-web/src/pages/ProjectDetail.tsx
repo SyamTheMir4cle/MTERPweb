@@ -10,6 +10,7 @@ import {
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import gsap from 'gsap';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { Card, ProgressBar, Button, LoadingOverlay, Badge } from '../components/shared';
 import { ProjectData, WorkItem } from '../types';
@@ -27,6 +28,14 @@ interface SCurveDataPoint {
   actualCost: number;     // Absolute cumulative actual cost
   deviation: number;      // actual - planned %
   isToday: boolean;       // Is this the current month?
+  todayLabel?: string;
+  plannedLabel?: string;
+  actualLabel?: string;
+  deviationLabel?: string;
+  aheadLabel?: string;
+  behindLabel?: string;
+  planLabel?: string;
+  actLabel?: string;
 }
 
 /* ─── Helpers ─── */
@@ -94,38 +103,37 @@ const SCurveTooltip = ({ active, payload, label }: any) => {
 
   const dev = data.deviation;
   const devColor = dev >= 0 ? '#10B981' : '#EF4444';
-  const devLabel = dev >= 0 ? 'Ahead' : 'Behind';
 
   return (
     <div className="scurve-tooltip">
       <div className="scurve-tooltip-title">
         {data.date}
-        {data.isToday && <span className="scurve-tooltip-today-badge">TODAY</span>}
+        {data.isToday && <span className="scurve-tooltip-today-badge">{data.todayLabel}</span>}
       </div>
       <div className="scurve-tooltip-divider" />
       <div className="scurve-tooltip-row">
         <span className="scurve-tooltip-dot planned" />
-        <span>Planned</span>
+        <span>{data.plannedLabel}</span>
         <span className="scurve-tooltip-value">{data.planned.toFixed(1)}%</span>
       </div>
       <div className="scurve-tooltip-row">
         <span className="scurve-tooltip-dot actual" />
-        <span>Actual</span>
+        <span>{data.actualLabel}</span>
         <span className="scurve-tooltip-value">{data.actual.toFixed(1)}%</span>
       </div>
       {data.actual > 0 && (
         <div className="scurve-tooltip-row">
           <span className="scurve-tooltip-dot" style={{ backgroundColor: devColor }} />
-          <span>Deviation</span>
+          <span>{data.deviationLabel}</span>
           <span className="scurve-tooltip-value" style={{ color: devColor }}>
-            {dev >= 0 ? '+' : ''}{dev.toFixed(1)}% ({devLabel})
+            {dev >= 0 ? '+' : ''}{dev.toFixed(1)}% ({dev >= 0 ? data.aheadLabel : data.behindLabel})
           </span>
         </div>
       )}
       <div className="scurve-tooltip-divider" />
       <div className="scurve-tooltip-detail">
-        <span>Plan: {formatRupiah(data.plannedCost)}</span>
-        <span>Act: {formatRupiah(data.actualCost)}</span>
+        <span>{data.planLabel}: {formatRupiah(data.plannedCost)}</span>
+        <span>{data.actLabel}: {formatRupiah(data.actualCost)}</span>
       </div>
     </div>
   );
@@ -134,6 +142,7 @@ const SCurveTooltip = ({ active, payload, label }: any) => {
 /* ─── Component ─── */
 
 export default function ProjectDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -234,7 +243,7 @@ export default function ProjectDetail() {
   if (!project) {
     return (
       <div className="project-detail-container">
-        <p>Project not found</p>
+        <p>{t('projectDetail.notFound')}</p>
       </div>
     );
   }
@@ -343,6 +352,14 @@ export default function ProjectDetail() {
         actualCost: cumActual,
         deviation: aPct - pPct,
         isToday: month.getTime() === nowMonth.getTime(),
+        todayLabel: t('projectDetail.tooltip.today'),
+        plannedLabel: t('projectDetail.tooltip.planned'),
+        actualLabel: t('projectDetail.tooltip.actual'),
+        deviationLabel: t('projectDetail.tooltip.deviation'),
+        aheadLabel: t('projectDetail.tooltip.ahead'),
+        behindLabel: t('projectDetail.tooltip.behind'),
+        planLabel: t('projectDetail.tooltip.plan'),
+        actLabel: t('projectDetail.tooltip.act'),
       });
     }
 
@@ -381,7 +398,7 @@ export default function ProjectDetail() {
         {/* Progress Card */}
         <Card className="progress-card gradient-primary">
           <div className="progress-header">
-            <span className="progress-label">Overall Progress</span>
+            <span className="progress-label">{t('projectDetail.progress.overall')}</span>
             <span className="progress-value">{progress}%</span>
           </div>
           <div className="progress-bar-white">
@@ -394,7 +411,7 @@ export default function ProjectDetail() {
           <Card className="stat-card">
             <Calendar size={24} color="var(--primary)" />
             <div className="stat-content">
-              <span className="stat-label">Start</span>
+              <span className="stat-label">{t('projectDetail.stats.start')}</span>
               <span className="stat-value">
                 {fmtDate(project.startDate || (project.globalDates as any)?.planned?.start)}
               </span>
@@ -404,7 +421,7 @@ export default function ProjectDetail() {
           <Card className="stat-card">
             <Calendar size={24} color="var(--danger, #EF4444)" />
             <div className="stat-content">
-              <span className="stat-label">End</span>
+              <span className="stat-label">{t('projectDetail.stats.end')}</span>
               <span className="stat-value">
                 {fmtDate(project.endDate || (project.globalDates as any)?.planned?.end)}
               </span>
@@ -414,7 +431,7 @@ export default function ProjectDetail() {
           <Card className="stat-card">
             <DollarSign size={24} color="var(--success)" />
             <div className="stat-content">
-              <span className="stat-label">Budget</span>
+              <span className="stat-label">{t('projectDetail.stats.budget')}</span>
               <span className="stat-value">{formatRupiah(budget)}</span>
             </div>
           </Card>
@@ -424,7 +441,7 @@ export default function ProjectDetail() {
               <Card className="stat-card">
                 <TrendingUp size={24} color="var(--warning)" />
                 <div className="stat-content">
-                  <span className="stat-label">Planned Cost</span>
+                  <span className="stat-label">{t('projectDetail.stats.plannedCost')}</span>
                   <span className="stat-value">{formatRupiah(totalPlannedCost)}</span>
                 </div>
               </Card>
@@ -432,7 +449,7 @@ export default function ProjectDetail() {
               <Card className="stat-card">
                 <BarChart3 size={24} color="var(--info, #3B82F6)" />
                 <div className="stat-content">
-                  <span className="stat-label">Actual Cost</span>
+                  <span className="stat-label">{t('projectDetail.stats.actualCost')}</span>
                   <span className="stat-value">{formatRupiah(totalActualCost)}</span>
                 </div>
               </Card>
@@ -447,19 +464,19 @@ export default function ProjectDetail() {
           <Card className="scurve-card">
             <div className="scurve-header">
               <div>
-                <h3 className="scurve-title">S-Curve Progress</h3>
-                <p className="scurve-subtitle">Planned vs Actual cumulative cost (%) — monthly timeline</p>
+                <h3 className="scurve-title">{t('projectDetail.scurve.title')}</h3>
+                <p className="scurve-subtitle">{t('projectDetail.scurve.subtitle')}</p>
               </div>
               <div className="scurve-legend">
                 <span className="legend-item">
-                  <span className="legend-dot planned" /> Planned
+                  <span className="legend-dot planned" /> {t('projectDetail.scurve.planned')}
                 </span>
                 <span className="legend-item">
-                  <span className="legend-dot actual" /> Actual
+                  <span className="legend-dot actual" /> {t('projectDetail.scurve.actual')}
                 </span>
                 {hasTodayOnChart && (
                   <span className="legend-item">
-                    <span className="legend-dot today" /> Today
+                    <span className="legend-dot today" /> {t('projectDetail.scurve.today')}
                   </span>
                 )}
               </div>
@@ -504,7 +521,7 @@ export default function ProjectDetail() {
                       stroke="#F59E0B"
                       strokeWidth={2}
                       strokeDasharray="6 4"
-                      label={{ value: 'Today', position: 'top', fill: '#F59E0B', fontSize: 11, fontWeight: 700 }}
+                      label={{ value: t('projectDetail.scurve.today'), position: 'top', fill: '#F59E0B', fontSize: 11, fontWeight: 700 }}
                     />
                   )}
                   <Area
@@ -538,9 +555,9 @@ export default function ProjectDetail() {
                   {isAheadOfSchedule ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
                 </div>
                 <div className="perf-info">
-                  <span className="perf-label">Schedule</span>
+                  <span className="perf-label">{t('projectDetail.scurve.performance.schedule')}</span>
                   <span className="perf-value">
-                    {Math.abs(scheduleDeviation).toFixed(1)}% {isAheadOfSchedule ? 'Ahead' : 'Behind'}
+                    {Math.abs(scheduleDeviation).toFixed(1)}% {isAheadOfSchedule ? t('projectDetail.scurve.performance.ahead') : t('projectDetail.scurve.performance.behind')}
                   </span>
                 </div>
               </div>
@@ -550,7 +567,7 @@ export default function ProjectDetail() {
                   {isUnderBudget ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
                 </div>
                 <div className="perf-info">
-                  <span className="perf-label">Cost Variance</span>
+                  <span className="perf-label">{t('projectDetail.scurve.performance.costVariance')}</span>
                   <span className="perf-value">
                     {costVariance >= 0 ? '+' : ''}{costVariance.toFixed(1)}%
                   </span>
@@ -560,20 +577,20 @@ export default function ProjectDetail() {
               <div className="perf-card perf-neutral">
                 <div className="perf-icon"><Target size={18} /></div>
                 <div className="perf-info">
-                  <span className="perf-label">CPI</span>
-                  <span className="perf-value">{cpi > 0 ? cpi.toFixed(2) : 'N/A'}</span>
+                  <span className="perf-label">{t('projectDetail.scurve.performance.cpi')}</span>
+                  <span className="perf-value">{cpi > 0 ? cpi.toFixed(2) : t('projectDetail.scurve.performance.na')}</span>
                 </div>
               </div>
 
               <div className="perf-card perf-neutral">
                 <div className="perf-icon"><Clock size={18} /></div>
                 <div className="perf-info">
-                  <span className="perf-label">Elapsed</span>
+                  <span className="perf-label">{t('projectDetail.scurve.performance.elapsed')}</span>
                   <span className="perf-value">
                     {(() => {
                       const gs = project.startDate || (project.globalDates as any)?.planned?.start;
                       const ge = project.endDate || (project.globalDates as any)?.planned?.end;
-                      if (!gs || !ge) return 'N/A';
+                      if (!gs || !ge) return t('projectDetail.scurve.performance.na');
                       const total = new Date(ge).getTime() - new Date(gs).getTime();
                       const elapsed = Date.now() - new Date(gs).getTime();
                       const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
@@ -593,23 +610,23 @@ export default function ProjectDetail() {
           <Card className="detail-table-card">
             <div className="detail-table-header">
               <Layers size={20} color="var(--primary)" />
-              <h3>Work Items</h3>
-              <Badge label={`${workItems.length} items`} variant="neutral" size="small" />
+              <h3>{t('projectDetail.workItems.title')}</h3>
+              <Badge label={`${workItems.length} ${t('projectDetail.workItems.items')}`} variant="neutral" size="small" />
             </div>
             <div className="detail-table-scroll">
               <table className="detail-table">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Qty</th>
-                    <th>Unit</th>
-                    {canSeeFinancials && <th>Cost (Rp)</th>}
-                    {canSeeFinancials && <th>Weight</th>}
-                    <th>Progress</th>
-                    {canSeeFinancials && <th>Actual Cost</th>}
+                    <th>{t('projectDetail.workItems.headers.num')}</th>
+                    <th>{t('projectDetail.workItems.headers.name')}</th>
+                    <th>{t('projectDetail.workItems.headers.start')}</th>
+                    <th>{t('projectDetail.workItems.headers.end')}</th>
+                    <th>{t('projectDetail.workItems.headers.qty')}</th>
+                    <th>{t('projectDetail.workItems.headers.unit')}</th>
+                    {canSeeFinancials && <th>{t('projectDetail.workItems.headers.cost')}</th>}
+                    {canSeeFinancials && <th>{t('projectDetail.workItems.headers.weight')}</th>}
+                    <th>{t('projectDetail.workItems.headers.progress')}</th>
+                    {canSeeFinancials && <th>{t('projectDetail.workItems.headers.actualCost')}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -657,23 +674,23 @@ export default function ProjectDetail() {
             <Card className="detail-table-card">
               <div className="detail-table-header">
                 <Package size={20} color="var(--warning)" />
-                <h3>Supply Plan</h3>
-                <Badge label={`${supplies.length} items`} variant="neutral" size="small" />
+                <h3>{t('projectDetail.supplyPlan.title')}</h3>
+                <Badge label={`${supplies.length} ${t('projectDetail.supplyPlan.items')}`} variant="neutral" size="small" />
               </div>
               <div className="detail-table-scroll">
                 <table className="detail-table">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Item</th>
-                      <th>Start</th>
-                      <th>End</th>
-                      <th>Qty</th>
-                      <th>Unit</th>
-                      <th>Cost (Rp)</th>
-                      <th>Weight</th>
-                      <th>Status</th>
-                      <th>Actual Cost</th>
+                      <th>{t('projectDetail.supplyPlan.headers.num')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.item')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.start')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.end')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.qty')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.unit')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.cost')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.weight')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.status')}</th>
+                      <th>{t('projectDetail.supplyPlan.headers.actualCost')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -718,29 +735,35 @@ export default function ProjectDetail() {
 
       {/* Quick Actions */}
       <Card className="actions-card">
-        <h3 className="actions-title">Quick Actions</h3>
+        <h3 className="actions-title">{t('projectDetail.actions.title')}</h3>
         <div className="actions-grid">
           <Button
-            title="Daily Report"
+            title={t('projectDetail.actions.dailyReport')}
             icon={FileText}
             onClick={() => navigate(`/daily-report?projectId=${id}`)}
             variant="outline"
             fullWidth
           />
           <Button
-            title="Tool Inventory"
+            title={t('projectDetail.actions.toolInventory')}
             icon={Wrench}
             onClick={() => navigate(`/project-tools/${id}`)}
+            variant="outline"
+            fullWidth
+          />
+          <Button
+            title={t('projectDetail.actions.materialPlan')}
+            icon={Package}
+            onClick={() => navigate(`/project-materials/${id}`)}
             variant="outline"
             fullWidth
           />
         </div>
       </Card>
 
-      {/* Description */}
       {project.description && (
         <Card className="description-card">
-          <h3 className="section-title">Description</h3>
+          <h3 className="section-title">{t('projectDetail.description.title')}</h3>
           <p className="description-text">{project.description}</p>
         </Card>
       )}

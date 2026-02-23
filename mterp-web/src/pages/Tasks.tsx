@@ -3,6 +3,7 @@ import {
   ClipboardList, Circle, Check, Plus, User, Calendar, 
   FolderKanban, AlertCircle, X, ChevronDown 
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Badge, Button, EmptyState, Input } from '../components/shared';
@@ -32,6 +33,7 @@ interface UserOption {
 }
 
 export default function Tasks() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
@@ -72,7 +74,7 @@ export default function Tasks() {
       setTasks(response.data);
     } catch (err: any) {
       console.error('Failed to fetch tasks', err);
-      setError(err.response?.data?.msg || 'Failed to load tasks');
+      setError(err.response?.data?.msg || t('tasks.messages.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -159,7 +161,7 @@ export default function Tasks() {
       setShowModal(false);
     } catch (err: any) {
       console.error('Submit error:', err);
-      alert(err.response?.data?.msg || 'Failed to save');
+      alert(err.response?.data?.msg || t('tasks.messages.saveFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -198,12 +200,12 @@ export default function Tasks() {
       {/* Header */}
       <div className="tasks-header">
         <div>
-          <h1 className="tasks-title">Tasks</h1>
-          <p className="tasks-subtitle">Manage and track work assignments</p>
+          <h1 className="tasks-title">{t('tasks.title')}</h1>
+          <p className="tasks-subtitle">{t('tasks.subtitle')}</p>
         </div>
         {canManageTasks && (
           <Button 
-            title="Add Task" 
+            title={t('tasks.actions.addTask')}
             icon={Plus} 
             onClick={handleOpenCreate}
             variant="primary"
@@ -216,19 +218,19 @@ export default function Tasks() {
         <div className="stat-row">
           <div className="stat-box">
             <span className="stat-value">{stats.pending}</span>
-            <span className="stat-label">Pending</span>
+            <span className="stat-label">{t('tasks.stats.pending')}</span>
           </div>
           <div className="stat-box">
             <span className="stat-value" style={{ color: 'var(--warning)' }}>
               {stats.inProgress}
             </span>
-            <span className="stat-label">In Progress</span>
+            <span className="stat-label">{t('tasks.stats.inProgress')}</span>
           </div>
           <div className="stat-box">
             <span className="stat-value" style={{ color: 'var(--success)' }}>
               {stats.completed}
             </span>
-            <span className="stat-label">Completed</span>
+            <span className="stat-label">{t('tasks.stats.completed')}</span>
           </div>
         </div>
       </Card>
@@ -237,7 +239,7 @@ export default function Tasks() {
       {loading && (
         <div className="tasks-loading">
           <div className="spinner"></div>
-          <span>Loading tasks...</span>
+          <span>{t('tasks.loading')}</span>
         </div>
       )}
 
@@ -245,7 +247,7 @@ export default function Tasks() {
       {error && !loading && (
         <EmptyState
           icon={AlertCircle}
-          title="Error Loading"
+          title={t('tasks.errorLoading')}
           description={error}
         />
       )}
@@ -254,8 +256,8 @@ export default function Tasks() {
       {!loading && !error && tasks.length === 0 && (
         <EmptyState
           icon={ClipboardList}
-          title="No Tasks Yet"
-          description={canManageTasks ? "Create your first task to get started." : "No tasks assigned to you yet."}
+          title={t('tasks.empty.title')}
+          description={canManageTasks ? t('tasks.empty.descManager') : t('tasks.empty.descWorker')}
         />
       )}
 
@@ -309,7 +311,7 @@ export default function Tasks() {
                 {/* Status buttons for workers and everyone */}
                 {task.status !== 'completed' && (
                   <Button
-                    title={task.status === 'pending' ? 'Start' : 'Done'}
+                    title={task.status === 'pending' ? t('tasks.actions.start') : t('tasks.actions.done')}
                     icon={task.status === 'pending' ? Circle : Check}
                     onClick={() => handleStatusToggle(task)}
                     variant={task.status === 'pending' ? 'warning' : 'success'}
@@ -317,12 +319,12 @@ export default function Tasks() {
                   />
                 )}
                 {task.status === 'completed' && (
-                  <Badge label="COMPLETED" variant="success" />
+                  <Badge label={t('tasks.status.completed')} variant="success" />
                 )}
                 {/* Assign button for managers */}
                 {canManageTasks && (
                   <Button
-                    title="Assign"
+                    title={t('tasks.actions.assign')}
                     icon={User}
                     onClick={() => handleOpenAssign(task)}
                     variant="outline"
@@ -340,7 +342,7 @@ export default function Tasks() {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{modalMode === 'create' ? 'Create Task' : 'Assign Task'}</h2>
+              <h2>{modalMode === 'create' ? t('tasks.modal.createTitle') : t('tasks.modal.assignTitle')}</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>
                 <X size={24} />
               </button>
@@ -350,29 +352,29 @@ export default function Tasks() {
               {modalMode === 'create' && (
                 <>
                   <Input
-                    label="Task Title"
+                    label={t('tasks.modal.taskTitle')}
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Enter task title"
+                    placeholder={t('tasks.modal.taskTitlePlaceholder')}
                   />
                   
                   <Input
-                    label="Description"
+                    label={t('tasks.modal.description')}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter description (optional)"
+                    placeholder={t('tasks.modal.descriptionPlaceholder')}
                     multiline
                   />
                   
                   <div className="form-group">
-                    <label className="form-label">Project *</label>
+                    <label className="form-label">{t('tasks.modal.project')}</label>
                     <div className="select-wrapper">
                       <select
                         value={formData.projectId}
                         onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
                         className="form-select"
                       >
-                        <option value="">Select project</option>
+                        <option value="">{t('tasks.modal.selectProject')}</option>
                         {projects.map(p => (
                           <option key={p._id} value={p._id}>{p.nama}</option>
                         ))}
@@ -382,23 +384,23 @@ export default function Tasks() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Priority</label>
+                    <label className="form-label">{t('tasks.modal.priority')}</label>
                     <div className="select-wrapper">
                       <select
                         value={formData.priority}
                         onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                         className="form-select"
                       >
-                        <option value="low">Low</option>
-                        <option value="normal">Normal</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
+                        <option value="low">{t('tasks.modal.priorityOptions.low')}</option>
+                        <option value="normal">{t('tasks.modal.priorityOptions.normal')}</option>
+                        <option value="high">{t('tasks.modal.priorityOptions.high')}</option>
+                        <option value="urgent">{t('tasks.modal.priorityOptions.urgent')}</option>
                       </select>
                       <ChevronDown size={16} className="select-icon" />
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Due Date</label>
+                    <label className="form-label">{t('tasks.modal.dueDate')}</label>
                     <input
                       type="date"
                       value={formData.dueDate}
@@ -411,7 +413,7 @@ export default function Tasks() {
 
               <div className="form-group">
                 <label className="form-label">
-                  {modalMode === 'create' ? 'Assign To (optional)' : 'Assign To'}
+                  {modalMode === 'create' ? t('tasks.modal.assignToOptional') : t('tasks.modal.assignTo')}
                 </label>
                 <div className="select-wrapper">
                   <select
@@ -419,7 +421,7 @@ export default function Tasks() {
                     onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
                     className="form-select"
                   >
-                    <option value="">Unassigned</option>
+                    <option value="">{t('tasks.modal.unassigned')}</option>
                     {users.map(u => (
                       <option key={u._id} value={u._id}>
                         {u.fullName} ({u.role})
@@ -433,12 +435,12 @@ export default function Tasks() {
             
             <div className="modal-footer">
               <Button
-                title="Cancel"
+                title={t('tasks.actions.cancel')}
                 onClick={() => setShowModal(false)}
                 variant="outline"
               />
               <Button
-                title={modalMode === 'create' ? 'Create Task' : 'Save Assignment'}
+                title={modalMode === 'create' ? t('tasks.actions.createTask') : t('tasks.actions.saveAssignment')}
                 onClick={handleSubmit}
                 loading={submitting}
                 variant="primary"

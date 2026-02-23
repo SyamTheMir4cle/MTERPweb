@@ -1,13 +1,16 @@
+/* ========== ProjectTools — Enhanced Styles ========== */
+
 .project-tools-container {
   padding: var(--space-6);
   max-width: 900px;
 }
 
-.tools-header {
+/* ---------- Header ---------- */
+.pt-header {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
 .back-btn {
@@ -20,29 +23,74 @@
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
+  transition: background var(--transition-fast);
 }
 
 .back-btn:hover {
   background: var(--bg-tertiary);
 }
 
-.tools-title {
+.pt-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pt-title {
   font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
 
-.tools-subtitle {
+.pt-subtitle {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
   margin: 0;
 }
 
-.tools-header > button:last-child {
-  margin-left: auto;
+/* ---------- Mini Stats Row ---------- */
+.pt-stats-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-4);
+  overflow-x: auto;
 }
 
+.pt-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.pt-stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pt-stat-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pt-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border-light);
+  flex-shrink: 0;
+}
+
+/* ---------- Loading ---------- */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -53,23 +101,44 @@
   color: var(--text-muted);
 }
 
-.tools-list {
+/* ---------- Tools List ---------- */
+.pt-tools-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.tool-card {
+.pt-tool-card {
+  padding: var(--space-4) !important;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  animation: ptToolFadeIn 0.35s ease both;
+}
+
+.pt-tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+@keyframes ptToolFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pt-tool-body {
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
-  padding: var(--space-4);
 }
 
-.tool-icon {
+.pt-tool-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -77,54 +146,64 @@
   flex-shrink: 0;
 }
 
-.tool-content {
+.pt-tool-content {
   flex: 1;
   min-width: 0;
 }
 
-.tool-header {
+.pt-tool-top {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
 }
 
-.tool-name {
+.pt-tool-name {
   font-size: var(--font-size-md);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
 
-.tool-meta {
+.pt-condition-badge {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 4px;
+}
+
+.pt-tool-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.pt-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--font-size-sm);
   color: var(--text-muted);
-  margin-bottom: var(--space-2);
+  white-space: nowrap;
 }
 
-.tool-category {
-  color: var(--text-secondary);
-}
-
-.tool-assigned {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
+.pt-meta-user {
   color: var(--primary);
   font-weight: 500;
 }
 
-.tool-actions {
+.pt-tool-actions {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  flex-shrink: 0;
 }
 
-/* Modal Styles */
+/* ---------- Modal Styles ---------- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -191,6 +270,7 @@
   border-top: 1px solid var(--border-light);
 }
 
+/* ---------- Form Elements ---------- */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -211,7 +291,7 @@
   width: 100%;
   padding: var(--space-3) var(--space-4);
   padding-right: var(--space-10);
-  border: 1px solid var(--border-medium);
+  border: 1px solid var(--border-medium, var(--border));
   border-radius: var(--radius-md);
   font-size: var(--font-size-md);
   color: var(--text-primary);
@@ -223,7 +303,7 @@
 .form-select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(49, 46, 89, 0.1);
 }
 
 .select-icon {
@@ -247,39 +327,49 @@
   color: var(--text-primary);
 }
 
-/* Responsive */
+/* ========== Tablet (≤1024px) ========== */
 @media (max-width: 1024px) {
   .project-tools-container {
     padding: var(--space-4);
   }
 }
 
+/* ========== Mobile (≤640px) ========== */
 @media (max-width: 640px) {
   .project-tools-container {
     padding: var(--space-3);
   }
 
-  .tools-header {
+  .pt-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-3);
   }
 
-  .tools-header > button:last-child {
-    margin-left: 0;
-    width: 100%;
+  .pt-stats-row {
+    gap: var(--space-3);
+    padding: var(--space-3);
   }
 
-  .tool-card {
+  .pt-stat-label {
+    display: none;
+  }
+
+  .pt-tool-body {
     flex-direction: column;
   }
 
-  .tool-actions {
+  .pt-tool-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pt-tool-actions {
     flex-direction: row;
     width: 100%;
   }
 
-  .tool-actions button {
+  .pt-tool-actions button {
     flex: 1;
   }
 }

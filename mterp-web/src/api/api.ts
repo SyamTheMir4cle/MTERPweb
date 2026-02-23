@@ -73,4 +73,60 @@ export const returnToolToWarehouse = async (data: {
   return response.data;
 };
 
+export const createTool = async (data: {
+  nama: string;
+  kategori?: string;
+  stok?: number;
+  satuan?: string;
+  kondisi?: string;
+  lokasi?: string;
+}) => {
+  const response = await api.post('/tools', data);
+  return response.data;
+};
+
+export const updateTool = async (id: string, data: Record<string, any>) => {
+  const response = await api.put(`/tools/${id}`, data);
+  return response.data;
+};
+
+export const deleteTool = async (id: string) => {
+  const response = await api.delete(`/tools/${id}`);
+  return response.data;
+};
+
+// === MATERIAL REQUESTS API ===
+
+export const createMaterialRequest = async (data: Record<string, any>) => {
+  const response = await api.post('/requests', data);
+  return response.data;
+};
+
+export const updateMaterialRequestStatus = async (id: string, data: { status: string; rejectionReason?: string }) => {
+  const response = await api.put(`/requests/${id}`, data);
+  return response.data;
+};
+
+export const deleteMaterialRequest = async (id: string) => {
+  const response = await api.delete(`/requests/${id}`);
+  return response.data;
+};
+
+// === PROJECT MATERIALS API ===
+
+export const addProjectSupply = async (projectId: string, data: Record<string, any>) => {
+  const response = await api.post(`/projects/${projectId}/supplies`, data);
+  return response.data;
+};
+
+export const updateProjectSupply = async (projectId: string, supplyId: string, data: Record<string, any>) => {
+  const response = await api.put(`/projects/${projectId}/supplies/${supplyId}`, data);
+  return response.data;
+};
+
+export const deleteProjectSupply = async (projectId: string, supplyId: string) => {
+  const response = await api.delete(`/projects/${projectId}/supplies/${supplyId}`);
+  return response.data;
+};
+
 export default api;

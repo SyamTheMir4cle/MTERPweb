@@ -17,6 +17,7 @@ import {
   DollarSign,
   Receipt,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import './MobileNav.css';
 
@@ -42,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'sidebar.dashboard',
     icon: BarChart3,
     route: '/dashboard',
     roles: ['owner', 'director', 'supervisor'],
@@ -60,7 +61,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'projects',
-    label: 'Projects',
+    label: 'sidebar.projects',
     icon: Briefcase,
     route: '/projects',
     roles: ['owner', 'director', 'supervisor', 'admin_project'],
@@ -78,7 +79,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'tools',
-    label: 'Tools',
+    label: 'sidebar.tools',
     icon: Wrench,
     route: '/tools',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'logistik'],
@@ -87,7 +88,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'materials',
-    label: 'Materials',
+    label: 'sidebar.materials',
     icon: Truck,
     route: '/materials',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'logistik'],
@@ -96,7 +97,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'attendance',
-    label: 'Attendance',
+    label: 'sidebar.attendance',
     icon: Clock,
     route: '/attendance',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'worker', 'mandor', 'tukang'],
@@ -105,7 +106,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'tasks',
-    label: 'Tasks',
+    label: 'sidebar.tasks',
     icon: ClipboardList,
     route: '/tasks',
     roles: ['worker', 'tukang', 'mandor', 'supervisor', 'admin_project'],
@@ -114,7 +115,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'my-payments',
-    label: 'My Payments',
+    label: 'sidebar.payments',
     icon: DollarSign,
     route: '/my-payments',
     roles: ['worker', 'tukang', 'mandor'],
@@ -123,7 +124,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'approvals',
-    label: 'Approvals',
+    label: 'sidebar.approvals',
     icon: CheckSquare,
     route: '/approvals',
     roles: ['owner', 'director', 'supervisor', 'admin_project'],
@@ -132,7 +133,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'slip-gaji',
-    label: 'Slip Gaji',
+    label: 'sidebar.payroll',
     icon: Receipt,
     route: '/slip-gaji',
     roles: ['owner', 'director', 'supervisor'],
@@ -142,6 +143,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function MobileNav() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -192,7 +194,7 @@ export default function MobileNav() {
                 <div className="mobile-nav-item-icon" style={{ backgroundColor: item.bg }}>
                   <Icon size={20} color={item.color} />
                 </div>
-                <span className="mobile-nav-item-label">{item.label}</span>
+                <span className="mobile-nav-item-label">{item.label.includes('sidebar.') ? t(item.label) : item.label}</span>
               </button>
             );
           })}
@@ -206,7 +208,7 @@ export default function MobileNav() {
             <div className="mobile-nav-item-icon" style={{ backgroundColor: '#FEE2E2' }}>
               <LogOut size={20} color="#EF4444" />
             </div>
-            <span className="mobile-nav-item-label">Logout</span>
+            <span className="mobile-nav-item-label">{t('sidebar.logout')}</span>
           </button>
         </div>
       </div>

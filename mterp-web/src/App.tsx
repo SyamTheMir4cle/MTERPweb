@@ -12,6 +12,7 @@ import ProjectTools from './pages/ProjectTools';
 import AddProject from './pages/AddProject';
 import Tools from './pages/Tools';
 import Materials from './pages/Materials';
+import ProjectMaterials from './pages/ProjectMaterials';
 import Approvals from './pages/Approvals';
 import Tasks from './pages/Tasks';
 import Attendance from './pages/Attendance';
@@ -41,6 +42,7 @@ function App() {
             <Route path="/add-project" element={<AddProject />} />
             <Route path="/tools" element={<Tools />} />
             <Route path="/materials" element={<Materials />} />
+            <Route path="/project-materials/:id" element={<ProjectMaterials />} />
             <Route path="/approvals" element={<Approvals />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/attendance" element={<Attendance />} />

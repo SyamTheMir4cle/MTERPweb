@@ -11,6 +11,7 @@ import {
   FileText,
   DollarSign,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Badge } from '../components/shared';
@@ -68,6 +69,7 @@ const getIcon = (iconName: string) => {
 };
 
 export default function Home() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [updates, setUpdates] = useState<UpdateItem[]>([]);
@@ -96,17 +98,17 @@ export default function Home() {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    if (diffMins < 60) return `${diffMins}${t('home.time.minsAgo')}`;
+    if (diffHours < 24) return `${diffHours}${t('home.time.hoursAgo')}`;
+    if (diffDays < 7) return `${diffDays}${t('home.time.daysAgo')}`;
+    return date.toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short' });
   };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('home.greeting.morning');
+    if (hour < 17) return t('home.greeting.afternoon');
+    return t('home.greeting.evening');
   };
 
   return (
@@ -138,8 +140,8 @@ export default function Home() {
               <HardHat size={32} color="white" />
             </div>
             <div>
-              <h3 className="big-card-title">Projects</h3>
-              <p className="big-card-sub">Manage Projects</p>
+              <h3 className="big-card-title">{t('home.cards.projectsTitle')}</h3>
+              <p className="big-card-sub">{t('home.cards.projectsSub')}</p>
             </div>
           </div>
           <div className="big-card-arrow">
@@ -153,8 +155,8 @@ export default function Home() {
               <Wrench size={32} color="white" />
             </div>
             <div>
-              <h3 className="big-card-title">Tool Tracking</h3>
-              <p className="big-card-sub">Manage Inventory</p>
+              <h3 className="big-card-title">{t('home.cards.toolsTitle')}</h3>
+              <p className="big-card-sub">{t('home.cards.toolsSub')}</p>
             </div>
           </div>
           <div className="big-card-arrow">
@@ -166,16 +168,16 @@ export default function Home() {
         <div className="small-cards-row">
           <DashboardCard
             icon={Clock}
-            label="Attendance"
-            sub="Check In/Out"
+            label={t('home.cards.attendanceTitle')}
+            sub={t('home.cards.attendanceSub')}
             color="#10B981"
             bg="#D1FAE5"
             onClick={() => navigate('/attendance')}
           />
           <DashboardCard
             icon={ClipboardList}
-            label="My Tasks"
-            sub="View Tasks"
+            label={t('home.cards.tasksTitle')}
+            sub={t('home.cards.tasksSub')}
             color="#F59E0B"
             bg="#FEF3C7"
             onClick={() => navigate('/tasks')}
@@ -187,8 +189,8 @@ export default function Home() {
           <div className="small-cards-row">
             <DashboardCard
               icon={DollarSign}
-              label="My Payments"
-              sub="Kasbon & Wages"
+              label={t('home.cards.paymentsTitle')}
+              sub={t('home.cards.paymentsSub')}
               color="#059669"
               bg="#D1FAE5"
               onClick={() => navigate('/my-payments')}
@@ -201,8 +203,8 @@ export default function Home() {
           <div className="small-cards-row">
             <DashboardCard
               icon={Truck}
-              label="Materials"
-              sub="Request Item"
+              label={t('home.cards.materialsTitle')}
+              sub={t('home.cards.materialsSub')}
               color="#8B5CF6"
               bg="#EDE9FE"
               onClick={() => navigate('/materials')}
@@ -211,8 +213,8 @@ export default function Home() {
             {['director', 'owner'].includes(user.role) ? (
               <DashboardCard
                 icon={CheckSquare}
-                label="Approvals"
-                sub="Review Requests"
+                label={t('home.cards.approvalsTitle')}
+                sub={t('home.cards.approvalsSub')}
                 color="#3B82F6"
                 bg="#DBEAFE"
                 onClick={() => navigate('/approvals')}
@@ -220,8 +222,8 @@ export default function Home() {
             ) : (
               <DashboardCard
                 icon={ClipboardList}
-                label="Daily Report"
-                sub="Submit Report"
+                label={t('home.cards.reportTitle')}
+                sub={t('home.cards.reportSub')}
                 color="#3B82F6"
                 bg="#DBEAFE"
                 onClick={() => navigate('/daily-report')}
@@ -234,17 +236,17 @@ export default function Home() {
       {/* Site Updates Section */}
       <div className="home-updates">
         <div className="updates-header">
-          <span className="updates-title">SITE UPDATES</span>
+          <span className="updates-title">{t('home.updates.title')}</span>
           {updates.length > 3 && (
-            <button className="updates-link" onClick={() => navigate('/updates')}>View All</button>
+            <button className="updates-link" onClick={() => navigate('/updates')}>{t('home.updates.viewAll')}</button>
           )}
         </div>
         
         {loadingUpdates ? (
-          <div className="updates-loading">Loading updates...</div>
+          <div className="updates-loading">{t('home.updates.loading')}</div>
         ) : updates.length === 0 ? (
           <div className="updates-empty">
-            <p>No recent updates</p>
+            <p>{t('home.updates.empty')}</p>
           </div>
         ) : (
           <div className="updates-list">

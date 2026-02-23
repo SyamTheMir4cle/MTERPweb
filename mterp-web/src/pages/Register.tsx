@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { Input, Button, Chip } from '../components/shared';
 import './Register.css';
 
 export default function Register() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export default function Register() {
 
   const handleRegister = async () => {
     if (!formData.username || !formData.email || !formData.password) {
-      setError('Mohon lengkapi semua data');
+      setError(t('auth.register.missingData'));
       return;
     }
 
@@ -33,7 +35,7 @@ export default function Register() {
       await api.post('/auth/register', formData);
       setStep(2);
     } catch (err: any) {
-      setError(err.response?.data?.msg || 'Terjadi kesalahan server');
+      setError(err.response?.data?.msg || t('auth.register.serverError'));
     } finally {
       setLoading(false);
     }
@@ -45,10 +47,10 @@ export default function Register() {
 
     try {
       await api.post('/auth/verify', { email: formData.email, otp });
-      alert('Akun Anda aktif! Silakan Login.');
+      alert(t('auth.register.accountActive'));
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.msg || 'OTP Salah');
+      setError(err.response?.data?.msg || t('auth.register.invalidOtp'));
     } finally {
       setLoading(false);
     }
@@ -60,9 +62,9 @@ export default function Register() {
       <div className="register-container">
         <div className="register-content">
           <CheckCircle2 size={60} color="var(--primary)" className="register-icon" />
-          <h1 className="register-title">Verifikasi Email</h1>
+          <h1 className="register-title">{t('auth.register.verifyEmailTitle')}</h1>
           <p className="register-subtitle">
-            Masukkan 6 digit kode yang dikirim ke {formData.email}
+            {t('auth.register.verifyEmailSubtitle')} {formData.email}
           </p>
 
           {error && <div className="register-error">{error}</div>}
@@ -77,7 +79,7 @@ export default function Register() {
           />
 
           <Button
-            title="Verifikasi & Aktifkan"
+            title={t('auth.register.verifyButton')}
             onClick={handleVerify}
             loading={loading}
             variant="primary"
@@ -93,20 +95,20 @@ export default function Register() {
   return (
     <div className="register-container">
       <div className="register-content">
-        <h1 className="register-title">Buat Akun Baru</h1>
-        <p className="register-subtitle">Daftar untuk akses sistem ERP</p>
+        <h1 className="register-title">{t('auth.register.createAccountTitle')}</h1>
+        <p className="register-subtitle">{t('auth.register.createAccountSubtitle')}</p>
 
         {error && <div className="register-error">{error}</div>}
 
         <div className="register-form">
           <Input
-            placeholder="Nama Lengkap"
+            placeholder={t('auth.register.fullNamePlaceholder')}
             value={formData.fullName}
             onChangeText={(t) => setFormData({ ...formData, fullName: t })}
           />
 
           <div className="role-section">
-            <label className="role-label">DAFTAR SEBAGAI:</label>
+            <label className="role-label">{t('auth.register.roleLabel')}</label>
             <div className="role-chips">
               {['supervisor', 'asset_admin', 'director'].map((r) => (
                 <Chip
@@ -122,27 +124,27 @@ export default function Register() {
           </div>
 
           <Input
-            placeholder="Email Perusahaan"
+            placeholder={t('auth.register.companyEmailPlaceholder')}
             type="email"
             value={formData.email}
             onChangeText={(t) => setFormData({ ...formData, email: t })}
           />
 
           <Input
-            placeholder="Username Login"
+            placeholder={t('auth.register.usernamePlaceholder')}
             value={formData.username}
             onChangeText={(t) => setFormData({ ...formData, username: t })}
           />
 
           <Input
-            placeholder="Password"
+            placeholder={t('auth.register.passwordPlaceholder')}
             type="password"
             value={formData.password}
             onChangeText={(t) => setFormData({ ...formData, password: t })}
           />
 
           <Button
-            title="Mulai Verifikasi E-mail"
+            title={t('auth.register.startVerifyButton')}
             onClick={handleRegister}
             loading={loading}
             variant="primary"
@@ -151,7 +153,7 @@ export default function Register() {
           />
 
           <Button
-            title="Sudah punya akun? Login"
+            title={t('auth.register.hasAccount')}
             onClick={() => navigate('/')}
             variant="outline"
             size="medium"

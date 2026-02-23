@@ -5,6 +5,7 @@ import {
   Building, CalendarOff, MapPin, Timer, Calendar, ChevronRight,
   Shield, TrendingUp, Loader,
 } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 import api from '../api/api';
 import { Card, Button, Input, Alert, CostInput } from '../components/shared';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +24,7 @@ interface AttendanceRecord {
 }
 
 export default function Attendance() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -121,17 +123,17 @@ export default function Attendance() {
 
   const handleCheckIn = async () => {
     if (!selectedProjectId) {
-      setAlertData({ visible: true, type: 'error', title: 'Project Required', message: 'Please select a project before checking in.' });
+      setAlertData({ visible: true, type: 'error', title: t('attendance.messages.projectRequiredTitle'), message: t('attendance.messages.projectRequired') });
       return;
     }
     setLoading(true);
     try {
       await api.post('/attendance/checkin', { projectId: selectedProjectId });
-      setAlertData({ visible: true, type: 'success', title: 'Checked In!', message: `You've checked in at ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` });
+      setAlertData({ visible: true, type: 'success', title: t('attendance.messages.checkInSuccessTitle'), message: t('attendance.messages.checkInSuccess', { time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }) });
       await fetchTodayAttendance();
       await fetchRecentHistory();
     } catch (err: any) {
-      setAlertData({ visible: true, type: 'error', title: 'Check-in Failed', message: err.response?.data?.msg || 'Could not check in.' });
+      setAlertData({ visible: true, type: 'error', title: t('attendance.messages.checkInFailedTitle'), message: err.response?.data?.msg || t('attendance.messages.checkInFailedDefault') });
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,7 @@ export default function Attendance() {
 
   const handleCheckOut = async () => {
     if (!photo) {
-      setAlertData({ visible: true, type: 'error', title: 'Photo Required', message: 'Please upload a selfie photo for check-out.' });
+      setAlertData({ visible: true, type: 'error', title: t('attendance.messages.photoRequiredTitle'), message: t('attendance.messages.photoRequired') });
       return;
     }
     setLoading(true);
@@ -147,13 +149,13 @@ export default function Attendance() {
       const formData = new FormData();
       formData.append('photo', photo);
       await api.put('/attendance/checkout', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setAlertData({ visible: true, type: 'success', title: 'Checked Out!', message: `You've checked out at ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` });
+      setAlertData({ visible: true, type: 'success', title: t('attendance.messages.checkOutSuccessTitle'), message: t('attendance.messages.checkOutSuccess', { time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }) });
       setPhoto(null);
       setPhotoPreview(null);
       await fetchTodayAttendance();
       await fetchRecentHistory();
     } catch (err: any) {
-      setAlertData({ visible: true, type: 'error', title: 'Check-out Failed', message: err.response?.data?.msg || 'Could not check out.' });
+      setAlertData({ visible: true, type: 'error', title: t('attendance.messages.checkOutFailedTitle'), message: err.response?.data?.msg || t('attendance.messages.checkOutFailedDefault') });
     } finally {
       setLoading(false);
     }
@@ -163,14 +165,14 @@ export default function Attendance() {
     if (!kasbonAmount) return;
     try {
       await api.post('/kasbon', { amount: Number(kasbonAmount), reason: kasbonReason, userId: user?._id });
-      setAlertData({ visible: true, type: 'success', title: 'Request Sent', message: 'Your kasbon request has been submitted.' });
+      setAlertData({ visible: true, type: 'success', title: t('attendance.messages.kasbonSuccessTitle'), message: t('attendance.messages.kasbonSuccess') });
       setKasbonOpen(false); setKasbonAmount(''); setKasbonReason('');
     } catch (err) { console.error('Kasbon request failed', err); }
   };
 
   const handlePermitSubmit = async () => {
     if (!permitReason || !permitPhoto) {
-      setAlertData({ visible: true, type: 'error', title: 'Missing Info', message: 'Reason and photo evidence are required.' });
+      setAlertData({ visible: true, type: 'error', title: t('attendance.messages.permitMissingInfoTitle'), message: t('attendance.messages.permitMissingInfo') });
       return;
     }
     setLoading(true);
@@ -179,11 +181,11 @@ export default function Attendance() {
       formData.append('reason', permitReason);
       formData.append('evidence', permitPhoto);
       await api.post('/attendance/permit', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setAlertData({ visible: true, type: 'success', title: 'Permit Sent', message: 'Your permit request has been submitted.' });
+      setAlertData({ visible: true, type: 'success', title: t('attendance.messages.permitSuccessTitle'), message: t('attendance.messages.permitSuccess') });
       setPermitModal(false); setPermitReason(''); setPermitPhoto(null); setPermitPhotoPreview(null);
       await fetchTodayAttendance();
     } catch (err: any) {
-      setAlertData({ visible: true, type: 'error', title: 'Request Failed', message: err.response?.data?.msg || 'Failed to submit permit.' });
+      setAlertData({ visible: true, type: 'error', title: t('attendance.messages.permitFailedTitle'), message: err.response?.data?.msg || t('attendance.messages.permitFailedDefault') });
     } finally {
       setLoading(false);
     }
@@ -219,13 +221,13 @@ export default function Attendance() {
   // Status color map
   const getStatusInfo = (status: string) => {
     const map: Record<string, { color: string; bg: string; label: string }> = {
-      Present: { color: '#059669', bg: '#D1FAE5', label: 'Present' },
-      Late: { color: '#D97706', bg: '#FEF3C7', label: 'Late' },
-      Absent: { color: '#DC2626', bg: '#FEE2E2', label: 'Absent' },
-      Permit: { color: '#7C3AED', bg: '#EDE9FE', label: 'Permit' },
-      'Half-day': { color: '#6366F1', bg: '#EEF2FF', label: 'Half Day' },
+      Present: { color: '#059669', bg: '#D1FAE5', label: t('attendance.statusRibbon.present') },
+      Late: { color: '#D97706', bg: '#FEF3C7', label: t('attendance.statusRibbon.late') },
+      Absent: { color: '#DC2626', bg: '#FEE2E2', label: t('attendance.statusRibbon.absent') },
+      Permit: { color: '#7C3AED', bg: '#EDE9FE', label: t('attendance.statusRibbon.permit') },
+      'Half-day': { color: '#6366F1', bg: '#EEF2FF', label: t('attendance.statusRibbon.halfDay') },
     };
-    return map[status] || map.Present;
+    return map[status] || { color: '#059669', bg: '#D1FAE5', label: t('attendance.statusRibbon.present') };
   };
 
   return (
@@ -245,7 +247,7 @@ export default function Attendance() {
             <Clock size={22} color="white" />
           </div>
           <div>
-            <h1 className="att-page-title">Attendance</h1>
+            <h1 className="att-page-title">{t('attendance.title')}</h1>
             <span className="att-page-date">
               {liveTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
@@ -256,7 +258,7 @@ export default function Attendance() {
             {liveTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </div>
           <span className={`att-clock-status ${isWorkingHours ? 'active' : ''}`}>
-            {isWorkingHours ? 'Working Hours' : 'Outside Hours'}
+            {isWorkingHours ? t('attendance.workingHours') : t('attendance.outsideHours')}
           </span>
         </div>
       </div>
@@ -266,7 +268,7 @@ export default function Attendance() {
         {fetchingToday ? (
           <div className="att-timeline-loading">
             <Loader size={20} className="dashboard-spinner" />
-            <span>Loading...</span>
+            <span>{t('attendance.loading')}</span>
           </div>
         ) : (
           <>
@@ -277,9 +279,9 @@ export default function Attendance() {
                   {hasCheckedIn ? <Check size={14} /> : isPermit ? <CalendarOff size={14} /> : <span>1</span>}
                 </div>
                 <div className="att-step-info">
-                  <span className="att-step-label">Check In</span>
+                  <span className="att-step-label">{t('attendance.steps.checkIn')}</span>
                   <span className="att-step-value">
-                    {hasCheckedIn ? formatTime(todayRecord!.checkIn!.time) : isPermit ? 'Permit' : '--:--'}
+                    {hasCheckedIn ? formatTime(todayRecord!.checkIn!.time) : isPermit ? t('attendance.steps.permit') : '--:--'}
                   </span>
                 </div>
               </div>
@@ -298,7 +300,7 @@ export default function Attendance() {
                   )}
                 </div>
                 <div className="att-step-info">
-                  <span className="att-step-label">Working</span>
+                  <span className="att-step-label">{t('attendance.steps.working')}</span>
                   <span className="att-step-value">
                     {getDuration() || '--'}
                   </span>
@@ -313,7 +315,7 @@ export default function Attendance() {
                   {hasCheckedOut ? <Check size={14} /> : <span>3</span>}
                 </div>
                 <div className="att-step-info">
-                  <span className="att-step-label">Check Out</span>
+                  <span className="att-step-label">{t('attendance.steps.checkOut')}</span>
                   <span className="att-step-value">
                     {hasCheckedOut ? formatTime(todayRecord!.checkOut!.time) : '--:--'}
                   </span>
@@ -328,7 +330,7 @@ export default function Attendance() {
                 color: getStatusInfo(todayRecord.status).color,
               }}>
                 <Shield size={14} />
-                <span>Status: {getStatusInfo(todayRecord.status).label}</span>
+                <span>{t('attendance.statusRibbon.status', { status: getStatusInfo(todayRecord.status).label })}</span>
                 {todayRecord.projectId && (
                   <>
                     <span className="att-ribbon-sep">•</span>
@@ -352,8 +354,8 @@ export default function Attendance() {
               <MapPin size={20} />
             </div>
             <div>
-              <h3 className="att-action-title">Ready to Work?</h3>
-              <p className="att-action-desc">Select your project and check in</p>
+              <h3 className="att-action-title">{t('attendance.actions.readyToWork')}</h3>
+              <p className="att-action-desc">{t('attendance.actions.selectProject')}</p>
             </div>
           </div>
 
@@ -364,7 +366,7 @@ export default function Attendance() {
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
             >
-              <option value="">-- Select Project --</option>
+              <option value="">{t('attendance.actions.selectProjectPlaceholder')}</option>
               {projects.map((p) => (
                 <option key={p._id} value={p._id}>{p.nama || p.name}</option>
               ))}
@@ -381,7 +383,7 @@ export default function Attendance() {
             ) : (
               <>
                 <Check size={22} />
-                <span>Check In Now</span>
+                <span>{t('attendance.actions.checkInNow')}</span>
               </>
             )}
           </button>
@@ -389,13 +391,13 @@ export default function Attendance() {
           {checkInDisabled && (
             <p className="att-time-warning">
               <AlertCircle size={14} />
-              Check-in only available between 08:00 – 16:00
+              {t('attendance.actions.checkInWarning')}
             </p>
           )}
 
           <button className="att-permit-link" onClick={() => setPermitModal(true)}>
             <CalendarOff size={14} />
-            <span>Can't work today? Request Permit</span>
+            <span>{t('attendance.actions.requestPermit')}</span>
             <ChevronRight size={14} />
           </button>
         </Card>
@@ -409,8 +411,8 @@ export default function Attendance() {
               <LogOut size={20} />
             </div>
             <div>
-              <h3 className="att-action-title">Ready to Leave?</h3>
-              <p className="att-action-desc">Upload a selfie photo to check out</p>
+              <h3 className="att-action-title">{t('attendance.actions.readyToLeave')}</h3>
+              <p className="att-action-desc">{t('attendance.actions.uploadSelfie')}</p>
             </div>
           </div>
 
@@ -419,13 +421,13 @@ export default function Attendance() {
               <div className="att-photo-preview">
                 <img src={photoPreview} alt="Preview" />
                 <button className="att-photo-remove" onClick={() => { setPhoto(null); setPhotoPreview(null); }}>
-                  ✕ Remove
+                  {t('attendance.actions.removePhoto')}
                 </button>
               </div>
             ) : (
               <label className="att-photo-input">
                 <Upload size={28} color="var(--text-muted)" />
-                <span>Tap to upload selfie</span>
+                <span>{t('attendance.actions.tapToUpload')}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -447,7 +449,7 @@ export default function Attendance() {
             ) : (
               <>
                 <LogOut size={22} />
-                <span>Check Out</span>
+                <span>{t('attendance.actions.checkOutNow')}</span>
               </>
             )}
           </button>
@@ -460,9 +462,9 @@ export default function Attendance() {
           <div className="att-done-icon">
             <Check size={36} />
           </div>
-          <h3 className="att-done-title">All Done For Today!</h3>
+          <h3 className="att-done-title">{t('attendance.allDone.title')}</h3>
           <p className="att-done-desc">
-            Worked for <strong>{getDuration()}</strong> • {formatTime(todayRecord!.checkIn!.time)} – {formatTime(todayRecord!.checkOut!.time)}
+            {t('attendance.allDone.desc')} <strong style={{ color: 'inherit' }}>{getDuration()}</strong> {t('attendance.allDone.descDetail', { start: formatTime(todayRecord!.checkIn!.time), end: formatTime(todayRecord!.checkOut!.time) })}
           </p>
         </Card>
       )}
@@ -473,8 +475,8 @@ export default function Attendance() {
           <div className="att-done-icon att-permit-icon">
             <CalendarOff size={36} />
           </div>
-          <h3 className="att-done-title">Permit Requested</h3>
-          <p className="att-done-desc">You have submitted a permit for today.</p>
+          <h3 className="att-done-title">{t('attendance.permitRequested.title')}</h3>
+          <p className="att-done-desc">{t('attendance.permitRequested.desc')}</p>
         </Card>
       )}
 
@@ -484,7 +486,7 @@ export default function Attendance() {
           <div className="att-quick-icon" style={{ backgroundColor: '#FEF3C7' }}>
             <DollarSign size={18} color="#D97706" />
           </div>
-          <span>Request Kasbon</span>
+          <span>{t('attendance.quickActions.requestKasbon')}</span>
           <ChevronRight size={16} color="var(--text-muted)" />
         </button>
 
@@ -493,7 +495,7 @@ export default function Attendance() {
             <div className="att-quick-icon" style={{ backgroundColor: '#EEF2FF' }}>
               <FileText size={18} color="#6366F1" />
             </div>
-            <span>Attendance Logs</span>
+            <span>{t('attendance.quickActions.attendanceLogs')}</span>
             <ChevronRight size={16} color="var(--text-muted)" />
           </button>
         )}
@@ -502,15 +504,15 @@ export default function Attendance() {
       {/* Recent History */}
       <div className="att-recent-section">
         <div className="att-recent-header">
-          <h3 className="att-recent-title">Recent History</h3>
-          <span className="att-recent-hint">Last 7 days</span>
+          <h3 className="att-recent-title">{t('attendance.recentHistory.title')}</h3>
+          <span className="att-recent-hint">{t('attendance.recentHistory.hint')}</span>
         </div>
         {loadingRecent ? (
-          <div className="att-recent-loading">Loading...</div>
+          <div className="att-recent-loading">{t('attendance.loading')}</div>
         ) : recentRecords.length === 0 ? (
           <div className="att-recent-empty">
             <Calendar size={24} color="var(--text-muted)" />
-            <span>No recent records</span>
+            <span>{t('attendance.recentHistory.noRecords')}</span>
           </div>
         ) : (
           <div className="att-recent-list">
@@ -545,13 +547,13 @@ export default function Attendance() {
           <div className="att-modal" onClick={(e) => e.stopPropagation()}>
             <div className="att-modal-title-row">
               <CalendarOff size={20} color="#7C3AED" />
-              <h3>Request Permit / Leave</h3>
+              <h3>{t('attendance.modals.permit.title')}</h3>
             </div>
-            <p className="att-modal-desc">Upload evidence (e.g. medical letter) and reason.</p>
+            <p className="att-modal-desc">{t('attendance.modals.permit.desc')}</p>
 
             <Input
-              label="Reason"
-              placeholder="Why are you unable to work?"
+              label={t('attendance.modals.permit.reasonLabel')}
+              placeholder={t('attendance.modals.permit.reasonPlaceholder')}
               value={permitReason}
               onChangeText={setPermitReason}
               multiline
@@ -562,13 +564,13 @@ export default function Attendance() {
                 <div className="att-photo-preview">
                   <img src={permitPhotoPreview} alt="Preview" />
                   <button className="att-photo-remove" onClick={() => { setPermitPhoto(null); setPermitPhotoPreview(null); }}>
-                    ✕ Remove
+                    {t('attendance.actions.removePhoto')}
                   </button>
                 </div>
               ) : (
                 <label className="att-photo-input">
                   <Upload size={28} color="var(--text-muted)" />
-                  <span>Upload evidence photo</span>
+                  <span>{t('attendance.modals.permit.uploadEvidence')}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -580,8 +582,8 @@ export default function Attendance() {
             </div>
 
             <div className="att-modal-actions">
-              <Button title="Cancel" onClick={() => setPermitModal(false)} variant="outline" />
-              <Button title="Submit Request" onClick={handlePermitSubmit} loading={loading} />
+              <Button title={t('attendance.modals.common.cancel')} onClick={() => setPermitModal(false)} variant="outline" />
+              <Button title={t('attendance.modals.common.submitRequest')} onClick={handlePermitSubmit} loading={loading} />
             </div>
           </div>
         </div>
@@ -593,31 +595,31 @@ export default function Attendance() {
           <div className="att-modal" onClick={(e) => e.stopPropagation()}>
             <div className="att-modal-title-row">
               <DollarSign size={20} color="#D97706" />
-              <h3>Request Kasbon</h3>
+              <h3>{t('attendance.modals.kasbon.title')}</h3>
             </div>
             <div className="att-kasbon-warning">
               <AlertCircle size={18} color="#D97706" />
-              <span>Kasbon akan dipotong dari gaji bulanan Anda</span>
+              <span>{t('attendance.modals.kasbon.warning')}</span>
             </div>
 
             <CostInput
-              label="Amount (Rp)"
-              placeholder="e.g. 500000"
+              label={t('attendance.modals.kasbon.amountLabel')}
+              placeholder={t('attendance.modals.kasbon.amountPlaceholder')}
               value={Number(kasbonAmount) || 0}
               onChange={(v) => setKasbonAmount(v.toString())}
             />
 
             <Input
-              label="Reason"
-              placeholder="Why do you need this advance?"
+              label={t('attendance.modals.kasbon.reasonLabel')}
+              placeholder={t('attendance.modals.kasbon.reasonPlaceholder')}
               value={kasbonReason}
               onChangeText={setKasbonReason}
               multiline
             />
 
             <div className="att-modal-actions">
-              <Button title="Cancel" onClick={() => setKasbonOpen(false)} variant="outline" />
-              <Button title="Submit Request" onClick={handleKasbonSubmit} />
+              <Button title={t('attendance.modals.common.cancel')} onClick={() => setKasbonOpen(false)} variant="outline" />
+              <Button title={t('attendance.modals.common.submitRequest')} onClick={handleKasbonSubmit} />
             </div>
           </div>
         </div>

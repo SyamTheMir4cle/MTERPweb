@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,13 +9,14 @@ import { Badge, IconButton } from '../shared';
 import './AppLayout.css';
 
 export default function AppLayout() {
+  const { t } = useTranslation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
 
   if (isLoading) {
     return (
       <div className="app-loading">
         <div className="spinner"></div>
-        <span>Loading...</span>
+        <span>{t('home.updates.loading')}</span>
       </div>
     );
   }
@@ -33,7 +35,7 @@ export default function AppLayout() {
       <div className="app-main">
         <header className="app-header">
           <div className="app-header-left">
-            <span className="app-greeting">Good day,</span>
+            <span className="app-greeting">{t('home.greeting.morning')}</span>
             <span className="app-username">{user?.fullName || 'User'}</span>
             <Badge 
               label={user?.role?.toUpperCase() || 'STAFF'} 

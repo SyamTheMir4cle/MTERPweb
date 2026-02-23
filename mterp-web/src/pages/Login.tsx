@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HardHat, ArrowRight, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Button, Input } from '../components/shared';
 import './Login.css';
 
 export default function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
   
@@ -32,7 +34,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!username || !password) {
-      setError('Isi username dan password');
+      setError(t('auth.login.usernameRequired'));
       return;
     }
     
@@ -44,7 +46,7 @@ export default function Login() {
       login(response.data, response.data.token);
       navigate('/home');
     } catch (err: any) {
-      setError(err.response?.data?.msg || 'Cek koneksi atau username/password.');
+      setError(err.response?.data?.msg || t('auth.login.networkError'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +67,7 @@ export default function Login() {
           <span className="loading-letter" style={{ animationDelay: '200ms' }}>p</span>
           <span className="loading-dot" style={{ animationDelay: '250ms' }}>.</span>
         </div>
-        <p className="loading-subtitle">Construction Resource Planning & Management</p>
+        <p className="loading-subtitle">{t('auth.login.subtitle')}</p>
       </div>
     );
   }
@@ -80,15 +82,15 @@ export default function Login() {
             <HardHat color="white" size={40} />
           </div>
           <h1 className="login-title">mterp<span className="login-dot">.</span></h1>
-          <p className="login-subtitle">Construction Resource Planning & Management</p>
+          <p className="login-subtitle">{t('auth.login.subtitle')}</p>
         </div>
 
         <div className="login-form">
           {error && <div className="login-error">{error}</div>}
           
           <Input
-            label="USERNAME"
-            placeholder="Masukan username"
+            label={t('auth.login.usernameLabel')}
+            placeholder={t('auth.login.usernamePlaceholder')}
             value={username}
             onChangeText={setUsername}
             type="text"
@@ -96,15 +98,15 @@ export default function Login() {
           />
 
           <Input
-            label="PASSWORD"
-            placeholder="Masukan password"
+            label={t('auth.login.passwordLabel')}
+            placeholder={t('auth.login.passwordPlaceholder')}
             value={password}
             onChangeText={setPassword}
             type="password"
           />
 
           <Button
-            title="Sign In"
+            title={t('auth.login.signIn')}
             onClick={handleLogin}
             variant="primary"
             size="large"
@@ -116,7 +118,7 @@ export default function Login() {
           />
 
           <Button
-            title="Belum punya akses? Daftar Akun"
+            title={t('auth.login.noAccount')}
             onClick={() => navigate('/register')}
             variant="outline"
             size="medium"

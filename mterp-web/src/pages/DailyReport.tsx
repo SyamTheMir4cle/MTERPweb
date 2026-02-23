@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Save, Cloud, Users, Package, ChevronDown, Layers, ArrowLeft, Truck,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { Card, Button, Input, Alert, Badge, CostInput } from '../components/shared';
 import './DailyReport.css';
@@ -42,6 +43,7 @@ const STATUS_PROGRESS: Record<string, number> = { 'Pending': 0, 'Ordered': 50, '
 const formatRupiah = (num: number) => new Intl.NumberFormat('id-ID').format(num);
 
 export default function DailyReport() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preselectedId = searchParams.get('projectId');
@@ -165,7 +167,7 @@ export default function DailyReport() {
 
   const handleSubmit = async () => {
     if (!selectedProjectId) {
-      setAlertData({ visible: true, type: 'error', title: 'Error', message: 'Please select a project first.' });
+      setAlertData({ visible: true, type: 'error', title: t('dailyReport.messages.error'), message: t('dailyReport.messages.selectProject') });
       return;
     }
 
@@ -192,14 +194,14 @@ export default function DailyReport() {
       setAlertData({
         visible: true,
         type: 'success',
-        title: 'Report Submitted',
-        message: `Daily report saved. Overall progress: ${computedProgress}%`,
+        title: t('dailyReport.messages.submitSuccess'),
+        message: t('dailyReport.messages.submitSuccessDesc', { progress: computedProgress }),
       });
 
       setTimeout(() => navigate(-1), 1500);
     } catch (err) {
       console.error('Failed to submit report', err);
-      setAlertData({ visible: true, type: 'error', title: 'Failed', message: 'Could not submit report.' });
+      setAlertData({ visible: true, type: 'error', title: t('dailyReport.messages.submitFailed'), message: t('dailyReport.messages.submitFailedDesc') });
     } finally {
       setLoading(false);
     }
@@ -222,7 +224,7 @@ export default function DailyReport() {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="report-title">Daily Report</h1>
+            <h1 className="report-title">{t('dailyReport.title')}</h1>
             <span className="report-date">{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
@@ -231,7 +233,7 @@ export default function DailyReport() {
       {/* Project Selector */}
       <Card className="report-card">
         <h3 className="card-title">
-          <Layers size={18} /> Select Project
+          <Layers size={18} /> {t('dailyReport.projectSelector.title')}
         </h3>
         <div className="project-selector-wrapper">
           <select
@@ -239,7 +241,7 @@ export default function DailyReport() {
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
           >
-            <option value="">— Choose a project —</option>
+            <option value="">{t('dailyReport.projectSelector.placeholder')}</option>
             {projects.map((p) => (
               <option key={p._id} value={p._id}>
                 {p.nama} — {p.lokasi}
@@ -251,19 +253,19 @@ export default function DailyReport() {
         {selectedProjectName && (
           <div className="selected-project-info">
             <span className="selected-project-name">{selectedProjectName}</span>
-            <Badge label={`${computedProgress}% progress`} variant="primary" size="small" />
+            <Badge label={t('dailyReport.projectSelector.progress', { progress: computedProgress })} variant="primary" size="small" />
           </div>
         )}
       </Card>
 
       {/* Loading */}
-      {loadingProject && <p className="loading-text">Loading project data...</p>}
+      {loadingProject && <p className="loading-text">{t('dailyReport.loadingProject')}</p>}
 
       {/* Work Item Progress */}
       {!loadingProject && workItemUpdates.length > 0 && (
         <Card className="report-card">
           <h3 className="card-title">
-            <Layers size={18} /> Work Item Progress
+            <Layers size={18} /> {t('dailyReport.workItem.title')}
           </h3>
           <div className="work-items-list">
             {workItemUpdates.map((item, i) => {
@@ -280,7 +282,7 @@ export default function DailyReport() {
                   </div>
                   <div className="work-item-controls">
                     <div className="progress-slider-group">
-                      <label className="slider-label">Progress</label>
+                      <label className="slider-label">{t('dailyReport.workItem.progress')}</label>
                       <div className="slider-row">
                         <input
                           type="range"
@@ -303,7 +305,7 @@ export default function DailyReport() {
                     </div>
                     <div className="actual-cost-group">
                       <CostInput
-                        label="Actual Cost (Rp)"
+                        label={t('dailyReport.workItem.actualCost')}
                         value={item.actualCost}
                         onChange={(v) => updateItemActualCost(i, v)}
                       />
@@ -320,7 +322,7 @@ export default function DailyReport() {
       {!loadingProject && supplyUpdates.length > 0 && (
         <Card className="report-card">
           <h3 className="card-title">
-            <Truck size={18} /> Supply Plan Status
+            <Truck size={18} /> {t('dailyReport.supplyPlan.title')}
           </h3>
           <div className="work-items-list">
             {supplyUpdates.map((supply, i) => {
@@ -336,7 +338,7 @@ export default function DailyReport() {
                     </div>
                   </div>
                   <div className="supply-status-controls">
-                    <label className="slider-label">Status</label>
+                    <label className="slider-label">{t('dailyReport.supplyPlan.status')}</label>
                     <div className="supply-status-btns">
                       {SUPPLY_STATUSES.map((status) => (
                         <button
@@ -344,7 +346,7 @@ export default function DailyReport() {
                           className={`supply-status-btn ${supply.newStatus === status ? 'active' : ''} status-${status.toLowerCase()}`}
                           onClick={() => updateSupplyStatus(i, status)}
                         >
-                          {status === 'Pending' ? '⏳' : status === 'Ordered' ? '📦' : '✅'} {status}
+                          {status === 'Pending' ? '⏳' : status === 'Ordered' ? '📦' : '✅'} {t(`dailyReport.status.${status.toLowerCase()}`)}
                         </button>
                       ))}
                     </div>
@@ -355,7 +357,7 @@ export default function DailyReport() {
                     )}
                     <div className="actual-cost-group">
                       <CostInput
-                        label="Actual Cost (Rp)"
+                        label={t('dailyReport.supplyPlan.actualCost')}
                         value={supply.actualCost}
                         onChange={(v) => updateSupplyActualCost(i, v)}
                       />
@@ -370,37 +372,49 @@ export default function DailyReport() {
 
       {!loadingProject && selectedProjectId && workItemUpdates.length === 0 && supplyUpdates.length === 0 && (
         <Card className="report-card">
-          <p className="empty-text">This project has no work items or supplies yet.</p>
+          <p className="empty-text">{t('dailyReport.emptyProject')}</p>
         </Card>
       )}
 
       {/* Weather */}
       <Card className="report-card">
         <h3 className="card-title">
-          <Cloud size={18} /> Weather Condition
+          <Cloud size={18} /> {t('dailyReport.weather.title')}
         </h3>
         <div className="weather-options">
-          {['Cerah', 'Berawan', 'Hujan'].map((w) => (
-            <button
-              key={w}
-              className={`weather-btn ${formData.weather === w ? 'active' : ''}`}
-              onClick={() => setFormData({ ...formData, weather: w })}
-            >
-              {w === 'Cerah' ? '☀️' : w === 'Berawan' ? '⛅' : '🌧️'} {w}
-            </button>
-          ))}
+          {['Cerah', 'Berawan', 'Hujan'].map((w) => {
+            const getIcon = (weather: string) => {
+              if (weather === 'Cerah') return '☀️';
+              if (weather === 'Berawan') return '⛅';
+              return '🌧️';
+            }
+            const getTranslationValue = (weather: string) => {
+              if (weather === 'Cerah') return t('dailyReport.weather.options.sunny');
+              if (weather === 'Berawan') return t('dailyReport.weather.options.cloudy');
+              return t('dailyReport.weather.options.rainy');
+            }
+            return (
+              <button
+                key={w}
+                className={`weather-btn ${formData.weather === w ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, weather: w })}
+              >
+                {getIcon(w)} {getTranslationValue(w)}
+              </button>
+            )
+          })}
         </div>
       </Card>
 
       {/* Materials */}
       <Card className="report-card">
         <h3 className="card-title">
-          <Package size={18} /> Materials Used
+          <Package size={18} /> {t('dailyReport.materials.title')}
         </h3>
         <Input
-          placeholder="List materials used today"
+          placeholder={t('dailyReport.materials.placeholder')}
           value={formData.materials}
-          onChangeText={(t) => setFormData({ ...formData, materials: t })}
+          onChangeText={(tVal) => setFormData({ ...formData, materials: tVal })}
           multiline
           numberOfLines={3}
         />
@@ -409,12 +423,12 @@ export default function DailyReport() {
       {/* Workforce */}
       <Card className="report-card">
         <h3 className="card-title">
-          <Users size={18} /> Workforce
+          <Users size={18} /> {t('dailyReport.workforce.title')}
         </h3>
         <Input
-          placeholder="Number of workers, roles, etc."
+          placeholder={t('dailyReport.workforce.placeholder')}
           value={formData.workforce}
-          onChangeText={(t) => setFormData({ ...formData, workforce: t })}
+          onChangeText={(tVal) => setFormData({ ...formData, workforce: tVal })}
           multiline
           numberOfLines={3}
         />
@@ -422,11 +436,11 @@ export default function DailyReport() {
 
       {/* Notes */}
       <Card className="report-card">
-        <h3 className="card-title">Additional Notes</h3>
+        <h3 className="card-title">{t('dailyReport.notes.title')}</h3>
         <Input
-          placeholder="Any issues, updates, or comments"
+          placeholder={t('dailyReport.notes.placeholder')}
           value={formData.notes}
-          onChangeText={(t) => setFormData({ ...formData, notes: t })}
+          onChangeText={(tVal) => setFormData({ ...formData, notes: tVal })}
           multiline
           numberOfLines={4}
         />
@@ -434,7 +448,7 @@ export default function DailyReport() {
 
       {/* Submit */}
       <Button
-        title="Submit Report"
+        title={t('dailyReport.actions.submit')}
         icon={Save}
         onClick={handleSubmit}
         loading={loading}

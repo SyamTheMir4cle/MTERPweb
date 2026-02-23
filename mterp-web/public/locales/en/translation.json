@@ -1,0 +1,1029 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "tools": "Tools",
+    "materials": "Material Requests",
+    "approvals": "Approvals",
+    "tasks": "Tasks",
+    "attendance": "Attendance",
+    "payments": "My Payments",
+    "payroll": "Salary Slips",
+    "logout": "Logout"
+  },
+  "header": {
+    "search": "Search projects, tools...",
+    "language": "EN"
+  },
+  "dashboard": {
+    "welcome": "Welcome back,",
+    "activeProjects": "Active Projects",
+    "toolsInUse": "Tools In Use",
+    "pendingApprovals": "Pending Approvals",
+    "totalWorkers": "Total Active Workers",
+    "quickActions": "Quick Actions",
+    "newProject": "New Project",
+    "reqMaterial": "Req Material",
+    "createTask": "Create Task",
+    "recentActivity": "Recent Activity",
+    "viewAll": "View All",
+    "projectProgress": "Project Progress",
+    "overall": "Overall",
+    "onTrack": "On Track",
+    "delayed": "Delayed",
+    "progressChart": "Project Completion Chart"
+  },
+  "auth": {
+    "login": {
+      "title": "mterp.",
+      "subtitle": "Construction Resource Planning & Management",
+      "usernameRequired": "Please enter username and password",
+      "networkError": "Check connection or username/password.",
+      "usernameLabel": "USERNAME",
+      "usernamePlaceholder": "Enter username",
+      "passwordLabel": "PASSWORD",
+      "passwordPlaceholder": "Enter password",
+      "signIn": "Sign In",
+      "noAccount": "Don't have access? Register Account"
+    },
+    "register": {
+      "missingData": "Please complete all fields",
+      "serverError": "Server error occurred",
+      "accountActive": "Your account is active! Please log in.",
+      "invalidOtp": "Invalid OTP",
+      "verifyEmailTitle": "Verify Email",
+      "verifyEmailSubtitle": "Enter 6-digit code sent to",
+      "verifyButton": "Verify & Activate",
+      "createAccountTitle": "Create New Account",
+      "createAccountSubtitle": "Register for ERP system access",
+      "fullNamePlaceholder": "Full Name",
+      "roleLabel": "REGISTER AS:",
+      "companyEmailPlaceholder": "Company Email",
+      "usernamePlaceholder": "Login Username",
+      "passwordPlaceholder": "Password",
+      "startVerifyButton": "Start Email Verification",
+      "hasAccount": "Already have an account? Login"
+    }
+  },
+  "home": {
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "time": {
+      "minsAgo": "m ago",
+      "hoursAgo": "h ago",
+      "daysAgo": "d ago"
+    },
+    "updates": {
+      "title": "SITE UPDATES",
+      "viewAll": "View All",
+      "loading": "Loading updates...",
+      "empty": "No recent updates"
+    },
+    "cards": {
+      "projectsTitle": "Projects",
+      "projectsSub": "Manage Projects",
+      "toolsTitle": "Tool Tracking",
+      "toolsSub": "Manage Inventory",
+      "attendanceTitle": "Attendance",
+      "attendanceSub": "Check In/Out",
+      "tasksTitle": "My Tasks",
+      "tasksSub": "View Tasks",
+      "paymentsTitle": "My Payments",
+      "paymentsSub": "Kasbon & Wages",
+      "materialsTitle": "Materials",
+      "materialsSub": "Request Item",
+      "approvalsTitle": "Approvals",
+      "approvalsSub": "Review Requests",
+      "reportTitle": "Daily Report",
+      "reportSub": "Submit Report"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "add": "Add",
+    "summary": {
+      "totalProjects": "Total Projects",
+      "avgProgress": "Avg Progress"
+    },
+    "empty": {
+      "title": "No Projects",
+      "desc": "Projects will appear here once added."
+    },
+    "status": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "pending": "Pending",
+      "complete": "Complete"
+    },
+    "actions": {
+      "update": "Update",
+      "deleteConfirm": "Delete this project?",
+      "cancel": "Cancel",
+      "save": "Save",
+      "updateProgress": "Update Progress"
+    },
+    "form": {
+      "progressPlaceholder": "Progress %"
+    }
+  },
+  "addProject": {
+    "title": "Create Project",
+    "steps": {
+      "basicInfo": "Basic Info",
+      "documents": "Documents",
+      "supplyPlan": "Supply Plan",
+      "workItems": "Work Items"
+    },
+    "errors": {
+      "fillNameLocation": "Please fill project name and location.",
+      "success": "Project created successfully!",
+      "failed": "Failed to create project."
+    },
+    "form": {
+      "projectName": "Project Name",
+      "projectNamePlaceholder": "Enter project name",
+      "location": "Location",
+      "locationPlaceholder": "Project location",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief project description",
+      "totalBudget": "Total Budget (Rp)",
+      "totalBudgetPlaceholder": "e.g. 500000000",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "uploadDocs": "Upload Documents",
+      "chooseFile": "Choose file",
+      "addSupply": "Add Supply",
+      "totalSupplyCost": "Total Supply Cost",
+      "ofBudget": "% of budget",
+      "itemName": "Item Name",
+      "itemNamePlaceholder": "e.g. Semen Tiga Roda",
+      "qty": "Qty",
+      "unit": "Unit",
+      "cost": "Cost (Rp)",
+      "noSupplies": "No supplies added yet.",
+      "addWorkItem": "Add Work Item",
+      "totalWorkItemCost": "Total Work Item Cost",
+      "workItemName": "Work Item Name",
+      "workItemNamePlaceholder": "e.g. Pekerjaan Pondasi",
+      "noWorkItems": "No work items added yet."
+    },
+    "actions": {
+      "add": "Add",
+      "back": "Back",
+      "next": "Next",
+      "create": "Create Project"
+    }
+  },
+  "projectDetail": {
+    "notFound": "Project not found",
+    "tooltip": {
+      "today": "TODAY",
+      "planned": "Planned",
+      "actual": "Actual",
+      "deviation": "Deviation",
+      "ahead": "Ahead",
+      "behind": "Behind",
+      "plan": "Plan",
+      "act": "Act"
+    },
+    "progress": {
+      "overall": "Overall Progress"
+    },
+    "stats": {
+      "start": "Start",
+      "end": "End",
+      "budget": "Budget",
+      "plannedCost": "Planned Cost",
+      "actualCost": "Actual Cost"
+    },
+    "scurve": {
+      "title": "S-Curve Progress",
+      "subtitle": "Planned vs Actual cumulative cost (%) — monthly timeline",
+      "planned": "Planned",
+      "actual": "Actual",
+      "today": "Today",
+      "performance": {
+        "schedule": "Schedule",
+        "ahead": "Ahead",
+        "behind": "Behind",
+        "costVariance": "Cost Variance",
+        "cpi": "CPI",
+        "elapsed": "Elapsed",
+        "na": "N/A"
+      }
+    },
+    "workItems": {
+      "title": "Work Items",
+      "items": "items",
+      "headers": {
+        "num": "#",
+        "name": "Name",
+        "start": "Start",
+        "end": "End",
+        "qty": "Qty",
+        "unit": "Unit",
+        "cost": "Cost (Rp)",
+        "weight": "Weight",
+        "progress": "Progress",
+        "actualCost": "Actual Cost"
+      }
+    },
+    "supplyPlan": {
+      "title": "Supply Plan",
+      "items": "items",
+      "headers": {
+        "num": "#",
+        "item": "Item",
+        "start": "Start",
+        "end": "End",
+        "qty": "Qty",
+        "unit": "Unit",
+        "cost": "Cost (Rp)",
+        "weight": "Weight",
+        "status": "Status",
+        "actualCost": "Actual Cost"
+      }
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "dailyReport": "Daily Report",
+      "toolInventory": "Tool Inventory",
+      "materialPlan": "Material Plan"
+    },
+    "description": {
+      "title": "Description"
+    }
+  },
+  "tools": {
+    "title": "Tool Inventory",
+    "subtitle": "Manage and track all equipment",
+    "stats": {
+      "total": "Total Tools",
+      "available": "Available",
+      "inUse": "In Use",
+      "needsAttention": "Needs Attention"
+    },
+    "filter": {
+      "all": "All",
+      "available": "Available",
+      "inUse": "In Use",
+      "service": "Service",
+      "damaged": "Damaged"
+    },
+    "condition": {
+      "good": "Good",
+      "service": "Service",
+      "damaged": "Damaged",
+      "na": "N/A"
+    },
+    "searchPlaceholder": "Search tools...",
+    "overview": "Overview",
+    "empty": {
+      "title": "No Tools Found",
+      "filtered": "No tools match this filter. Try another category.",
+      "default": "Tools will appear here once added to inventory."
+    },
+    "actions": {
+      "add": "Add Tool",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes"
+    },
+    "messages": {
+      "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+      "saveFailed": "Failed to save tool",
+      "deleteFailed": "Failed to delete tool"
+    },
+    "modal": {
+      "addTitle": "Add New Tool",
+      "editTitle": "Edit Tool",
+      "name": "Tool Name *",
+      "namePlaceholder": "e.g. Mesin Bor",
+      "category": "Category",
+      "categoryPlaceholder": "e.g. Power Tools",
+      "location": "Location",
+      "locationPlaceholder": "e.g. Warehouse",
+      "stock": "Stock",
+      "unit": "Unit",
+      "unitPlaceholder": "e.g. unit, pcs, set",
+      "condition": "Condition"
+    }
+  },
+  "materials": {
+    "title": "Material Requests",
+    "subtitle": "Manage project material and supply requisitions",
+    "stats": {
+      "total": "Total Requests",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "searchPlaceholder": "Search item, project, or requester...",
+    "empty": {
+      "title": "No Requests Found",
+      "filtered": "No materials match \"{{search}}\"",
+      "default": "You haven't made any material requests yet."
+    },
+    "card": {
+      "highPriority": "High Priority",
+      "project": "Project",
+      "requester": "Requester",
+      "quantity": "Quantity",
+      "dateNeeded": "Date Needed",
+      "costEstimate": "Cost Estimate",
+      "reviewedBy": "Reviewed By",
+      "purpose": "Purpose/Notes:",
+      "rejectionReason": "Reason for Rejection:"
+    },
+    "actions": {
+      "newRequest": "New Request",
+      "approve": "Approve",
+      "reject": "Reject",
+      "delete": "Delete Request",
+      "cancel": "Cancel",
+      "submit": "Submit Request",
+      "confirmRejection": "Confirm Rejection"
+    },
+    "modal": {
+      "addTitle": "New Material Request",
+      "rejectTitle": "Reject Request",
+      "itemName": "Item Name",
+      "itemNamePlaceholder": "e.g. Semen",
+      "quantity": "Quantity",
+      "quantityPlaceholder": "e.g. 50 sak",
+      "dateNeeded": "Date Needed",
+      "costEstimate": "Estimated Cost (Rp)",
+      "costEstimatePlaceholder": "Output cost...",
+      "urgency": "Urgency",
+      "urgencyOptions": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High"
+      },
+      "assignProject": "Assign to Project (Optional)",
+      "noProject": "-- No Project --",
+      "purpose": "Purpose / Notes",
+      "purposePlaceholder": "Explain why this is needed...",
+      "rejectionReason": "Reason for Rejection",
+      "rejectionPlaceholder": "Please provide a reason to the requester..."
+    },
+    "messages": {
+      "fillRequired": "Please fill in Item Name, Quantity, and Date Needed",
+      "fetchFailed": "Failed to fetch data",
+      "createFailed": "Failed to create request",
+      "submitFailed": "Failed to submit request",
+      "updateStatusFailed": "Failed to update status",
+      "deleteConfirm": "Are you sure you want to delete the request for \"{{name}}\"?",
+      "deleteFailed": "Failed to delete request",
+      "reasonRequired": "Reason is required"
+    }
+  },
+  "projectTools": {
+    "title": "Tool Inventory",
+    "fallbackProject": "Project",
+    "loading": "Loading...",
+    "searchPlaceholder": "Search tools...",
+    "stats": {
+      "total": "Total",
+      "good": "Good",
+      "attention": "Attention",
+      "assigned": "Assigned"
+    },
+    "empty": {
+      "error": "Error",
+      "noAssignedTools": "No Tools Assigned",
+      "addFromWarehouse": "Add tools from warehouse to this project.",
+      "noAssignedWait": "No tools have been assigned to this project yet.",
+      "noResults": "No Results",
+      "noMatch": "No tools match \"{{search}}\"",
+      "noToolsAvailable": "No Tools Available",
+      "allAssigned": "All tools are currently assigned to projects."
+    },
+    "actions": {
+      "addTool": "Add Tool",
+      "reassign": "Reassign",
+      "assign": "Assign",
+      "return": "Return",
+      "cancel": "Cancel",
+      "addToProject": "Add to Project",
+      "saveAssignment": "Save Assignment"
+    },
+    "modal": {
+      "addTitle": "Add Tool from Warehouse",
+      "assignTitle": "Assign User to Tool",
+      "selectTool": "Select Tool",
+      "chooseTool": "Choose a tool...",
+      "assignTo": "Assign To",
+      "unassigned": "Unassigned (Team Use)"
+    },
+    "messages": {
+      "fetchFailed": "Failed to load data",
+      "addFailed": "Failed to add tool",
+      "assignFailed": "Failed to assign user",
+      "returnConfirm": "Return \"{{name}}\" to warehouse?",
+      "returnFailed": "Failed to return tool"
+    }
+  },
+  "projectMaterials": {
+    "title": "Project Materials",
+    "fallbackProject": "Project Materials",
+    "searchPlaceholder": "Search materials...",
+    "stats": {
+      "total": "Total Items",
+      "pending": "Pending",
+      "ordered": "Ordered",
+      "delivered": "Delivered"
+    },
+    "empty": {
+      "noMaterials": "No Materials Added",
+      "trackDesc": "Track supplies and materials for this project.",
+      "noResults": "No Results",
+      "noMatch": "No materials match \"{{search}}\""
+    },
+    "actions": {
+      "addMaterial": "Add Material",
+      "editMaterial": "Edit Material",
+      "cancel": "Cancel",
+      "saveMaterial": "Save Material",
+      "markOrdered": "Mark as Ordered",
+      "markDelivered": "Mark as Delivered"
+    },
+    "labels": {
+      "estCost": "Est: {{cost}}",
+      "ordered": "Ordered",
+      "delivered": "Delivered"
+    },
+    "modal": {
+      "itemName": "Item Name",
+      "itemNamePlaceholder": "e.g. Semen Tiga Roda",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "unitPlaceholder": "e.g. sak",
+      "estimatedCost": "Estimated Cost (per {{unit}})",
+      "costPlaceholder": "Rp...",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "statusOptions": {
+        "pending": "Pending",
+        "ordered": "Ordered",
+        "delivered": "Delivered"
+      }
+    },
+    "messages": {
+      "validationRequired": "Item name and quantity are required",
+      "saveFailed": "Failed to save material",
+      "deleteConfirm": "Are you sure you want to delete \"{{name}}\"?",
+      "deleteFailed": "Failed to delete material",
+      "updateFailed": "Failed to update status"
+    }
+  },
+  "attendance": {
+    "title": "Attendance",
+    "workingHours": "Working Hours",
+    "outsideHours": "Outside Hours",
+    "loading": "Loading...",
+    "steps": {
+      "checkIn": "Check In",
+      "working": "Working",
+      "checkOut": "Check Out",
+      "permit": "Permit"
+    },
+    "statusRibbon": {
+      "status": "Status: {{status}}",
+      "present": "Present",
+      "late": "Late",
+      "absent": "Absent",
+      "permit": "Permit",
+      "halfDay": "Half Day"
+    },
+    "actions": {
+      "readyToWork": "Ready to Work?",
+      "selectProject": "Select your project and check in",
+      "selectProjectPlaceholder": "-- Select Project --",
+      "checkInNow": "Check In Now",
+      "checkInWarning": "Check-in only available between 08:00 – 16:00",
+      "requestPermit": "Can't work today? Request Permit",
+      "readyToLeave": "Ready to Leave?",
+      "uploadSelfie": "Upload a selfie photo to check out",
+      "removePhoto": "✕ Remove",
+      "tapToUpload": "Tap to upload selfie",
+      "checkOutNow": "Check Out"
+    },
+    "allDone": {
+      "title": "All Done For Today!",
+      "desc": "Worked for",
+      "descDetail": "• {{start}} – {{end}}"
+    },
+    "permitRequested": {
+      "title": "Permit Requested",
+      "desc": "You have submitted a permit for today."
+    },
+    "quickActions": {
+      "requestKasbon": "Request Kasbon",
+      "attendanceLogs": "Attendance Logs"
+    },
+    "recentHistory": {
+      "title": "Recent History",
+      "hint": "Last 7 days",
+      "noRecords": "No recent records"
+    },
+    "modals": {
+      "permit": {
+        "title": "Request Permit / Leave",
+        "desc": "Upload evidence (e.g. medical letter) and reason.",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Why are you unable to work?",
+        "uploadEvidence": "Upload evidence photo"
+      },
+      "kasbon": {
+        "title": "Request Kasbon",
+        "warning": "Kasbon will be deducted from your monthly salary.",
+        "amountLabel": "Amount (Rp)",
+        "amountPlaceholder": "e.g. 500000",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Why do you need this advance?"
+      },
+      "common": {
+        "cancel": "Cancel",
+        "submitRequest": "Submit Request"
+      }
+    },
+    "messages": {
+      "projectRequiredTitle": "Project Required",
+      "projectRequired": "Please select a project before checking in.",
+      "checkInSuccessTitle": "Checked In!",
+      "checkInSuccess": "You've checked in at {{time}}",
+      "checkInFailedTitle": "Check-in Failed",
+      "checkInFailedDefault": "Could not check in.",
+      "photoRequiredTitle": "Photo Required",
+      "photoRequired": "Please upload a selfie photo for check-out.",
+      "checkOutSuccessTitle": "Checked Out!",
+      "checkOutSuccess": "You've checked out at {{time}}",
+      "checkOutFailedTitle": "Check-out Failed",
+      "checkOutFailedDefault": "Could not check out.",
+      "kasbonSuccessTitle": "Request Sent",
+      "kasbonSuccess": "Your kasbon request has been submitted.",
+      "permitMissingInfoTitle": "Missing Info",
+      "permitMissingInfo": "Reason and photo evidence are required.",
+      "permitSuccessTitle": "Permit Sent",
+      "permitSuccess": "Your permit request has been submitted.",
+      "permitFailedTitle": "Request Failed",
+      "permitFailedDefault": "Failed to submit permit."
+    }
+  },
+  "attendanceLogs": {
+    "title": "Attendance Logs",
+    "subtitle": "View and manage attendance records",
+    "filters": {
+      "dateRange": "Date Range",
+      "tabs": {
+        "week": "This Week",
+        "month": "This Month",
+        "custom": "Custom"
+      },
+      "customStart": "Start",
+      "customEnd": "End",
+      "worker": "Worker",
+      "allWorkers": "All Workers",
+      "payment": "Payment",
+      "paymentOptions": {
+        "unpaid": "Unpaid",
+        "paid": "Paid",
+        "all": "All"
+      }
+    },
+    "summary": {
+      "totalDays": "Total Days",
+      "present": "Present",
+      "totalHours": "Total Hours",
+      "totalPayment": "Total Payment"
+    },
+    "actions": {
+      "markAllPaid": "Mark All as Paid ({{amount}})",
+      "setWage": "Set Wage",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "loading": "Loading records...",
+    "empty": {
+      "title": "No Records Found",
+      "desc": "No attendance records found for the selected filters."
+    },
+    "record": {
+      "daily": "Daily",
+      "overtime": "Overtime"
+    },
+    "wageModal": {
+      "title": "Set Wage Type",
+      "ratePerDay": "Rate per Day (Rp)",
+      "ratePlaceholder": "e.g. 150000",
+      "overtimePay": "Overtime Pay (Rp)",
+      "overtimePlaceholder": "Auto-calculated or Manual Override",
+      "duration": "Duration: {{hours}} hours",
+      "helper": "Hourly rate is auto-calculated (Daily / 8). Overtime is calculated based on duration."
+    },
+    "messages": {
+      "noUnpaid": "No unpaid records to pay.",
+      "confirmPay": "Mark {{count}} records as PAID? Total: {{amount}}",
+      "payFailed": "Failed to mark as paid",
+      "updateWageFailed": "Failed to update wage type"
+    },
+    "wageOptions": {
+      "daily": "Regular Daily",
+      "overtime15": "Overtime 1.5x",
+      "overtime2": "Overtime 2x"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Manage and track work assignments",
+    "actions": {
+      "addTask": "Add Task",
+      "assign": "Assign",
+      "start": "Start",
+      "done": "Done",
+      "createTask": "Create Task",
+      "saveAssignment": "Save Assignment",
+      "cancel": "Cancel"
+    },
+    "stats": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "loading": "Loading tasks...",
+    "errorLoading": "Error Loading",
+    "empty": {
+      "title": "No Tasks Yet",
+      "descManager": "Create your first task to get started.",
+      "descWorker": "No tasks assigned to you yet."
+    },
+    "status": {
+      "completed": "COMPLETED"
+    },
+    "modal": {
+      "createTitle": "Create Task",
+      "assignTitle": "Assign Task",
+      "taskTitle": "Task Title",
+      "taskTitlePlaceholder": "Enter task title",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter description (optional)",
+      "project": "Project *",
+      "selectProject": "Select project",
+      "priority": "Priority",
+      "priorityOptions": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "dueDate": "Due Date",
+      "assignTo": "Assign To",
+      "assignToOptional": "Assign To (optional)",
+      "unassigned": "Unassigned"
+    },
+    "messages": {
+      "loadFailed": "Failed to load tasks",
+      "saveFailed": "Failed to save"
+    }
+  },
+  "dailyReport": {
+    "title": "Daily Report",
+    "projectSelector": {
+      "title": "Select Project",
+      "placeholder": "— Choose a project —",
+      "progress": "{{progress}}% progress"
+    },
+    "loadingProject": "Loading project data...",
+    "workItem": {
+      "title": "Work Item Progress",
+      "progress": "Progress",
+      "actualCost": "Actual Cost (Rp)"
+    },
+    "supplyPlan": {
+      "title": "Supply Plan Status",
+      "status": "Status",
+      "actualCost": "Actual Cost (Rp)"
+    },
+    "emptyProject": "This project has no work items or supplies yet.",
+    "weather": {
+      "title": "Weather Condition",
+      "options": {
+        "sunny": "Sunny",
+        "cloudy": "Cloudy",
+        "rainy": "Rainy"
+      }
+    },
+    "materials": {
+      "title": "Materials Used",
+      "placeholder": "List materials used today"
+    },
+    "workforce": {
+      "title": "Workforce",
+      "placeholder": "Number of workers, roles, etc."
+    },
+    "notes": {
+      "title": "Additional Notes",
+      "placeholder": "Any issues, updates, or comments"
+    },
+    "actions": {
+      "submit": "Submit Report"
+    },
+    "messages": {
+      "selectProject": "Please select a project first.",
+      "submitSuccess": "Report Submitted",
+      "submitSuccessDesc": "Daily report saved. Overall progress: {{progress}}%",
+      "submitFailed": "Failed",
+      "submitFailedDesc": "Could not submit report.",
+      "error": "Error"
+    },
+    "status": {
+      "pending": "Pending",
+      "ordered": "Ordered",
+      "delivered": "Delivered"
+    }
+  },
+  "approvals": {
+    "title": "Pending Approvals",
+    "itemsCount": "{{count}} ITEMS",
+    "loading": "Loading approvals...",
+    "errorLoading": "Error Loading",
+    "empty": {
+      "title": "All Caught Up!",
+      "desc": "No pending approvals at this time."
+    },
+    "materialRequests": {
+      "title": "Material Requests",
+      "requester": "Requester",
+      "role": "Role",
+      "item": "Item",
+      "qty": "Quantity",
+      "dateNeeded": "Date Needed",
+      "project": "Project",
+      "urgency": {
+        "urgent": "URGENT",
+        "low": "LOW",
+        "normal": "NORMAL"
+      }
+    },
+    "kasbon": {
+      "title": "Kasbon (Cash Advance)",
+      "empty": "No pending kasbon requests.",
+      "amount": "Amount",
+      "reason": "Reason",
+      "requested": "Requested",
+      "badge": "KASBON"
+    },
+    "actions": {
+      "reject": "Reject",
+      "approve": "Approve"
+    },
+    "messages": {
+      "loadFailed": "Failed to load approvals"
+    }
+  },
+  "myPayments": {
+    "title": "My Payments",
+    "tabs": {
+      "kasbon": "Kasbon",
+      "addRequest": "Add Request",
+      "slipGaji": "Slip Gaji"
+    },
+    "summary": {
+      "period": "Period: This Month",
+      "totalEarnings": "Total Earnings"
+    },
+    "loading": "Loading...",
+    "loadingSlips": "Loading slips...",
+    "error": "Error",
+    "kasbon": {
+      "pending": "Pending",
+      "approvedPaid": "Approved / Paid",
+      "btnRequest": "Request Kasbon",
+      "btnCancel": "Cancel",
+      "form": {
+        "title": "New Kasbon Request",
+        "amount": "Amount (IDR)",
+        "amountPlaceholder": "e.g. 500000",
+        "reason": "Reason",
+        "reasonPlaceholder": "Why do you need this advance?",
+        "btnSubmit": "Submit Request",
+        "btnSubmitting": "Submitting..."
+      },
+      "history": "Request History",
+      "emptyTitle": "No Kasbon Requests",
+      "emptyDesc": "You haven't submitted any cash advance requests yet.",
+      "rejected": "Rejected:",
+      "approvedBy": "Approved by {{name}}",
+      "paidOn": "Paid on {{date}}"
+    },
+    "wages": {
+      "daysWorked": "Days Worked",
+      "totalHours": "Total Hours",
+      "multiplier": "Wage Multiplier",
+      "title": "This Month's Wage Records",
+      "emptyTitle": "No Records",
+      "emptyDesc": "No attendance records found for this month.",
+      "checkIn": "Check In",
+      "checkOut": "Check Out"
+    },
+    "slip": {
+      "emptyTitle": "No Salary Slips",
+      "emptyDesc": "No salary slips have been generated for you yet.",
+      "days": "days",
+      "detail": {
+        "title": "Salary Slip",
+        "period": "Period:",
+        "attendance": {
+          "totalDays": "Total Days",
+          "present": "Present",
+          "late": "Late",
+          "absent": "Absent",
+          "permit": "Permit",
+          "hours": "Hours"
+        },
+        "earnings": {
+          "title": "Earnings Breakdown",
+          "dailyRate": "Daily Rate",
+          "dailyWages": "Daily Wages ({{days}} days)",
+          "overtime": "Overtime",
+          "bonus": "Bonus",
+          "deductions": "Deductions",
+          "kasbon": "Kasbon",
+          "netPay": "Net Pay"
+        },
+        "authorization": {
+          "pending": "Pending"
+        },
+        "notes": "Notes:",
+        "btnClose": "Close",
+        "btnExport": "Export PDF"
+      }
+    },
+    "messages": {
+      "kasbonSuccess": "Kasbon Submitted",
+      "kasbonSuccessDesc": "Your cash advance request has been submitted for approval.",
+      "kasbonFailed": "Submit Failed",
+      "kasbonFailedDesc": "Failed to submit kasbon request.",
+      "loadFailed": "Failed to load data"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "paid": "Paid"
+    },
+    "wageType": {
+      "daily": "Daily",
+      "overtime_1.5": "OT 1.5x",
+      "overtime_2": "OT 2x"
+    }
+  },
+  "slipGaji": {
+    "title": "Slip Gaji",
+    "subtitle": "Weekly salary slips · Payment every Saturday",
+    "loading": "Loading slips...",
+    "empty": {
+      "title": "No salary slips for this period",
+      "btnGenerate": "Generate First Slip"
+    },
+    "actions": {
+      "generate": "Generate Slip"
+    },
+    "card": {
+      "worker": "Worker",
+      "days": "days"
+    },
+    "status": {
+      "draft": "Draft",
+      "authorized": "Authorized",
+      "issued": "Issued"
+    },
+    "modals": {
+      "generate": {
+        "title": "Generate Salary Slip",
+        "desc": "Weekly period · Payment on Saturday",
+        "worker": "Select Worker",
+        "workerPlaceholder": "-- Choose worker --",
+        "startDate": "Start Date",
+        "endDate": "End Date (Sat)",
+        "bonus": "Bonus",
+        "deductions": "Deductions",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes...",
+        "btnCancel": "Cancel",
+        "btnGenerate": "Generate Slip",
+        "btnGenerating": "Generating..."
+      },
+      "detail": {
+        "title": "Salary Slip",
+        "period": "Period:",
+        "totalDays": "Total Days",
+        "present": "Present",
+        "late": "Late",
+        "absent": "Absent",
+        "permit": "Permit",
+        "totalHours": "Total Hours",
+        "earnings": {
+          "title": "Earnings Breakdown",
+          "dailyRate": "Daily Rate",
+          "totalDailyWages": "Total Daily Wages ({{days}} days)",
+          "overtime": "Overtime",
+          "bonus": "Bonus",
+          "deductions": "Deductions",
+          "kasbon": "Kasbon Deduction",
+          "netPay": "Net Pay"
+        },
+        "digitalAuth": {
+          "title": "Digital Authorization",
+          "director": "Director",
+          "owner": "Owner",
+          "awaiting": "Awaiting signature",
+          "btnSign": "Sign Now"
+        },
+        "notes": "Notes:",
+        "btnClose": "Close",
+        "btnExport": "Export PDF",
+        "btnAuthorize": "Authorize"
+      },
+      "auth": {
+        "title": "Digital Passphrase",
+        "desc": "Enter your secure passphrase to authorize this salary slip as",
+        "placeholder": "Enter passphrase (min 4 chars)",
+        "btnCancel": "Cancel",
+        "btnAuthorize": "Authorize",
+        "btnAuthorizing": "Authorizing..."
+      }
+    },
+    "messages": {
+      "genSuccess": "Slip Generated",
+      "genSuccessDesc": "Salary slip has been created as draft.",
+      "genError": "Error",
+      "genErrorDesc": "Failed to generate slip",
+      "authSuccess": "Authorized",
+      "authSuccessDesc": "Slip signed by {{name}}",
+      "authError": "Authorization Failed",
+      "authErrorDesc": "Failed to authorize",
+      "delSuccess": "Deleted",
+      "delSuccessDesc": "Draft slip has been deleted.",
+      "delError": "Error",
+      "delErrorDesc": "Failed to delete"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "btnEdit": "Edit",
+    "btnSave": "Save",
+    "btnSaving": "Saving...",
+    "btnChangePhoto": "Change Photo",
+    "btnRemovePhoto": "Remove Photo",
+    "sections": {
+      "personalInfo": "PERSONAL INFORMATION",
+      "paymentInfo": "PAYMENT INFORMATION",
+      "account": "ACCOUNT",
+      "settings": "SETTINGS"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter your phone",
+      "address": "Address",
+      "addressPlaceholder": "Enter your address",
+      "notSet": "Not set",
+      "paymentPlatform": "Payment Platform",
+      "paymentPlatformPlaceholder": "e.g. BCA, Mandiri, GoPay, Dana",
+      "accountNumber": "Account Number",
+      "accountNumberPlaceholder": "Enter your account number",
+      "accountName": "Account Name",
+      "accountNamePlaceholder": "Account holder name",
+      "role": "Role"
+    },
+    "settings": {
+      "notifications": "Notifications",
+      "privacy": "Privacy & Security",
+      "help": "Help & Support",
+      "about": "About",
+      "signOut": "Sign Out"
+    },
+    "messages": {
+      "photoSuccess": "Photo Updated",
+      "photoSuccessDesc": "Your profile photo has been updated successfully.",
+      "photoError": "Upload Failed",
+      "photoErrorDesc": "Failed to update profile photo. Please try again.",
+      "photoRemoved": "Photo Removed",
+      "photoRemovedDesc": "Your profile photo has been removed.",
+      "saveSuccess": "Profile Saved",
+      "saveSuccessDesc": "Your profile has been updated successfully.",
+      "saveError": "Update Failed",
+      "saveErrorDesc": "Failed to update profile. Please try again."
+    }
+  }
+}

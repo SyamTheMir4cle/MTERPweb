@@ -8,6 +8,7 @@ import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Badge, Button, EmptyState, CostInput } from '../components/shared';
 import { Alert } from '../components/shared';
+import { useTranslation } from 'react-i18next';
 import { exportSlipToPdf } from '../utils/exportSlipPdf';
 import './MyPayments.css';
 
@@ -89,6 +90,7 @@ const fmtPeriod = (p: { startDate?: string; endDate?: string; month?: number; ye
 };
 
 export default function MyPayments() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'kasbon' | 'wages' | 'slip'>('kasbon');
   const [kasbons, setKasbons] = useState<KasbonRecord[]>([]);
@@ -139,7 +141,7 @@ export default function MyPayments() {
       setWageSummary(wageRes.data.summary || null);
     } catch (err: any) {
       console.error('Failed to fetch data', err);
-      setError(err.response?.data?.msg || 'Failed to load data');
+      setError(err.response?.data?.msg || t('myPayments.messages.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -174,16 +176,16 @@ export default function MyPayments() {
       setAlertData({
         visible: true,
         type: 'success',
-        title: 'Kasbon Submitted',
-        message: 'Your cash advance request has been submitted for approval.',
+        title: t('myPayments.messages.kasbonSuccess'),
+        message: t('myPayments.messages.kasbonSuccessDesc'),
       });
       fetchData();
     } catch (err: any) {
       setAlertData({
         visible: true,
         type: 'error',
-        title: 'Submit Failed',
-        message: err.response?.data?.msg || 'Failed to submit kasbon request.',
+        title: t('myPayments.messages.kasbonFailed'),
+        message: err.response?.data?.msg || t('myPayments.messages.kasbonFailedDesc'),
       });
     } finally {
       setSubmitting(false);
@@ -213,16 +215,12 @@ export default function MyPayments() {
       Rejected: 'danger',
       Paid: 'primary',
     };
-    return <Badge label={status.toUpperCase()} variant={variants[status] || 'neutral'} size="small" />;
+    const translatedStatus = t(`myPayments.status.${status.toLowerCase()}`, status);
+    return <Badge label={translatedStatus.toUpperCase()} variant={variants[status] || 'neutral'} size="small" />;
   };
 
   const getWageLabel = (wageType: string) => {
-    const labels: Record<string, string> = {
-      daily: 'Daily',
-      'overtime_1.5': 'OT 1.5x',
-      'overtime_2': 'OT 2x',
-    };
-    return labels[wageType] || wageType;
+    return t(`myPayments.wageType.${wageType}`, wageType);
   };
 
   const getWageBadge = (wageType: string) => {
@@ -257,7 +255,7 @@ export default function MyPayments() {
 
       {/* Header */}
       <div className="mypayments-header">
-        <h1 className="mypayments-title">My Payments</h1>
+        <h1 className="mypayments-title">{t('myPayments.title')}</h1>
       </div>
 
       {/* Tabs */}
@@ -267,21 +265,21 @@ export default function MyPayments() {
           onClick={() => setActiveTab('kasbon')}
         >
           <DollarSign size={16} />
-          Kasbon
+          {t('myPayments.tabs.kasbon')}
         </button>
         <button
           className={`mypayments-tab ${activeTab === 'wages' ? 'active' : ''}`}
           onClick={() => setActiveTab('wages')}
         >
           <TrendingUp size={16} />
-          Add Request
+          {t('myPayments.tabs.addRequest')}
         </button>
         <button
           className={`mypayments-tab ${activeTab === 'slip' ? 'active' : ''}`}
           onClick={() => setActiveTab('slip')}
         >
           <Receipt size={16} />
-          Slip Gaji
+          {t('myPayments.tabs.slipGaji')}
         </button>
       </div>
 
@@ -295,13 +293,13 @@ export default function MyPayments() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Badge label={user?.role || 'User'} variant="neutral" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none' }} />
-              <span style={{ fontSize: '0.9em', opacity: 0.8 }}>Period: This Month</span>
+              <span style={{ fontSize: '0.9em', opacity: 0.8 }}>{t('myPayments.summary.period')}</span>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 4, opacity: 0.9 }}>
               <Wallet size={16} />
-              <span style={{ fontSize: '0.9em' }}>Total Earnings</span>
+              <span style={{ fontSize: '0.9em' }}>{t('myPayments.summary.totalEarnings')}</span>
             </div>
             <span style={{ fontSize: '1.5em', fontWeight: 700 }}>
               Rp {new Intl.NumberFormat('id-ID').format(wageSummary?.totalPayment || 0)}
@@ -314,13 +312,13 @@ export default function MyPayments() {
       {loading && (
         <div className="mypayments-loading">
           <div className="spinner"></div>
-          <span>Loading...</span>
+          <span>{t('myPayments.loading')}</span>
         </div>
       )}
 
       {/* Error */}
       {error && !loading && (
-        <EmptyState icon={AlertCircle} title="Error" description={error} />
+        <EmptyState icon={AlertCircle} title={t('myPayments.error')} description={error} />
       )}
 
       {/* ===== KASBON TAB ===== */}
@@ -329,18 +327,18 @@ export default function MyPayments() {
           {/* Kasbon Summary Cards */}
           <div className="summary-cards">
             <div className="summary-card pending">
-              <span className="summary-card-label">Pending</span>
+              <span className="summary-card-label">{t('myPayments.kasbon.pending')}</span>
               <span className="summary-card-value">{formatCurrency(totalKasbonPending)}</span>
             </div>
             <div className="summary-card approved">
-              <span className="summary-card-label">Approved / Paid</span>
+              <span className="summary-card-label">{t('myPayments.kasbon.approvedPaid')}</span>
               <span className="summary-card-value">{formatCurrency(totalKasbonApproved)}</span>
             </div>
           </div>
 
           {/* New Kasbon Button */}
           <Button
-            title={showForm ? 'Cancel' : 'Request Kasbon'}
+            title={showForm ? t('myPayments.kasbon.btnCancel') : t('myPayments.kasbon.btnRequest')}
             icon={showForm ? ChevronUp : Plus}
             onClick={() => setShowForm(!showForm)}
             variant={showForm ? 'secondary' : 'primary'}
@@ -350,27 +348,27 @@ export default function MyPayments() {
           {/* Kasbon Form */}
           {showForm && (
             <Card className="kasbon-form-card">
-              <h3 className="form-title">New Kasbon Request</h3>
+              <h3 className="form-title">{t('myPayments.kasbon.form.title')}</h3>
               <div className="form-group">
                 <CostInput
-                  label="Amount (IDR)"
-                  placeholder="e.g. 500000"
+                  label={t('myPayments.kasbon.form.amount')}
+                  placeholder={t('myPayments.kasbon.form.amountPlaceholder')}
                   value={Number(amount) || 0}
                   onChange={(v) => setAmount(v.toString())}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Reason</label>
+                <label className="form-label">{t('myPayments.kasbon.form.reason')}</label>
                 <textarea
                   className="form-textarea"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Why do you need this advance?"
+                  placeholder={t('myPayments.kasbon.form.reasonPlaceholder')}
                   rows={3}
                 />
               </div>
               <Button
-                title={submitting ? 'Submitting...' : 'Submit Request'}
+                title={submitting ? t('myPayments.kasbon.form.btnSubmitting') : t('myPayments.kasbon.form.btnSubmit')}
                 onClick={handleSubmitKasbon}
                 variant="success"
                 size="medium"
@@ -380,12 +378,12 @@ export default function MyPayments() {
           )}
 
           {/* Kasbon List */}
-          <h2 className="section-label">Request History</h2>
+          <h2 className="section-label">{t('myPayments.kasbon.history')}</h2>
           {kasbons.length === 0 ? (
             <EmptyState
               icon={Inbox}
-              title="No Kasbon Requests"
-              description="You haven't submitted any cash advance requests yet."
+              title={t('myPayments.kasbon.emptyTitle')}
+              description={t('myPayments.kasbon.emptyDesc')}
             />
           ) : (
             <div className="records-list">
@@ -399,17 +397,17 @@ export default function MyPayments() {
                   {k.reason && <p className="record-reason">{k.reason}</p>}
                   {k.rejectionReason && (
                     <p className="record-rejection">
-                      <strong>Rejected:</strong> {k.rejectionReason}
+                      <strong>{t('myPayments.kasbon.rejected')}</strong> {k.rejectionReason}
                     </p>
                   )}
                   {k.approvedBy && (
                     <span className="record-meta">
-                      Approved by {k.approvedBy.fullName}
+                      {t('myPayments.kasbon.approvedBy', { name: k.approvedBy.fullName })}
                       {k.approvedAt && ` • ${formatDate(k.approvedAt)}`}
                     </span>
                   )}
                   {k.paidAt && (
-                    <span className="record-meta paid">Paid on {formatDate(k.paidAt)}</span>
+                    <span className="record-meta paid">{t('myPayments.kasbon.paidOn', { date: formatDate(k.paidAt) })}</span>
                   )}
                 </Card>
               ))}
@@ -425,15 +423,15 @@ export default function MyPayments() {
           {wageSummary && (
             <div className="summary-cards">
               <div className="summary-card wage-days">
-                <span className="summary-card-label">Days Worked</span>
+                <span className="summary-card-label">{t('myPayments.wages.daysWorked')}</span>
                 <span className="summary-card-value">{wageSummary.present + wageSummary.late}</span>
               </div>
               <div className="summary-card wage-hours">
-                <span className="summary-card-label">Total Hours</span>
+                <span className="summary-card-label">{t('myPayments.wages.totalHours')}</span>
                 <span className="summary-card-value">{wageSummary.totalHours.toFixed(1)}h</span>
               </div>
               <div className="summary-card wage-multiplier">
-                <span className="summary-card-label">Wage Multiplier</span>
+                <span className="summary-card-label">{t('myPayments.wages.multiplier')}</span>
                 <span className="summary-card-value">{wageSummary.wageMultiplierTotal.toFixed(1)}x</span>
               </div>
             </div>
@@ -441,14 +439,14 @@ export default function MyPayments() {
 
           <h2 className="section-label">
             <Clock size={16} />
-            This Month's Wage Records
+            {t('myPayments.wages.title')}
           </h2>
 
           {wageRecords.length === 0 ? (
             <EmptyState
               icon={Inbox}
-              title="No Records"
-              description="No attendance records found for this month."
+              title={t('myPayments.wages.emptyTitle')}
+              description={t('myPayments.wages.emptyDesc')}
             />
           ) : (
             <div className="records-list">
@@ -460,11 +458,11 @@ export default function MyPayments() {
                   </div>
                   <div className="wage-details">
                     <div className="wage-detail">
-                      <span className="wage-detail-label">Check In</span>
+                      <span className="wage-detail-label">{t('myPayments.wages.checkIn')}</span>
                       <span className="wage-detail-value">{formatTime(r.checkIn?.time)}</span>
                     </div>
                     <div className="wage-detail">
-                      <span className="wage-detail-label">Check Out</span>
+                      <span className="wage-detail-label">{t('myPayments.wages.checkOut')}</span>
                       <span className="wage-detail-value">{formatTime(r.checkOut?.time)}</span>
                     </div>
                     <div className="wage-detail">
@@ -488,13 +486,13 @@ export default function MyPayments() {
           {slipLoading ? (
             <div className="mypayments-loading">
               <div className="spinner"></div>
-              <span>Loading slips…</span>
+              <span>{t('myPayments.loadingSlips')}</span>
             </div>
           ) : mySlips.length === 0 ? (
             <EmptyState
               icon={Receipt}
-              title="No Salary Slips"
-              description="No salary slips have been generated for you yet."
+              title={t('myPayments.slip.emptyTitle')}
+              description={t('myPayments.slip.emptyDesc')}
             />
           ) : (
             <div className="records-list">
@@ -520,7 +518,7 @@ export default function MyPayments() {
                   <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
                     <span className="record-meta">
                       <Clock size={12} style={{ marginRight: 3, verticalAlign: 'middle' }} />
-                      {slip.attendanceSummary.presentDays} days
+                      {slip.attendanceSummary.presentDays} {t('myPayments.slip.days')}
                     </span>
                     <span className="record-meta" style={{ fontFamily: 'monospace', fontSize: '0.75em' }}>
                       {slip.slipNumber}
@@ -543,7 +541,7 @@ export default function MyPayments() {
                 <FileText size={20} color="white" />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.1em', fontWeight: 700, margin: 0 }}>Salary Slip</h3>
+                <h3 style={{ fontSize: '1.1em', fontWeight: 700, margin: 0 }}>{t('myPayments.slip.detail.title')}</h3>
                 <p style={{ fontSize: '0.75em', color: 'var(--text-muted)', margin: 0 }}>{selectedSlip.slipNumber}</p>
               </div>
               <button
@@ -569,7 +567,7 @@ export default function MyPayments() {
               {/* Period */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85em', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '8px 14px', borderRadius: 8 }}>
                 <Calendar size={14} />
-                Period: {fmtPeriod(selectedSlip.period)}
+                {t('myPayments.slip.detail.period')} {fmtPeriod(selectedSlip.period)}
               </div>
 
               {/* Payment Info */}
@@ -584,12 +582,12 @@ export default function MyPayments() {
               {/* Attendance Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 {[
-                  { val: selectedSlip.attendanceSummary.totalDays, label: 'Total Days', color: '' },
-                  { val: selectedSlip.attendanceSummary.presentDays, label: 'Present', color: '#059669' },
-                  { val: selectedSlip.attendanceSummary.lateDays, label: 'Late', color: '#D97706' },
-                  { val: selectedSlip.attendanceSummary.absentDays, label: 'Absent', color: '#DC2626' },
-                  { val: selectedSlip.attendanceSummary.permitDays, label: 'Permit', color: '#7C3AED' },
-                  { val: `${selectedSlip.attendanceSummary.totalHours}h`, label: 'Hours', color: '' },
+                  { val: selectedSlip.attendanceSummary.totalDays, label: t('myPayments.slip.detail.attendance.totalDays'), color: '' },
+                  { val: selectedSlip.attendanceSummary.presentDays, label: t('myPayments.slip.detail.attendance.present'), color: '#059669' },
+                  { val: selectedSlip.attendanceSummary.lateDays, label: t('myPayments.slip.detail.attendance.late'), color: '#D97706' },
+                  { val: selectedSlip.attendanceSummary.absentDays, label: t('myPayments.slip.detail.attendance.absent'), color: '#DC2626' },
+                  { val: selectedSlip.attendanceSummary.permitDays, label: t('myPayments.slip.detail.attendance.permit'), color: '#7C3AED' },
+                  { val: `${selectedSlip.attendanceSummary.totalHours}h`, label: t('myPayments.slip.detail.attendance.hours'), color: '' },
                 ].map((s, i) => (
                   <div key={i} style={{ textAlign: 'center', padding: 10, background: 'var(--bg-secondary)', borderRadius: 8 }}>
                     <span style={{ display: 'block', fontSize: '1.1em', fontWeight: 700, color: s.color || 'var(--text-primary)' }}>{s.val}</span>
@@ -600,12 +598,12 @@ export default function MyPayments() {
 
               {/* Earnings Table */}
               <div style={{ background: 'var(--bg-secondary)', borderRadius: 8, padding: 16 }}>
-                <h4 style={{ fontSize: '0.7em', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 10px 0' }}>Earnings Breakdown</h4>
+                <h4 style={{ fontSize: '0.7em', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 10px 0' }}>{t('myPayments.slip.detail.earnings.title')}</h4>
                 {[
-                  { label: 'Daily Rate', value: formatRp(selectedSlip.earnings.dailyRate) },
-                  { label: `Daily Wages (${selectedSlip.attendanceSummary.presentDays + selectedSlip.attendanceSummary.lateDays} days)`, value: formatRp(selectedSlip.earnings.totalDailyWage) },
-                  { label: 'Overtime', value: formatRp(selectedSlip.earnings.totalOvertime), color: '#059669' },
-                  ...(selectedSlip.earnings.bonus > 0 ? [{ label: 'Bonus', value: formatRp(selectedSlip.earnings.bonus), color: '#059669' }] : []),
+                  { label: t('myPayments.slip.detail.earnings.dailyRate'), value: formatRp(selectedSlip.earnings.dailyRate) },
+                  { label: t('myPayments.slip.detail.earnings.dailyWages', { days: selectedSlip.attendanceSummary.presentDays + selectedSlip.attendanceSummary.lateDays }), value: formatRp(selectedSlip.earnings.totalDailyWage) },
+                  { label: t('myPayments.slip.detail.earnings.overtime'), value: formatRp(selectedSlip.earnings.totalOvertime), color: '#059669' },
+                  ...(selectedSlip.earnings.bonus > 0 ? [{ label: t('myPayments.slip.detail.earnings.bonus'), value: formatRp(selectedSlip.earnings.bonus), color: '#059669' }] : []),
                 ].map((row, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                     <span>{row.label}</span>
@@ -615,16 +613,16 @@ export default function MyPayments() {
                 <div style={{ borderTop: '1px dashed var(--border)', margin: '6px 0' }} />
                 {selectedSlip.earnings.deductions > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '0.85em', color: '#DC2626' }}>
-                    <span>Deductions</span><span>-{formatRp(selectedSlip.earnings.deductions)}</span>
+                    <span>{t('myPayments.slip.detail.earnings.deductions')}</span><span>-{formatRp(selectedSlip.earnings.deductions)}</span>
                   </div>
                 )}
                 {selectedSlip.earnings.kasbonDeduction > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '0.85em', color: '#DC2626' }}>
-                    <span>Kasbon</span><span>-{formatRp(selectedSlip.earnings.kasbonDeduction)}</span>
+                    <span>{t('myPayments.slip.detail.earnings.kasbon')}</span><span>-{formatRp(selectedSlip.earnings.kasbonDeduction)}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, borderTop: '2px solid var(--text-primary)', fontSize: '1em', fontWeight: 800 }}>
-                  <span>Net Pay</span><span>{formatRp(selectedSlip.earnings.netPay)}</span>
+                  <span>{t('myPayments.slip.detail.earnings.netPay')}</span><span>{formatRp(selectedSlip.earnings.netPay)}</span>
                 </div>
               </div>
 
@@ -655,7 +653,7 @@ export default function MyPayments() {
                         <CheckCircle2 size={12} color="#059669" />
                       </>
                     ) : (
-                      <span style={{ fontSize: '0.75em', color: 'var(--text-muted)', fontStyle: 'italic' }}>Pending</span>
+                      <span style={{ fontSize: '0.75em', color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('myPayments.slip.detail.authorization.pending')}</span>
                     )}
                   </div>
                 ))}
@@ -663,7 +661,7 @@ export default function MyPayments() {
 
               {selectedSlip.notes && (
                 <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', padding: 12, background: 'var(--bg-secondary)', borderRadius: 8 }}>
-                  <strong>Notes:</strong> {selectedSlip.notes}
+                  <strong>{t('myPayments.slip.detail.notes')}</strong> {selectedSlip.notes}
                 </div>
               )}
             </div>
@@ -673,7 +671,7 @@ export default function MyPayments() {
                 onClick={() => setSlipDetailOpen(false)}
                 style={{ padding: '10px 20px', border: '1px solid var(--border)', background: 'var(--bg-white)', borderRadius: 8, fontSize: '0.85em', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' }}
               >
-                Close
+                {t('myPayments.slip.detail.btnClose')}
               </button>
               <button
                 onClick={() => exportSlipToPdf({
@@ -695,7 +693,7 @@ export default function MyPayments() {
                 })}
                 style={{ padding: '10px 20px', border: 'none', background: 'linear-gradient(135deg, #059669, #34D399)', borderRadius: 8, fontSize: '0.85em', fontWeight: 600, color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
               >
-                <Download size={14} /> Export PDF
+                <Download size={14} /> {t('myPayments.slip.detail.btnExport')}
               </button>
             </div>
           </div>

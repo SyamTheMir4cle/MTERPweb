@@ -15,7 +15,9 @@ import {
   LogOut,
   ChevronRight,
   Receipt,
+  Globe,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import './Sidebar.css';
 
@@ -37,14 +39,14 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'sidebar.dashboard',
     icon: BarChart3,
     route: '/dashboard',
     roles: ['owner', 'director', 'supervisor'],
   },
   {
     id: 'projects',
-    label: 'Projects',
+    label: 'sidebar.projects',
     icon: Briefcase,
     route: '/projects',
     roles: ['owner', 'director', 'supervisor', 'admin_project'],
@@ -58,49 +60,49 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'tools',
-    label: 'Tools',
+    label: 'sidebar.tools',
     icon: Wrench,
     route: '/tools',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'logistik'],
   },
   {
     id: 'materials',
-    label: 'Materials',
+    label: 'sidebar.materials',
     icon: Truck,
     route: '/materials',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'logistik'],
   },
   {
     id: 'attendance',
-    label: 'Attendance',
+    label: 'sidebar.attendance',
     icon: Clock,
     route: '/attendance',
     roles: ['owner', 'director', 'supervisor', 'admin_project', 'worker', 'mandor', 'tukang'],
   },
   {
     id: 'tasks',
-    label: 'Tasks',
+    label: 'sidebar.tasks',
     icon: ClipboardList,
     route: '/tasks',
     roles: ['worker', 'tukang', 'mandor', 'supervisor', 'admin_project'],
   },
   {
     id: 'my-payments',
-    label: 'My Payments',
+    label: 'sidebar.payments',
     icon: DollarSign,
     route: '/my-payments',
     roles: ['worker', 'tukang', 'mandor'],
   },
   {
     id: 'approvals',
-    label: 'Approvals',
+    label: 'sidebar.approvals',
     icon: CheckSquare,
     route: '/approvals',
     roles: ['owner', 'director', 'supervisor', 'admin_project'],
   },
   {
     id: 'slip-gaji',
-    label: 'Slip Gaji',
+    label: 'sidebar.payroll',
     icon: Receipt,
     route: '/slip-gaji',
     roles: ['owner', 'director', 'supervisor'],
@@ -108,6 +110,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function Sidebar() {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -121,6 +124,11 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     logout();
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'id' ? 'en' : 'id';
+    i18n.changeLanguage(newLang);
   };
 
   return (
@@ -148,7 +156,7 @@ export default function Sidebar() {
               className={`sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
             >
               <Icon size={20} />
-              <span>{item.label}</span>
+              <span>{item.label.includes('sidebar.') ? t(item.label) : item.label}</span>
               {isActive && <ChevronRight size={16} className="sidebar-link-indicator" />}
             </NavLink>
           );
@@ -174,9 +182,14 @@ export default function Sidebar() {
           </div>
         </NavLink>
 
+        <button className="sidebar-logout-btn" onClick={toggleLanguage} style={{ marginBottom: 8 }}>
+          <Globe size={18} />
+          <span>{i18n.language === 'id' ? 'English' : 'Bahasa Ind'}</span>
+        </button>
+
         <button className="sidebar-logout-btn" onClick={handleLogout}>
           <LogOut size={18} />
-          <span>Logout</span>
+          <span>{t('sidebar.logout')}</span>
         </button>
       </div>
     </aside>

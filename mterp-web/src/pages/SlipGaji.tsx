@@ -27,6 +27,7 @@ import {
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Alert, Button } from '../components/shared';
+import { useTranslation } from 'react-i18next';
 import { exportSlipToPdf } from '../utils/exportSlipPdf';
 import './SlipGaji.css';
 
@@ -101,13 +102,14 @@ interface SlipData {
     createdAt: string;
 }
 
-const STATUS_BADGE: Record<string, { color: string; bg: string; label: string }> = {
-    draft: { color: '#D97706', bg: '#FEF3C7', label: 'Draft' },
-    authorized: { color: '#059669', bg: '#D1FAE5', label: 'Authorized' },
-    issued: { color: '#6366F1', bg: '#EEF2FF', label: 'Issued' },
+const STATUS_BADGE: Record<string, { color: string; bg: string; labelKey: string }> = {
+    draft: { color: '#D97706', bg: '#FEF3C7', labelKey: 'draft' },
+    authorized: { color: '#059669', bg: '#D1FAE5', labelKey: 'authorized' },
+    issued: { color: '#6366F1', bg: '#EEF2FF', labelKey: 'issued' },
 };
 
 export default function SlipGaji() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
     const role = user?.role?.toLowerCase() || '';
@@ -198,10 +200,10 @@ export default function SlipGaji() {
             setGenBonus(0);
             setGenDeductions(0);
             setGenNotes('');
-            setAlertData({ visible: true, type: 'success', title: 'Slip Generated', message: 'Salary slip has been created as draft.' });
+            setAlertData({ visible: true, type: 'success', title: t('slipGaji.messages.genSuccess'), message: t('slipGaji.messages.genSuccessDesc') });
             fetchSlips();
         } catch (err: any) {
-            setAlertData({ visible: true, type: 'error', title: 'Error', message: err?.response?.data?.msg || 'Failed to generate slip' });
+            setAlertData({ visible: true, type: 'error', title: t('slipGaji.messages.genError'), message: err?.response?.data?.msg || t('slipGaji.messages.genErrorDesc') });
         }
         setGenerating(false);
     };
@@ -213,11 +215,11 @@ export default function SlipGaji() {
             const res = await api.post(`/slipgaji/${authSlipId}/authorize`, { passphrase });
             setAuthModal(false);
             setPassphrase('');
-            setAlertData({ visible: true, type: 'success', title: 'Authorized', message: `Slip signed by ${user?.fullName}` });
+            setAlertData({ visible: true, type: 'success', title: t('slipGaji.messages.authSuccess'), message: t('slipGaji.messages.authSuccessDesc', { name: user?.fullName }) });
             if (selectedSlip?._id === authSlipId) setSelectedSlip(res.data);
             fetchSlips();
         } catch (err: any) {
-            setAlertData({ visible: true, type: 'error', title: 'Authorization Failed', message: err?.response?.data?.msg || 'Failed to authorize' });
+            setAlertData({ visible: true, type: 'error', title: t('slipGaji.messages.authError'), message: err?.response?.data?.msg || t('slipGaji.messages.authErrorDesc') });
         }
         setAuthorizing(false);
     };
@@ -225,11 +227,11 @@ export default function SlipGaji() {
     const handleDelete = async (id: string) => {
         try {
             await api.delete(`/slipgaji/${id}`);
-            setAlertData({ visible: true, type: 'success', title: 'Deleted', message: 'Draft slip has been deleted.' });
+            setAlertData({ visible: true, type: 'success', title: t('slipGaji.messages.delSuccess'), message: t('slipGaji.messages.delSuccessDesc') });
             fetchSlips();
             if (selectedSlip?._id === id) { setDetailModal(false); setSelectedSlip(null); }
         } catch (err: any) {
-            setAlertData({ visible: true, type: 'error', title: 'Error', message: err?.response?.data?.msg || 'Failed to delete' });
+            setAlertData({ visible: true, type: 'error', title: t('slipGaji.messages.delError'), message: err?.response?.data?.msg || t('slipGaji.messages.delErrorDesc') });
         }
     };
 
@@ -280,8 +282,8 @@ export default function SlipGaji() {
                     <Receipt size={22} color="white" />
                 </div>
                 <div>
-                    <h1 className="sg-title">Slip Gaji</h1>
-                    <p className="sg-subtitle">Weekly salary slips · Payment every Saturday</p>
+                    <h1 className="sg-title">{t('slipGaji.title')}</h1>
+                    <p className="sg-subtitle">{t('slipGaji.subtitle')}</p>
                 </div>
             </div>
 
@@ -299,7 +301,7 @@ export default function SlipGaji() {
                 </div>
                 <button className="sg-generate-btn" onClick={() => setGenModal(true)}>
                     <Plus size={18} />
-                    <span>Generate Slip</span>
+                    <span>{t('slipGaji.actions.generate')}</span>
                 </button>
             </div>
 
@@ -307,15 +309,15 @@ export default function SlipGaji() {
             {loading ? (
                 <div className="sg-loading">
                     <Loader2 size={32} className="sg-spinner" />
-                    <span>Loading slips…</span>
+                    <span>{t('slipGaji.loading')}</span>
                 </div>
             ) : slips.length === 0 ? (
                 <Card className="sg-empty">
                     <FileText size={48} color="var(--text-muted)" />
-                    <p>No salary slips for this period</p>
+                    <p>{t('slipGaji.empty.title')}</p>
                     <button className="sg-generate-btn" onClick={() => setGenModal(true)}>
                         <Plus size={18} />
-                        <span>Generate First Slip</span>
+                        <span>{t('slipGaji.empty.btnGenerate')}</span>
                     </button>
                 </Card>
             ) : (
@@ -330,12 +332,12 @@ export default function SlipGaji() {
                                             {slip.workerId?.fullName?.[0]?.toUpperCase() || 'W'}
                                         </div>
                                         <div>
-                                            <span className="sg-slip-name">{slip.workerId?.fullName || 'Worker'}</span>
+                                            <span className="sg-slip-name">{slip.workerId?.fullName || t('slipGaji.card.worker')}</span>
                                             <span className="sg-slip-number">{slip.slipNumber}</span>
                                         </div>
                                     </div>
                                     <span className="sg-slip-badge" style={{ color: badge.color, background: badge.bg }}>
-                                        {badge.label}
+                                        {t(`slipGaji.status.${badge.labelKey}`)}
                                     </span>
                                 </div>
 
@@ -347,7 +349,7 @@ export default function SlipGaji() {
                                 <div className="sg-slip-middle">
                                     <div className="sg-slip-stat">
                                         <Clock size={12} />
-                                        <span>{slip.attendanceSummary.presentDays} days</span>
+                                        <span>{slip.attendanceSummary.presentDays} {t('slipGaji.card.days')}</span>
                                     </div>
                                     <div className="sg-slip-stat">
                                         <Briefcase size={12} />
@@ -363,11 +365,11 @@ export default function SlipGaji() {
                                     <div className="sg-slip-sigs">
                                         <div className={`sg-sig-dot ${slip.authorization.directorPassphrase ? 'signed' : ''}`}>
                                             <Shield size={10} />
-                                            <span>Director</span>
+                                            <span>{t('slipGaji.modals.detail.digitalAuth.director')}</span>
                                         </div>
                                         <div className={`sg-sig-dot ${slip.authorization.ownerPassphrase ? 'signed' : ''}`}>
                                             <Shield size={10} />
-                                            <span>Owner</span>
+                                            <span>{t('slipGaji.modals.detail.digitalAuth.owner')}</span>
                                         </div>
                                     </div>
                                     <div className="sg-slip-actions" onClick={(e) => e.stopPropagation()}>
@@ -398,19 +400,19 @@ export default function SlipGaji() {
                                 <Receipt size={20} color="white" />
                             </div>
                             <div>
-                                <h3 className="sg-modal-title">Generate Salary Slip</h3>
-                                <p className="sg-modal-desc">Weekly period · Payment on Saturday</p>
+                                <h3 className="sg-modal-title">{t('slipGaji.modals.generate.title')}</h3>
+                                <p className="sg-modal-desc">{t('slipGaji.modals.generate.desc')}</p>
                             </div>
                             <button className="sg-modal-close" onClick={() => setGenModal(false)}><X size={18} /></button>
                         </div>
 
                         <div className="sg-modal-body">
                             <div className="sg-form-group">
-                                <label className="sg-label"><UserCheck size={14} /> Select Worker</label>
+                                <label className="sg-label"><UserCheck size={14} /> {t('slipGaji.modals.generate.worker')}</label>
                                 <div className="sg-select-group sg-full">
                                     <Search size={14} className="sg-select-icon" />
                                     <select className="sg-select" value={genWorker} onChange={(e) => setGenWorker(e.target.value)}>
-                                        <option value="">-- Choose worker --</option>
+                                        <option value="">{t('slipGaji.modals.generate.workerPlaceholder')}</option>
                                         {workers.map(w => <option key={w._id} value={w._id}>{w.fullName}</option>)}
                                     </select>
                                     <ChevronDown size={14} className="sg-select-arrow" />
@@ -419,36 +421,36 @@ export default function SlipGaji() {
 
                             <div className="sg-form-row">
                                 <div className="sg-form-group">
-                                    <label className="sg-label"><Calendar size={14} /> Start Date</label>
+                                    <label className="sg-label"><Calendar size={14} /> {t('slipGaji.modals.generate.startDate')}</label>
                                     <input type="date" className="sg-input" value={genStart} onChange={(e) => setGenStart(e.target.value)} />
                                 </div>
                                 <div className="sg-form-group">
-                                    <label className="sg-label">End Date (Sat)</label>
+                                    <label className="sg-label">{t('slipGaji.modals.generate.endDate')}</label>
                                     <input type="date" className="sg-input" value={genEnd} onChange={(e) => setGenEnd(e.target.value)} />
                                 </div>
                             </div>
 
                             <div className="sg-form-row">
                                 <div className="sg-form-group">
-                                    <label className="sg-label"><DollarSign size={14} /> Bonus</label>
+                                    <label className="sg-label"><DollarSign size={14} /> {t('slipGaji.modals.generate.bonus')}</label>
                                     <input type="number" className="sg-input" value={genBonus || ''} onChange={(e) => setGenBonus(Number(e.target.value))} placeholder="0" />
                                 </div>
                                 <div className="sg-form-group">
-                                    <label className="sg-label">Deductions</label>
+                                    <label className="sg-label">{t('slipGaji.modals.generate.deductions')}</label>
                                     <input type="number" className="sg-input" value={genDeductions || ''} onChange={(e) => setGenDeductions(Number(e.target.value))} placeholder="0" />
                                 </div>
                             </div>
 
                             <div className="sg-form-group">
-                                <label className="sg-label"><FileText size={14} /> Notes</label>
-                                <textarea className="sg-textarea" value={genNotes} onChange={(e) => setGenNotes(e.target.value)} placeholder="Optional notes…" rows={2} />
+                                <label className="sg-label"><FileText size={14} /> {t('slipGaji.modals.generate.notes')}</label>
+                                <textarea className="sg-textarea" value={genNotes} onChange={(e) => setGenNotes(e.target.value)} placeholder={t('slipGaji.modals.generate.notesPlaceholder')} rows={2} />
                             </div>
                         </div>
 
                         <div className="sg-modal-footer">
-                            <button className="sg-btn-cancel" onClick={() => setGenModal(false)}>Cancel</button>
+                            <button className="sg-btn-cancel" onClick={() => setGenModal(false)}>{t('slipGaji.modals.generate.btnCancel')}</button>
                             <button className="sg-btn-primary" onClick={handleGenerate} disabled={!genWorker || generating}>
-                                {generating ? <><Loader2 size={16} className="sg-spinner" /> Generating…</> : <><Receipt size={16} /> Generate Slip</>}
+                                {generating ? <><Loader2 size={16} className="sg-spinner" /> {t('slipGaji.modals.generate.btnGenerating')}</> : <><Receipt size={16} /> {t('slipGaji.modals.generate.btnGenerate')}</>}
                             </button>
                         </div>
                     </div>
@@ -464,7 +466,7 @@ export default function SlipGaji() {
                                 <FileText size={20} color="white" />
                             </div>
                             <div>
-                                <h3 className="sg-modal-title">Salary Slip</h3>
+                                <h3 className="sg-modal-title">{t('slipGaji.modals.detail.title')}</h3>
                                 <p className="sg-modal-desc">{selectedSlip.slipNumber}</p>
                             </div>
                             <button className="sg-modal-close" onClick={() => setDetailModal(false)}><X size={18} /></button>
@@ -485,7 +487,7 @@ export default function SlipGaji() {
                                         color: STATUS_BADGE[selectedSlip.status]?.color,
                                         background: STATUS_BADGE[selectedSlip.status]?.bg,
                                     }}>
-                                        {STATUS_BADGE[selectedSlip.status]?.label}
+                                        {t(`slipGaji.status.${STATUS_BADGE[selectedSlip.status]?.labelKey}`)}
                                     </span>
                                 </div>
                             </div>
@@ -493,7 +495,7 @@ export default function SlipGaji() {
                             {/* Period */}
                             <div className="sg-detail-period">
                                 <Calendar size={14} />
-                                <span>Period: {formatDateRange(selectedSlip.period.startDate, selectedSlip.period.endDate)}</span>
+                                <span>{t('slipGaji.modals.detail.period')} {formatDateRange(selectedSlip.period.startDate, selectedSlip.period.endDate)}</span>
                             </div>
 
                             {/* Payment Info */}
@@ -509,79 +511,79 @@ export default function SlipGaji() {
                             <div className="sg-detail-grid">
                                 <div className="sg-detail-stat">
                                     <span className="sg-detail-stat-val">{selectedSlip.attendanceSummary.totalDays}</span>
-                                    <span className="sg-detail-stat-label">Total Days</span>
+                                    <span className="sg-detail-stat-label">{t('slipGaji.modals.detail.totalDays')}</span>
                                 </div>
                                 <div className="sg-detail-stat">
                                     <span className="sg-detail-stat-val sg-green">{selectedSlip.attendanceSummary.presentDays}</span>
-                                    <span className="sg-detail-stat-label">Present</span>
+                                    <span className="sg-detail-stat-label">{t('slipGaji.modals.detail.present')}</span>
                                 </div>
                                 <div className="sg-detail-stat">
                                     <span className="sg-detail-stat-val sg-amber">{selectedSlip.attendanceSummary.lateDays}</span>
-                                    <span className="sg-detail-stat-label">Late</span>
+                                    <span className="sg-detail-stat-label">{t('slipGaji.modals.detail.late')}</span>
                                 </div>
                                 <div className="sg-detail-stat">
                                     <span className="sg-detail-stat-val sg-red">{selectedSlip.attendanceSummary.absentDays}</span>
-                                    <span className="sg-detail-stat-label">Absent</span>
+                                    <span className="sg-detail-stat-label">{t('slipGaji.modals.detail.absent')}</span>
                                 </div>
                                 <div className="sg-detail-stat">
                                     <span className="sg-detail-stat-val sg-purple">{selectedSlip.attendanceSummary.permitDays}</span>
-                                    <span className="sg-detail-stat-label">Permit</span>
+                                    <span className="sg-detail-stat-label">{t('slipGaji.modals.detail.permit')}</span>
                                 </div>
                                 <div className="sg-detail-stat">
                                     <span className="sg-detail-stat-val">{selectedSlip.attendanceSummary.totalHours}h</span>
-                                    <span className="sg-detail-stat-label">Total Hours</span>
+                                    <span className="sg-detail-stat-label">{t('slipGaji.modals.detail.totalHours')}</span>
                                 </div>
                             </div>
 
                             {/* Earnings Table */}
                             <div className="sg-detail-table">
-                                <h4 className="sg-detail-table-title">Earnings Breakdown</h4>
+                                <h4 className="sg-detail-table-title">{t('slipGaji.modals.detail.earnings.title')}</h4>
                                 <div className="sg-table-row">
-                                    <span>Daily Rate</span>
+                                    <span>{t('slipGaji.modals.detail.earnings.dailyRate')}</span>
                                     <span>{formatRp(selectedSlip.earnings.dailyRate)}</span>
                                 </div>
                                 <div className="sg-table-row">
-                                    <span>Total Daily Wages ({selectedSlip.attendanceSummary.presentDays + selectedSlip.attendanceSummary.lateDays} days)</span>
+                                    <span>{t('slipGaji.modals.detail.earnings.totalDailyWages', { days: selectedSlip.attendanceSummary.presentDays + selectedSlip.attendanceSummary.lateDays })}</span>
                                     <span>{formatRp(selectedSlip.earnings.totalDailyWage)}</span>
                                 </div>
                                 <div className="sg-table-row">
-                                    <span>Overtime</span>
+                                    <span>{t('slipGaji.modals.detail.earnings.overtime')}</span>
                                     <span className="sg-green">{formatRp(selectedSlip.earnings.totalOvertime)}</span>
                                 </div>
                                 {selectedSlip.earnings.bonus > 0 && (
                                     <div className="sg-table-row">
-                                        <span>Bonus</span>
+                                        <span>{t('slipGaji.modals.detail.earnings.bonus')}</span>
                                         <span className="sg-green">{formatRp(selectedSlip.earnings.bonus)}</span>
                                     </div>
                                 )}
                                 <div className="sg-table-divider" />
                                 {selectedSlip.earnings.deductions > 0 && (
                                     <div className="sg-table-row">
-                                        <span>Deductions</span>
+                                        <span>{t('slipGaji.modals.detail.earnings.deductions')}</span>
                                         <span className="sg-red">-{formatRp(selectedSlip.earnings.deductions)}</span>
                                     </div>
                                 )}
                                 {selectedSlip.earnings.kasbonDeduction > 0 && (
                                     <div className="sg-table-row">
-                                        <span>Kasbon Deduction</span>
+                                        <span>{t('slipGaji.modals.detail.earnings.kasbon')}</span>
                                         <span className="sg-red">-{formatRp(selectedSlip.earnings.kasbonDeduction)}</span>
                                     </div>
                                 )}
                                 <div className="sg-table-total">
-                                    <span>Net Pay</span>
+                                    <span>{t('slipGaji.modals.detail.earnings.netPay')}</span>
                                     <span>{formatRp(selectedSlip.earnings.netPay)}</span>
                                 </div>
                             </div>
 
                             {/* Authorization */}
                             <div className="sg-auth-section">
-                                <h4 className="sg-detail-table-title">Digital Authorization</h4>
+                                <h4 className="sg-detail-table-title">{t('slipGaji.modals.detail.digitalAuth.title')}</h4>
                                 <div className="sg-auth-grid">
                                     <div className={`sg-auth-card ${selectedSlip.authorization.directorPassphrase ? 'signed' : 'pending'}`}>
                                         <div className="sg-auth-icon">
                                             {selectedSlip.authorization.directorPassphrase ? <Unlock size={20} /> : <Lock size={20} />}
                                         </div>
-                                        <span className="sg-auth-role">Director</span>
+                                        <span className="sg-auth-role">{t('slipGaji.modals.detail.digitalAuth.director')}</span>
                                         {selectedSlip.authorization.directorPassphrase ? (
                                             <>
                                                 <span className="sg-auth-name">{selectedSlip.authorization.directorName}</span>
@@ -592,10 +594,10 @@ export default function SlipGaji() {
                                             </>
                                         ) : (
                                             <>
-                                                <span className="sg-auth-pending">Awaiting signature</span>
+                                                <span className="sg-auth-pending">{t('slipGaji.modals.detail.digitalAuth.awaiting')}</span>
                                                 {role === 'director' && (
                                                     <button className="sg-auth-sign-btn" onClick={() => openAuth(selectedSlip._id)}>
-                                                        <Shield size={12} /> Sign Now
+                                                        <Shield size={12} /> {t('slipGaji.modals.detail.digitalAuth.btnSign')}
                                                     </button>
                                                 )}
                                             </>
@@ -606,7 +608,7 @@ export default function SlipGaji() {
                                         <div className="sg-auth-icon">
                                             {selectedSlip.authorization.ownerPassphrase ? <Unlock size={20} /> : <Lock size={20} />}
                                         </div>
-                                        <span className="sg-auth-role">Owner</span>
+                                        <span className="sg-auth-role">{t('slipGaji.modals.detail.digitalAuth.owner')}</span>
                                         {selectedSlip.authorization.ownerPassphrase ? (
                                             <>
                                                 <span className="sg-auth-name">{selectedSlip.authorization.ownerName}</span>
@@ -617,10 +619,10 @@ export default function SlipGaji() {
                                             </>
                                         ) : (
                                             <>
-                                                <span className="sg-auth-pending">Awaiting signature</span>
+                                                <span className="sg-auth-pending">{t('slipGaji.modals.detail.digitalAuth.awaiting')}</span>
                                                 {role === 'owner' && (
                                                     <button className="sg-auth-sign-btn" onClick={() => openAuth(selectedSlip._id)}>
-                                                        <Shield size={12} /> Sign Now
+                                                        <Shield size={12} /> {t('slipGaji.modals.detail.digitalAuth.btnSign')}
                                                     </button>
                                                 )}
                                             </>
@@ -631,19 +633,19 @@ export default function SlipGaji() {
 
                             {selectedSlip.notes && (
                                 <div className="sg-detail-notes">
-                                    <strong>Notes:</strong> {selectedSlip.notes}
+                                    <strong>{t('slipGaji.modals.detail.notes')}</strong> {selectedSlip.notes}
                                 </div>
                             )}
                         </div>
 
                         <div className="sg-modal-footer">
-                            <button className="sg-btn-cancel" onClick={() => setDetailModal(false)}>Close</button>
+                            <button className="sg-btn-cancel" onClick={() => setDetailModal(false)}>{t('slipGaji.modals.detail.btnClose')}</button>
                             <button className="sg-btn-export" onClick={() => handleExportPdf(selectedSlip)}>
-                                <Download size={16} /> Export PDF
+                                <Download size={16} /> {t('slipGaji.modals.detail.btnExport')}
                             </button>
                             {canSign(selectedSlip) && (
                                 <button className="sg-btn-primary" onClick={() => openAuth(selectedSlip._id)}>
-                                    <Lock size={16} /> Authorize
+                                    <Lock size={16} /> {t('slipGaji.modals.detail.btnAuthorize')}
                                 </button>
                             )}
                         </div>
@@ -659,9 +661,9 @@ export default function SlipGaji() {
                             <div className="sg-auth-lock-icon">
                                 <Lock size={32} />
                             </div>
-                            <h3 className="sg-auth-modal-title">Digital Passphrase</h3>
+                            <h3 className="sg-auth-modal-title">{t('slipGaji.modals.auth.title')}</h3>
                             <p className="sg-auth-modal-desc">
-                                Enter your secure passphrase to authorize this salary slip as <strong>{role}</strong>
+                                {t('slipGaji.modals.auth.desc')} <strong>{role}</strong>
                             </p>
                             <div className="sg-auth-input-wrap">
                                 <Shield size={16} className="sg-auth-input-icon" />
@@ -670,22 +672,22 @@ export default function SlipGaji() {
                                     className="sg-auth-input"
                                     value={passphrase}
                                     onChange={(e) => setPassphrase(e.target.value)}
-                                    placeholder="Enter passphrase (min 4 chars)"
+                                    placeholder={t('slipGaji.modals.auth.placeholder')}
                                     autoFocus
                                     onKeyDown={(e) => e.key === 'Enter' && handleAuthorize()}
                                 />
                             </div>
                             <div className="sg-auth-modal-actions">
-                                <button className="sg-btn-cancel" onClick={() => setAuthModal(false)}>Cancel</button>
+                                <button className="sg-btn-cancel" onClick={() => setAuthModal(false)}>{t('slipGaji.modals.auth.btnCancel')}</button>
                                 <button
                                     className="sg-btn-authorize"
                                     onClick={handleAuthorize}
                                     disabled={passphrase.length < 4 || authorizing}
                                 >
                                     {authorizing ? (
-                                        <><Loader2 size={16} className="sg-spinner" /> Authorizing…</>
+                                        <><Loader2 size={16} className="sg-spinner" /> {t('slipGaji.modals.auth.btnAuthorizing')}</>
                                     ) : (
-                                        <><Unlock size={16} /> Authorize</>
+                                        <><Unlock size={16} /> {t('slipGaji.modals.auth.btnAuthorize')}</>
                                     )}
                                 </button>
                             </div>

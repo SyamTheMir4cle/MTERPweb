@@ -275,4 +275,90 @@ router.put('/:id/work-items/:itemId/progress', auth, authorize('owner', 'directo
   }
 });
 
+// POST /api/projects/:id/supplies - Add a supply
+router.post('/:id/supplies', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
+  try {
+    const { item, qty, unit, cost, startDate, endDate, status } = req.body;
+
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ msg: 'Project not found' });
+    }
+
+    project.supplies.push({
+      item,
+      qty,
+      unit: unit || 'pcs',
+      cost,
+      actualCost: 0,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      status: status || 'Pending',
+    });
+
+    project.progress = project.calculateProgress();
+    await project.save();
+    
+    res.status(201).json(project.supplies[project.supplies.length - 1]);
+  } catch (error) {
+    console.error('Add project supply error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// PUT /api/projects/:id/supplies/:supplyId - Update a supply
+router.put('/:id/supplies/:supplyId', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ msg: 'Project not found' });
+    }
+
+    const supply = project.supplies.id(req.params.supplyId);
+    if (!supply) {
+      return res.status(404).json({ msg: 'Supply not found' });
+    }
+
+    // Update fields
+    const fields = ['item', 'qty', 'unit', 'cost', 'actualCost', 'status'];
+    fields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        supply[field] = req.body[field];
+      }
+    });
+    
+    if (req.body.startDate !== undefined) supply.startDate = req.body.startDate ? new Date(req.body.startDate) : undefined;
+    if (req.body.endDate !== undefined) supply.endDate = req.body.endDate ? new Date(req.body.endDate) : undefined;
+    if (req.body.deliveryDate !== undefined) supply.deliveryDate = req.body.deliveryDate ? new Date(req.body.deliveryDate) : undefined;
+
+    project.progress = project.calculateProgress();
+    await project.save();
+    
+    res.json(supply);
+  } catch (error) {
+    console.error('Update project supply error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// DELETE /api/projects/:id/supplies/:supplyId - Delete a supply
+router.delete('/:id/supplies/:supplyId', auth, authorize('owner', 'director', 'supervisor'), async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ msg: 'Project not found' });
+    }
+
+    project.supplies.pull(req.params.supplyId);
+
+    project.progress = project.calculateProgress();
+    await project.save();
+    
+    res.json({ msg: 'Supply deleted successfully' });
+  } catch (error) {
+    console.error('Delete project supply error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;

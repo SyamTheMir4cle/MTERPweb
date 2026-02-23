@@ -112,20 +112,31 @@ export interface MaterialRequest {
   qty: string;
   dateNeeded: string;
   status: 'Pending' | 'Approved' | 'Rejected';
-  requestedBy: string;
-  approvedBy?: string;
-  costEstimate?: string;
+  requestedBy: { _id: string; fullName: string; role?: string } | string;
+  approvedBy?: { _id: string; fullName: string } | string;
+  projectId?: { _id: string; nama: string; lokasi?: string } | string;
+  costEstimate?: number;
   purpose?: string;
-  projectId?: string;
+  urgency?: 'Low' | 'Normal' | 'High';
+  rejectionReason?: string;
+  createdAt?: string;
 }
 
 export interface Tool {
   _id: string;
   nama: string;
+  kategori?: string;
   stok: number;
   satuan: string;
-  lokasi?: string;
   kondisi?: string;
+  lokasi?: string;
+  qrCode?: string;
+  assignedTo?: { _id: string; fullName: string };
+  projectId?: { _id: string; nama: string };
+  lastChecked?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ApprovalItem {
