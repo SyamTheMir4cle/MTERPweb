@@ -96,7 +96,7 @@ router.get('/my', auth, async (req, res) => {
     try {
         const slips = await SlipGaji.find({
             workerId: req.user._id,
-            status: { $in: ['authorized', 'issued'] },
+            status: { $in: ['draft', 'authorized', 'issued'] },
         })
             .populate('workerId', 'fullName role paymentInfo')
             .populate('createdBy', 'fullName')

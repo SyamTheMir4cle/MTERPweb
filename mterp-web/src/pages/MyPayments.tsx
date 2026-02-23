@@ -494,7 +494,7 @@ export default function MyPayments() {
             <EmptyState
               icon={Receipt}
               title="No Salary Slips"
-              description="No authorized salary slips have been issued to you yet."
+              description="No salary slips have been generated for you yet."
             />
           ) : (
             <div className="records-list">
