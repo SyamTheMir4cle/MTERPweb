@@ -13,6 +13,7 @@ import AddProject from './pages/AddProject';
 import Tools from './pages/Tools';
 import Materials from './pages/Materials';
 import ProjectMaterials from './pages/ProjectMaterials';
+import MaterialUsage from './pages/MaterialUsage';
 import Approvals from './pages/Approvals';
 import Tasks from './pages/Tasks';
 import Attendance from './pages/Attendance';
@@ -43,6 +44,7 @@ function App() {
             <Route path="/tools" element={<Tools />} />
             <Route path="/materials" element={<Materials />} />
             <Route path="/project-materials/:id" element={<ProjectMaterials />} />
+            <Route path="/project-material-usage/:id" element={<MaterialUsage />} />
             <Route path="/approvals" element={<Approvals />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/attendance" element={<Attendance />} />

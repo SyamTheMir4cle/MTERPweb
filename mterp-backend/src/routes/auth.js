@@ -145,9 +145,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Check if email is verified
-    if (!user.isVerified) {
-      return res.status(401).json({ msg: 'Please verify your email first' });
-    }
+    // if (!user.isVerified) {
+    //   return res.status(401).json({ msg: 'Please verify your email first' });
+    // }
 
     // Generate token
     const token = generateToken(user._id);

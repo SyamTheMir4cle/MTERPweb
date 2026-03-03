@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-  Save, Cloud, Users, Package, ChevronDown, Layers, ArrowLeft, Truck,
+  Save, Cloud, Users, Package, ChevronDown, Layers, ArrowLeft, Truck, Calendar
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/api';
@@ -63,6 +63,13 @@ export default function DailyReport() {
     message: '',
   });
 
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Default to today in local timezone (YYYY-MM-DD)
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
+  });
+
   const [formData, setFormData] = useState({
     weather: 'Cerah',
     materials: '',
@@ -82,6 +89,78 @@ export default function DailyReport() {
     };
     fetchProjects();
   }, []);
+
+  // When project or date changes, fetch workforce for that date automatically
+  useEffect(() => {
+    if (!selectedProjectId || !selectedDate) return;
+    
+    const fetchWorkforce = async () => {
+      try {
+        const res = await api.get(`/attendance?projectId=${selectedProjectId}&startDate=${selectedDate}&endDate=${selectedDate}`);
+        const attendanceRecords = res.data;
+        
+        if (attendanceRecords && attendanceRecords.length > 0) {
+          // Filter to only count people who were Present or Late (actually at work)
+          const presentWorkers = attendanceRecords.filter((a: any) => 
+            a.status === 'Present' || a.status === 'Late' || a.status === 'Half-day'
+          );
+          
+          if (presentWorkers.length > 0) {
+            const names = presentWorkers.map((a: any) => a.userId?.fullName).filter(Boolean);
+            const workforceString = `${presentWorkers.length} Pekerja: ${names.join(', ')}`;
+            
+            // Only overwrite if it matches the auto-generated format or is empty, 
+            // so we don't destroy manual edits every time they switch back and forth
+            setFormData(prev => ({
+              ...prev,
+              workforce: prev.workforce === '' || prev.workforce.includes('Pekerja:') ? workforceString : prev.workforce
+            }));
+          } else {
+             setFormData(prev => ({ ...prev, workforce: '0 Pekerja (Tidak ada yang hadir)' }));
+          }
+        } else {
+             setFormData(prev => ({ ...prev, workforce: '0 Pekerja' }));
+        }
+      } catch (err) {
+        console.error('Failed to auto-fetch workforce:', err);
+      }
+    };
+    
+    fetchWorkforce();
+  }, [selectedProjectId, selectedDate]);
+
+  // When project or date changes, fetch material logs for that date automatically
+  useEffect(() => {
+    if (!selectedProjectId || !selectedDate) return;
+    
+    const fetchMaterialLogs = async () => {
+      try {
+        const res = await api.get(`/projects/${selectedProjectId}/material-logs?date=${selectedDate}`);
+        const materialLogs = res.data;
+        
+        if (materialLogs && materialLogs.length > 0) {
+          const lines = materialLogs.map((log: any) => 
+            `- ${log.qtyUsed} ${log.supplyId?.unit || ''} ${log.supplyId?.item || 'Unknown'}${log.notes ? ': ' + log.notes : ''}`
+          );
+          const materialsString = lines.join('\n');
+          
+          setFormData(prev => ({
+            ...prev,
+            materials: prev.materials === '' || prev.materials.startsWith('- ') ? materialsString : prev.materials
+          }));
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            materials: prev.materials === '' || prev.materials.startsWith('- ') ? '' : prev.materials
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to auto-fetch material logs:', err);
+      }
+    };
+    
+    fetchMaterialLogs();
+  }, [selectedProjectId, selectedDate]);
 
   // When a project is selected, fetch its work items + supplies
   useEffect(() => {
@@ -192,7 +271,7 @@ export default function DailyReport() {
         materials: formData.materials,
         workforce: formData.workforce,
         notes: formData.notes,
-        date: new Date().toISOString().split('T')[0],
+        date: selectedDate, // Use the selected backdate or today
       });
 
       setAlertData({
@@ -380,9 +459,24 @@ export default function DailyReport() {
         </Card>
       )}
 
-      {/* Weather */}
+      {/* Report Details: Date & Weather */}
       <Card className="report-card">
         <h3 className="card-title">
+          <Calendar size={18} /> Tanggal Laporan (Date)
+        </h3>
+        <div className="report-form-group" style={{ marginBottom: 20 }}>
+          <div className="report-input-wrapper" style={{ display: 'flex', alignItems: 'center', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 12px' }}>
+            <Calendar size={18} color="#64748B" style={{ marginRight: 10 }} />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '1rem', color: '#1E293B' }}
+            />
+          </div>
+        </div>
+
+        <h3 className="card-title" style={{ marginTop: 24 }}>
           <Cloud size={18} /> {t('dailyReport.weather.title')}
         </h3>
         <div className="weather-options">

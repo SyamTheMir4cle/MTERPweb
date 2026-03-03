@@ -11,6 +11,7 @@ const supplySchema = new mongoose.Schema({
   unit: { type: String, default: 'pcs' },
   cost: { type: Number, default: 0 },
   actualCost: { type: Number, default: 0 },
+  totalQtyUsed: { type: Number, default: 0 },
   status: {
     type: String,
     enum: ['Pending', 'Ordered', 'Delivered'],

@@ -757,6 +757,13 @@ export default function ProjectDetail() {
             fullWidth
           />
           <Button
+            title="Material Usage"
+            icon={BarChart3}
+            onClick={() => navigate(`/project-material-usage/${id}`)}
+            variant="outline"
+            fullWidth
+          />
+          <Button
             title={t('projectDetail.actions.materialPlan')}
             icon={Package}
             onClick={() => navigate(`/project-materials/${id}`)}

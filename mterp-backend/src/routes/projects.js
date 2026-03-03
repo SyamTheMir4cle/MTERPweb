@@ -1,5 +1,5 @@
 const express = require('express');
-const { Project, Supply, DailyReport } = require('../models');
+const { Project, Supply, DailyReport, MaterialLog } = require('../models');
 const { auth, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { uploadLimiter } = require('../middleware/rateLimiter');
@@ -424,6 +424,77 @@ router.delete('/:id/supplies/:supplyId', auth, authorize('owner', 'director', 's
     res.json({ msg: 'Supply deleted successfully' });
   } catch (error) {
     console.error('Delete project supply error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+// ===== Material Usage Logs =====
+
+// POST /api/projects/:id/material-logs - Log material usage
+router.post('/:id/material-logs', auth, authorize('supervisor', 'owner', 'director', 'admin'), async (req, res) => {
+  try {
+    const { supplyId, qtyUsed, notes, date } = req.body;
+
+    if (!supplyId || !qtyUsed || qtyUsed <= 0) {
+      return res.status(400).json({ msg: 'supplyId and a positive qtyUsed are required' });
+    }
+
+    const supply = await Supply.findOne({ _id: supplyId, projectId: req.params.id });
+    if (!supply) {
+      return res.status(404).json({ msg: 'Supply not found for this project' });
+    }
+
+    // Update running total on the supply
+    supply.totalQtyUsed = (supply.totalQtyUsed || 0) + Number(qtyUsed);
+    await supply.save();
+
+    const qtyLeft = Math.max(0, supply.qty - supply.totalQtyUsed);
+
+    const log = new MaterialLog({
+      projectId: req.params.id,
+      supplyId,
+      date: date ? new Date(date) : new Date(),
+      qtyUsed: Number(qtyUsed),
+      qtyLeft,
+      notes,
+      recordedBy: req.user._id,
+    });
+    await log.save();
+
+    // Populate for the response
+    await log.populate('supplyId', 'item unit qty totalQtyUsed');
+    await log.populate('recordedBy', 'fullName');
+
+    res.status(201).json(log);
+  } catch (error) {
+    console.error('Create material log error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// GET /api/projects/:id/material-logs - Get material usage logs
+router.get('/:id/material-logs', auth, async (req, res) => {
+  try {
+    const { date } = req.query;
+    const query = { projectId: req.params.id };
+
+    if (date) {
+      // Match logs for the entire day (timezone-safe using start/end of day)
+      const start = new Date(date);
+      start.setUTCHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setUTCHours(23, 59, 59, 999);
+      query.date = { $gte: start, $lte: end };
+    }
+
+    const logs = await MaterialLog.find(query)
+      .populate('supplyId', 'item unit qty totalQtyUsed')
+      .populate('recordedBy', 'fullName')
+      .sort({ date: -1, createdAt: -1 })
+      .lean();
+
+    res.json(logs);
+  } catch (error) {
+    console.error('Get material logs error:', error);
     res.status(500).json({ msg: 'Server error' });
   }
 });
