@@ -943,6 +943,13 @@ export default function ProjectDetail() {
             variant="outline"
             fullWidth
           />
+          <Button
+            title={t('projectDetail.actions.projectReports')}
+            icon={FileText}
+            onClick={() => navigate(`/project-reports/${id}`)}
+            variant="outline"
+            fullWidth
+          />
         </div>
       </Card>
 

@@ -261,7 +261,8 @@
       "title": "Aksi Cepat",
       "dailyReport": "Laporan Harian",
       "toolInventory": "Inventaris Alat",
-      "materialPlan": "Rencana Material"
+      "materialPlan": "Rencana Material",
+      "projectReports": "Laporan Proyek"
     },
     "description": {
       "title": "Deskripsi"
@@ -1044,6 +1045,51 @@
       "saveSuccessDesc": "Profil Anda berhasil diperbarui.",
       "saveError": "Pembaruan Gagal",
       "saveErrorDesc": "Gagal memperbarui profil. Silakan coba lagi."
+    }
+  },
+  "projectReports": {
+    "title": "Laporan Proyek",
+    "loading": "Memuat laporan...",
+    "submitNew": "Ajukan Laporan Baru",
+    "startDate": "Tanggal Mulai",
+    "endDate": "Tanggal Selesai",
+    "submittedReports": "Laporan Diajukan",
+    "empty": "Belum ada laporan yang diajukan.",
+    "dailyCount": "{{count}} laporan harian",
+    "by": "Oleh",
+    "approvedBy": "Disetujui oleh",
+    "pendingApprovalNote": "Menunggu persetujuan direktur untuk ekspor",
+    "types": {
+      "daily": "Harian",
+      "weekly": "Mingguan",
+      "monthly": "Bulanan",
+      "custom": "Kustom"
+    },
+    "status": {
+      "pending": "Tertunda",
+      "approved": "Disetujui"
+    },
+    "actions": {
+      "submit": "Ajukan Laporan",
+      "approve": "Setujui",
+      "approving": "Menyetujui...",
+      "exportPdf": "Ekspor PDF",
+      "cancel": "Batal"
+    },
+    "approveModal": {
+      "title": "Setujui Laporan",
+      "desc": "Masukkan kata sandi digital Anda untuk menyetujui laporan ini dan mengaktifkan ekspor PDF.",
+      "passphrase": "Kata Sandi Digital",
+      "placeholder": "Min 4 karakter"
+    },
+    "messages": {
+      "error": "Error",
+      "submitSuccess": "Laporan Diajukan",
+      "submitSuccessDesc": "Laporan telah diajukan untuk persetujuan direktur.",
+      "submitFailed": "Gagal mengajukan laporan.",
+      "approveSuccess": "Laporan Disetujui",
+      "approveSuccessDesc": "Laporan disetujui. Ekspor PDF sekarang tersedia.",
+      "approveFailed": "Gagal menyetujui laporan."
     }
   }
 }

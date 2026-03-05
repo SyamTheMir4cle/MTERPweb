@@ -9,6 +9,7 @@ const SlipGaji = require('./SlipGaji');
 const DailyReport = require('./DailyReport');
 const Supply = require('./Supply');
 const MaterialLog = require('./MaterialLog');
+const ProjectReport = require('./ProjectReport');
 
 module.exports = {
   User,
@@ -22,4 +23,5 @@ module.exports = {
   DailyReport,
   Supply,
   MaterialLog,
+  ProjectReport,
 };

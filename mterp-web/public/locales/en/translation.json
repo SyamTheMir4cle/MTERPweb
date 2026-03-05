@@ -261,7 +261,8 @@
       "title": "Quick Actions",
       "dailyReport": "Daily Report",
       "toolInventory": "Tool Inventory",
-      "materialPlan": "Material Plan"
+      "materialPlan": "Material Plan",
+      "projectReports": "Project Reports"
     },
     "description": {
       "title": "Description"
@@ -1044,6 +1045,51 @@
       "saveSuccessDesc": "Your profile has been updated successfully.",
       "saveError": "Update Failed",
       "saveErrorDesc": "Failed to update profile. Please try again."
+    }
+  },
+  "projectReports": {
+    "title": "Project Reports",
+    "loading": "Loading reports...",
+    "submitNew": "Submit New Report",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "submittedReports": "Submitted Reports",
+    "empty": "No reports submitted yet.",
+    "dailyCount": "{{count}} daily report(s)",
+    "by": "By",
+    "approvedBy": "Approved by",
+    "pendingApprovalNote": "Awaiting director approval to export",
+    "types": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "custom": "Custom"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved"
+    },
+    "actions": {
+      "submit": "Submit Report",
+      "approve": "Approve",
+      "approving": "Approving...",
+      "exportPdf": "Export PDF",
+      "cancel": "Cancel"
+    },
+    "approveModal": {
+      "title": "Approve Report",
+      "desc": "Enter your digital passphrase to approve this report and enable PDF export.",
+      "passphrase": "Digital Passphrase",
+      "placeholder": "Min 4 characters"
+    },
+    "messages": {
+      "error": "Error",
+      "submitSuccess": "Report Submitted",
+      "submitSuccessDesc": "Report has been submitted for director approval.",
+      "submitFailed": "Failed to submit report.",
+      "approveSuccess": "Report Approved",
+      "approveSuccessDesc": "Report approved. PDF export is now available.",
+      "approveFailed": "Failed to approve report."
     }
   }
 }

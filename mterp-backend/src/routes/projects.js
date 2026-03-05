@@ -1,5 +1,6 @@
 const express = require('express');
-const { Project, Supply, DailyReport, MaterialLog } = require('../models');
+const { Project, Supply, DailyReport, MaterialLog, ProjectReport } = require('../models');
+const bcrypt = require('bcryptjs');
 const { auth, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { uploadLimiter } = require('../middleware/rateLimiter');
@@ -508,6 +509,125 @@ router.get('/:id/material-logs', auth, async (req, res) => {
     res.json(logs);
   } catch (error) {
     console.error('Get material logs error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// === PROJECT REPORT ROUTES ===
+
+// GET /api/projects/:id/reports - List submitted reports for a project
+router.get('/:id/reports', auth, async (req, res) => {
+  try {
+    const reports = await ProjectReport.find({ projectId: req.params.id })
+      .populate('submittedBy', 'fullName role')
+      .populate('authorization.directorId', 'fullName')
+      .sort({ createdAt: -1 });
+    res.json(reports);
+  } catch (error) {
+    console.error('Get project reports error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// POST /api/projects/:id/reports - Submit a new report
+router.post('/:id/reports', auth, authorize('supervisor', 'asset_admin', 'owner', 'director'), async (req, res) => {
+  try {
+    const { reportType, startDate, endDate } = req.body;
+    if (!reportType || !startDate || !endDate) {
+      return res.status(400).json({ msg: 'reportType, startDate, and endDate are required' });
+    }
+
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ msg: 'Project not found' });
+    }
+
+    // Find matching daily reports in the date range
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const dailyReports = await DailyReport.find({
+      projectId: req.params.id,
+      date: { $gte: start, $lte: end },
+    }).sort({ date: 1 });
+
+    const report = new ProjectReport({
+      projectId: req.params.id,
+      reportType,
+      startDate: start,
+      endDate: end,
+      dailyReportIds: dailyReports.map(dr => dr._id),
+      submittedBy: req.user._id,
+    });
+
+    await report.save();
+    res.status(201).json(report);
+  } catch (error) {
+    console.error('Submit project report error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// PUT /api/projects/reports/:reportId/approve - Director approves a report
+router.put('/reports/:reportId/approve', auth, authorize('director', 'owner'), async (req, res) => {
+  try {
+    const { passphrase } = req.body;
+    if (!passphrase || passphrase.length < 4) {
+      return res.status(400).json({ msg: 'Passphrase is required (min 4 characters)' });
+    }
+
+    const report = await ProjectReport.findById(req.params.reportId);
+    if (!report) {
+      return res.status(404).json({ msg: 'Report not found' });
+    }
+    if (report.status === 'approved') {
+      return res.status(400).json({ msg: 'Report already approved' });
+    }
+
+    const hashedPassphrase = await bcrypt.hash(passphrase, 10);
+
+    report.status = 'approved';
+    report.authorization = {
+      directorId: req.user._id,
+      directorName: req.user.fullName,
+      directorPassphrase: hashedPassphrase,
+      directorSignedAt: new Date(),
+    };
+
+    await report.save();
+
+    const populated = await ProjectReport.findById(report._id)
+      .populate('submittedBy', 'fullName role')
+      .populate('authorization.directorId', 'fullName');
+
+    res.json(populated);
+  } catch (error) {
+    console.error('Approve project report error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// GET /api/projects/reports/:reportId - Get single report with populated data
+router.get('/reports/:reportId', auth, async (req, res) => {
+  try {
+    const report = await ProjectReport.findById(req.params.reportId)
+      .populate('projectId', 'nama lokasi progress startDate endDate workItems')
+      .populate('submittedBy', 'fullName role')
+      .populate('authorization.directorId', 'fullName')
+      .populate({
+        path: 'dailyReportIds',
+        populate: { path: 'createdBy', select: 'fullName' },
+      });
+
+    if (!report) {
+      return res.status(404).json({ msg: 'Report not found' });
+    }
+
+    res.json(report);
+  } catch (error) {
+    console.error('Get project report error:', error);
     res.status(500).json({ msg: 'Server error' });
   }
 });

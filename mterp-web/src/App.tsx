@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import MyPayments from './pages/MyPayments';
 import Dashboard from './pages/Dashboard';
 import SlipGaji from './pages/SlipGaji';
+import ProjectReports from './pages/ProjectReports';
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-payments" element={<MyPayments />} />
             <Route path="/slip-gaji" element={<SlipGaji />} />
+            <Route path="/project-reports/:id" element={<ProjectReports />} />
           </Route>
 
           {/* Fallback */}
