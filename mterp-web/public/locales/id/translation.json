@@ -742,7 +742,8 @@
       "placeholder": "Kendala, kabar terbaru, atau komentar"
     },
     "actions": {
-      "submit": "Kirim Laporan"
+      "submit": "Kirim Laporan",
+      "exportPdf": "Ekspor PDF"
     },
     "messages": {
       "selectProject": "Silakan pilih proyek terlebih dahulu.",
@@ -756,6 +757,15 @@
       "pending": "Pending",
       "ordered": "Ordered",
       "delivered": "Delivered"
+    },
+    "photos": {
+      "title": "Foto Lokasi",
+      "add": "Tambah Foto",
+      "maxReached": "Maksimal 5 foto",
+      "remove": "Hapus"
+    },
+    "equipment": {
+      "title": "Penggunaan Alat"
     }
   },
   "approvals": {

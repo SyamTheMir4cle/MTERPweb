@@ -167,10 +167,22 @@ router.put('/:id/progress', auth, authorize('owner', 'director', 'supervisor', '
   }
 });
 
-// POST /api/projects/:id/daily-report - Add daily report with per-item progress
-router.post('/:id/daily-report', auth, authorize('supervisor', 'asset_admin', 'owner', 'director'), async (req, res) => {
+// POST /api/projects/:id/daily-report - Add daily report with per-item progress (supports photo uploads)
+router.post('/:id/daily-report', auth, authorize('supervisor', 'asset_admin', 'owner', 'director'), uploadLimiter,
+  upload.array('photos', 5),
+  async (req, res) => {
   try {
-    const { workItemUpdates, supplyUpdates, weather, materials, workforce, notes, date } = req.body;
+    // Parse JSON fields from multipart form data
+    const weather = req.body.weather;
+    const materials = req.body.materials;
+    const workforce = req.body.workforce;
+    const notes = req.body.notes;
+    const date = req.body.date;
+    const workItemUpdates = req.body.workItemUpdates ? JSON.parse(req.body.workItemUpdates) : [];
+    const supplyUpdates = req.body.supplyUpdates ? JSON.parse(req.body.supplyUpdates) : [];
+    
+    // Collect uploaded photo paths
+    const photoPaths = (req.files || []).map(f => f.path.replace(/\\/g, '/'));
     
     const project = await Project.findById(req.params.id);
     if (!project) {
@@ -233,6 +245,7 @@ router.post('/:id/daily-report', auth, authorize('supervisor', 'asset_admin', 'o
       materials,
       workforce,
       notes,
+      photos: photoPaths,
       createdBy: req.user._id,
     });
     await report.save();

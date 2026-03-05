@@ -742,7 +742,8 @@
       "placeholder": "Any issues, updates, or comments"
     },
     "actions": {
-      "submit": "Submit Report"
+      "submit": "Submit Report",
+      "exportPdf": "Export PDF"
     },
     "messages": {
       "selectProject": "Please select a project first.",
@@ -756,6 +757,15 @@
       "pending": "Pending",
       "ordered": "Ordered",
       "delivered": "Delivered"
+    },
+    "photos": {
+      "title": "Site Photos",
+      "add": "Add Photo",
+      "maxReached": "Maximum 5 photos",
+      "remove": "Remove"
+    },
+    "equipment": {
+      "title": "Equipment Usage"
     }
   },
   "approvals": {
