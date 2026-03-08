@@ -208,6 +208,34 @@ router.put('/:id/assign', auth, authorize('owner', 'director', 'asset_admin', 's
   }
 });
 
+// PUT /api/tools/:id/unassign - Unassign user from tool (keep on project)
+router.put('/:id/unassign', auth, authorize('owner', 'director', 'asset_admin', 'supervisor'), async (req, res) => {
+  try {
+    const tool = await Tool.findByIdAndUpdate(
+      req.params.id,
+      { 
+        $unset: { assignedTo: 1 },
+        $set: {
+          lastChecked: new Date(),
+          updatedAt: new Date(),
+        }
+      },
+      { new: true }
+    )
+      .populate('assignedTo', 'fullName')
+      .populate('projectId', 'nama');
+    
+    if (!tool) {
+      return res.status(404).json({ msg: 'Tool not found' });
+    }
+    
+    res.json(tool);
+  } catch (error) {
+    console.error('Unassign tool error:', error);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // PUT /api/tools/:id/return - Return tool to warehouse
 router.put('/:id/return', auth, authorize('owner', 'director', 'asset_admin', 'supervisor'), async (req, res) => {
   try {

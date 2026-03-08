@@ -162,6 +162,7 @@ export default function ProjectReports() {
   const [approveModal, setApproveModal] = useState<{ open: boolean; reportId: string }>({ open: false, reportId: '' });
   const [passphrase, setPassphrase] = useState('');
   const [approving, setApproving] = useState(false);
+  const [passphraseError, setPassphraseError] = useState('');
 
   const [alertData, setAlertData] = useState<{ visible: boolean; type: 'success' | 'error'; title: string; message: string }>({
     visible: false, type: 'success', title: '', message: '',
@@ -235,15 +236,17 @@ export default function ProjectReports() {
   const handleApprove = async () => {
     if (!approveModal.reportId || passphrase.length < 4) return;
     setApproving(true);
+    setPassphraseError('');
     try {
       await api.put(`/projects/reports/${approveModal.reportId}/approve`, { passphrase });
       setAlertData({ visible: true, type: 'success', title: t('projectReports.messages.approveSuccess'), message: t('projectReports.messages.approveSuccessDesc') });
       setApproveModal({ open: false, reportId: '' });
       setPassphrase('');
+      setPassphraseError('');
       fetchData();
     } catch (err: any) {
       const msg = err?.response?.data?.msg || t('projectReports.messages.approveFailed');
-      setAlertData({ visible: true, type: 'error', title: t('projectReports.messages.error'), message: msg });
+      setPassphraseError(msg);
     } finally {
       setApproving(false);
     }
@@ -752,7 +755,7 @@ export default function ProjectReports() {
 
       {/* Approve Modal */}
       {approveModal.open && (
-        <div className="pr-modal-overlay" onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); }}>
+        <div className="pr-modal-overlay" onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); setPassphraseError(''); }}>
           <div className="pr-modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="pr-modal-title">
               <Shield size={20} /> {t('projectReports.approveModal.title')}
@@ -764,16 +767,18 @@ export default function ProjectReports() {
               <input
                 type="password"
                 value={passphrase}
-                onChange={(e) => setPassphrase(e.target.value)}
+                onChange={(e) => { setPassphrase(e.target.value); setPassphraseError(''); }}
                 placeholder={t('projectReports.approveModal.placeholder')}
-                className="pr-modal-input"
+                className={`pr-modal-input ${passphraseError ? 'pr-modal-input-error' : ''}`}
+                onKeyDown={(e) => { if (e.key === 'Enter' && passphrase.length >= 4) handleApprove(); }}
               />
+              {passphraseError && <p className="pr-modal-error">{passphraseError}</p>}
             </div>
 
             <div className="pr-modal-actions">
               <Button
                 title={t('projectReports.actions.cancel')}
-                onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); }}
+                onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); setPassphraseError(''); }}
                 variant="outline"
               />
               <Button

@@ -914,6 +914,18 @@
     background: white;
 }
 
+.sg-auth-input-error {
+    border-color: #EF4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.sg-auth-error {
+    color: #EF4444;
+    font-size: 0.8rem;
+    margin: 0;
+    font-weight: 500;
+}
+
 .sg-auth-modal-actions {
     display: flex;
     gap: var(--space-3);

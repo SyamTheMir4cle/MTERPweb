@@ -257,6 +257,16 @@ router.post('/:id/authorize', auth, authorize('owner', 'director'), async (req, 
             return res.status(400).json({ msg: 'Passphrase is required (min 4 characters)' });
         }
 
+        // Verify passphrase against user's login password
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        const isMatch = await bcrypt.compare(passphrase, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Incorrect passphrase' });
+        }
+
         const slip = await SlipGaji.findById(req.params.id);
         if (!slip) return res.status(404).json({ msg: 'Slip not found' });
         if (slip.status === 'issued') return res.status(400).json({ msg: 'Slip is already issued' });

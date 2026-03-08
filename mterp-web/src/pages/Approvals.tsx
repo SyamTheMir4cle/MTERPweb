@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, X, Inbox, AlertCircle, DollarSign } from 'lucide-react';
+import { Check, X, Inbox, AlertCircle, DollarSign, Shield, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,16 @@ export default function Approvals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
+
+  // Passphrase confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    type: 'request' | 'kasbon';
+    id: string;
+  }>({ open: false, type: 'request', id: '' });
+  const [passphrase, setPassphrase] = useState('');
+  const [passphraseError, setPassphraseError] = useState('');
+  const [confirming, setConfirming] = useState(false);
 
   const isDirectorOrOwner = user?.role === 'director' || user?.role === 'owner';
 
@@ -63,29 +73,61 @@ export default function Approvals() {
     }
   };
 
-  const handleAction = async (id: string, action: 'approve' | 'reject') => {
-    setProcessing(id);
+  // Open confirmation modal for approvals
+  const openConfirmApprove = (id: string, type: 'request' | 'kasbon') => {
+    setConfirmModal({ open: true, type, id });
+    setPassphrase('');
+    setPassphraseError('');
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal({ open: false, type: 'request', id: '' });
+    setPassphrase('');
+    setPassphraseError('');
+  };
+
+  // Confirm approval with passphrase
+  const handleConfirmApprove = async () => {
+    if (passphrase.length < 4) return;
+    setConfirming(true);
+    setPassphraseError('');
     try {
-      await api.put(`/requests/${id}`, {
-        status: action === 'approve' ? 'Approved' : 'Rejected',
-      });
-      setApprovals((prev) => prev.filter((a) => a.id !== id));
-    } catch (err) {
-      console.error('Failed to process approval', err);
+      const { type, id } = confirmModal;
+      if (type === 'request') {
+        await api.put(`/requests/${id}`, {
+          status: 'Approved',
+          passphrase,
+        });
+        setApprovals((prev) => prev.filter((a) => a.id !== id));
+      } else {
+        await api.put(`/kasbon/${id}`, {
+          status: 'Approved',
+          passphrase,
+        });
+        setKasbons((prev) => prev.filter((k) => k.id !== id));
+      }
+      closeConfirmModal();
+    } catch (err: any) {
+      const msg = err?.response?.data?.msg || t('approvals.messages.approveFailed');
+      setPassphraseError(msg);
     } finally {
-      setProcessing(null);
+      setConfirming(false);
     }
   };
 
-  const handleKasbonAction = async (id: string, action: 'approve' | 'reject') => {
+  // Reject without passphrase
+  const handleReject = async (id: string, type: 'request' | 'kasbon') => {
     setProcessing(id);
     try {
-      await api.put(`/kasbon/${id}`, {
-        status: action === 'approve' ? 'Approved' : 'Rejected',
-      });
-      setKasbons((prev) => prev.filter((k) => k.id !== id));
+      if (type === 'request') {
+        await api.put(`/requests/${id}`, { status: 'Rejected' });
+        setApprovals((prev) => prev.filter((a) => a.id !== id));
+      } else {
+        await api.put(`/kasbon/${id}`, { status: 'Rejected' });
+        setKasbons((prev) => prev.filter((k) => k.id !== id));
+      }
     } catch (err) {
-      console.error('Failed to process kasbon', err);
+      console.error('Failed to reject', err);
     } finally {
       setProcessing(null);
     }
@@ -184,7 +226,7 @@ export default function Approvals() {
                   <Button
                     title={t('approvals.actions.reject')}
                     icon={X}
-                    onClick={() => handleAction(item.id, 'reject')}
+                    onClick={() => handleReject(item.id, 'request')}
                     variant="danger"
                     size="small"
                     loading={processing === item.id}
@@ -192,7 +234,7 @@ export default function Approvals() {
                   <Button
                     title={t('approvals.actions.approve')}
                     icon={Check}
-                    onClick={() => handleAction(item.id, 'approve')}
+                    onClick={() => openConfirmApprove(item.id, 'request')}
                     variant="success"
                     size="small"
                     loading={processing === item.id}
@@ -250,7 +292,7 @@ export default function Approvals() {
                     <Button
                       title={t('approvals.actions.reject')}
                       icon={X}
-                      onClick={() => handleKasbonAction(item.id, 'reject')}
+                      onClick={() => handleReject(item.id, 'kasbon')}
                       variant="danger"
                       size="small"
                       loading={processing === item.id}
@@ -258,7 +300,7 @@ export default function Approvals() {
                     <Button
                       title={t('approvals.actions.approve')}
                       icon={Check}
-                      onClick={() => handleKasbonAction(item.id, 'approve')}
+                      onClick={() => openConfirmApprove(item.id, 'kasbon')}
                       variant="success"
                       size="small"
                       loading={processing === item.id}
@@ -269,6 +311,52 @@ export default function Approvals() {
             </div>
           )}
         </>
+      )}
+
+      {/* Passphrase Confirmation Modal */}
+      {confirmModal.open && (
+        <div className="approval-modal-overlay" onClick={closeConfirmModal}>
+          <div className="approval-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="approval-modal-body">
+              <div className="approval-modal-icon">
+                <Lock size={28} />
+              </div>
+              <h3 className="approval-modal-title">{t('approvals.confirmModal.title')}</h3>
+              <p className="approval-modal-desc">{t('approvals.confirmModal.desc')}</p>
+
+              <div className="approval-modal-input-wrap">
+                <Shield size={16} className="approval-modal-input-icon" />
+                <input
+                  type="password"
+                  className={`approval-modal-input ${passphraseError ? 'approval-modal-input-error' : ''}`}
+                  value={passphrase}
+                  onChange={(e) => { setPassphrase(e.target.value); setPassphraseError(''); }}
+                  placeholder={t('approvals.confirmModal.placeholder')}
+                  autoFocus
+                  onKeyDown={(e) => { if (e.key === 'Enter' && passphrase.length >= 4) handleConfirmApprove(); }}
+                />
+              </div>
+              {passphraseError && <p className="approval-modal-error">{passphraseError}</p>}
+
+              <div className="approval-modal-actions">
+                <button className="approval-modal-btn-cancel" onClick={closeConfirmModal}>
+                  {t('approvals.confirmModal.btnCancel')}
+                </button>
+                <button
+                  className="approval-modal-btn-approve"
+                  onClick={handleConfirmApprove}
+                  disabled={passphrase.length < 4 || confirming}
+                >
+                  {confirming ? (
+                    <><div className="spinner-small"></div> {t('approvals.confirmModal.btnApproving')}</>
+                  ) : (
+                    <><Check size={16} /> {t('approvals.confirmModal.btnApprove')}</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

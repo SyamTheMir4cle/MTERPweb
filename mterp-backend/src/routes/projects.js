@@ -578,6 +578,17 @@ router.put('/reports/:reportId/approve', auth, authorize('director', 'owner'), a
       return res.status(400).json({ msg: 'Passphrase is required (min 4 characters)' });
     }
 
+    // Verify passphrase against user's login password
+    const { User } = require('../models');
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    const isMatch = await bcrypt.compare(passphrase, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Incorrect passphrase' });
+    }
+
     const report = await ProjectReport.findById(req.params.reportId);
     if (!report) {
       return res.status(404).json({ msg: 'Report not found' });

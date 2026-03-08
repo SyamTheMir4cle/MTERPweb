@@ -152,6 +152,7 @@ export default function SlipGaji() {
     const [authSlipId, setAuthSlipId] = useState('');
     const [passphrase, setPassphrase] = useState('');
     const [authorizing, setAuthorizing] = useState(false);
+    const [passphraseError, setPassphraseError] = useState('');
 
     /* ---- data loading ---- */
     const fetchSlips = useCallback(async () => {
@@ -211,15 +212,18 @@ export default function SlipGaji() {
     const handleAuthorize = async () => {
         if (!passphrase || passphrase.length < 4) return;
         setAuthorizing(true);
+        setPassphraseError('');
         try {
             const res = await api.post(`/slipgaji/${authSlipId}/authorize`, { passphrase });
             setAuthModal(false);
             setPassphrase('');
+            setPassphraseError('');
             setAlertData({ visible: true, type: 'success', title: t('slipGaji.messages.authSuccess'), message: t('slipGaji.messages.authSuccessDesc', { name: user?.fullName }) });
             if (selectedSlip?._id === authSlipId) setSelectedSlip(res.data);
             fetchSlips();
         } catch (err: any) {
-            setAlertData({ visible: true, type: 'error', title: t('slipGaji.messages.authError'), message: err?.response?.data?.msg || t('slipGaji.messages.authErrorDesc') });
+            const msg = err?.response?.data?.msg || t('slipGaji.messages.authErrorDesc');
+            setPassphraseError(msg);
         }
         setAuthorizing(false);
     };
@@ -236,7 +240,7 @@ export default function SlipGaji() {
     };
 
     const openDetail = (slip: SlipData) => { setSelectedSlip(slip); setDetailModal(true); };
-    const openAuth = (slipId: string) => { setAuthSlipId(slipId); setPassphrase(''); setAuthModal(true); };
+    const openAuth = (slipId: string) => { setAuthSlipId(slipId); setPassphrase(''); setPassphraseError(''); setAuthModal(true); };
     const canSign = (slip: SlipData) => {
         if (role === 'director' && !slip.authorization.directorPassphrase) return true;
         if (role === 'owner' && !slip.authorization.ownerPassphrase) return true;
@@ -669,16 +673,17 @@ export default function SlipGaji() {
                                 <Shield size={16} className="sg-auth-input-icon" />
                                 <input
                                     type="password"
-                                    className="sg-auth-input"
+                                    className={`sg-auth-input ${passphraseError ? 'sg-auth-input-error' : ''}`}
                                     value={passphrase}
-                                    onChange={(e) => setPassphrase(e.target.value)}
+                                    onChange={(e) => { setPassphrase(e.target.value); setPassphraseError(''); }}
                                     placeholder={t('slipGaji.modals.auth.placeholder')}
                                     autoFocus
                                     onKeyDown={(e) => e.key === 'Enter' && handleAuthorize()}
                                 />
                             </div>
+                            {passphraseError && <p className="sg-auth-error">{passphraseError}</p>}
                             <div className="sg-auth-modal-actions">
-                                <button className="sg-btn-cancel" onClick={() => setAuthModal(false)}>{t('slipGaji.modals.auth.btnCancel')}</button>
+                                <button className="sg-btn-cancel" onClick={() => { setAuthModal(false); setPassphraseError(''); }}>{t('slipGaji.modals.auth.btnCancel')}</button>
                                 <button
                                     className="sg-btn-authorize"
                                     onClick={handleAuthorize}

@@ -419,6 +419,7 @@
       "reassign": "Reassign",
       "assign": "Assign",
       "return": "Return",
+      "unassign": "Unassign",
       "cancel": "Cancel",
       "addToProject": "Add to Project",
       "saveAssignment": "Save Assignment"
@@ -436,7 +437,9 @@
       "addFailed": "Failed to add tool",
       "assignFailed": "Failed to assign user",
       "returnConfirm": "Return \"{{name}}\" to warehouse?",
-      "returnFailed": "Failed to return tool"
+      "returnFailed": "Failed to return tool",
+      "unassignConfirm": "Unassign \"{{name}}\" from {{user}}?",
+      "unassignFailed": "Failed to unassign tool"
     }
   },
   "projectMaterials": {
@@ -648,6 +651,16 @@
       "daily": "Regular Daily",
       "overtime15": "Overtime 1.5x",
       "overtime2": "Overtime 2x"
+    },
+    "viewMode": {
+      "attendance": "Attendance",
+      "permits": "Permits"
+    },
+    "permit": {
+      "emptyTitle": "No Permits Found",
+      "emptyDesc": "No permit requests found for the selected filters.",
+      "viewEvidence": "View Evidence",
+      "evidenceTitle": "{{name}}'s Permit"
     }
   },
   "tasks": {
@@ -811,8 +824,17 @@
       "reject": "Reject",
       "approve": "Approve"
     },
+    "confirmModal": {
+      "title": "Confirm Approval",
+      "desc": "Enter your login password to confirm this approval.",
+      "placeholder": "Enter password (min 4 chars)",
+      "btnCancel": "Cancel",
+      "btnApprove": "Approve",
+      "btnApproving": "Approving..."
+    },
     "messages": {
-      "loadFailed": "Failed to load approvals"
+      "loadFailed": "Failed to load approvals",
+      "approveFailed": "Failed to approve"
     }
   },
   "myPayments": {
@@ -980,9 +1002,9 @@
         "btnAuthorize": "Authorize"
       },
       "auth": {
-        "title": "Digital Passphrase",
-        "desc": "Enter your secure passphrase to authorize this salary slip as",
-        "placeholder": "Enter passphrase (min 4 chars)",
+        "title": "Confirm Authorization",
+        "desc": "Enter your login password to authorize this salary slip as",
+        "placeholder": "Enter your login password",
         "btnCancel": "Cancel",
         "btnAuthorize": "Authorize",
         "btnAuthorizing": "Authorizing..."
@@ -1085,9 +1107,9 @@
     },
     "approveModal": {
       "title": "Approve Report",
-      "desc": "Enter your digital passphrase to approve this report and enable PDF export.",
-      "passphrase": "Digital Passphrase",
-      "placeholder": "Min 4 characters"
+      "desc": "Enter your login password to approve this report and enable PDF export.",
+      "passphrase": "Login Password",
+      "placeholder": "Enter your login password"
     },
     "messages": {
       "error": "Error",

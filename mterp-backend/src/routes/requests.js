@@ -1,5 +1,6 @@
 const express = require('express');
-const { Request, Project } = require('../models');
+const bcrypt = require('bcryptjs');
+const { Request, Project, User } = require('../models');
 const { auth, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -96,7 +97,22 @@ router.post('/', auth, async (req, res) => {
 // PUT /api/requests/:id - Update request (approve/reject)
 router.put('/:id', auth, authorize('owner', 'director', 'asset_admin'), async (req, res) => {
   try {
-    const { status, rejectionReason } = req.body;
+    const { status, rejectionReason, passphrase } = req.body;
+    
+    // Require passphrase verification for approvals
+    if (status === 'Approved') {
+      if (!passphrase || passphrase.length < 4) {
+        return res.status(400).json({ msg: 'Passphrase is required (min 4 characters)' });
+      }
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ msg: 'User not found' });
+      }
+      const isMatch = await bcrypt.compare(passphrase, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ msg: 'Incorrect passphrase' });
+      }
+    }
     
     const updateData = { status };
     

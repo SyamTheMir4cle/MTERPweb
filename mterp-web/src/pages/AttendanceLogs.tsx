@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Calendar, User, Clock, Filter,
   ChevronDown, DollarSign, X, Check, Building, Users,
-  Wallet, TrendingUp, Loader,
+  Wallet, TrendingUp, Loader, FileText, CalendarOff, Eye,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/api';
@@ -32,7 +32,22 @@ interface AttendanceRecord {
   paidAt?: string;
   projectId?: { _id: string; nama: string };
   status: string;
+  permit?: { reason: string; evidence: string; status: string };
 }
+
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
+
+const getImageUrl = (path: string | undefined): string => {
+  if (!path) return '';
+  // Convert Windows backslashes to forward slashes
+  const normalizedPath = path.replace(/\\/g, '/');
+  // If absolute path from backend (contains /uploads/), extract from 'uploads'
+  const uploadsIndex = normalizedPath.indexOf('uploads/');
+  if (uploadsIndex !== -1) {
+    return `${API_BASE}/${normalizedPath.substring(uploadsIndex)}`;
+  }
+  return `${API_BASE}/${normalizedPath}`;
+};
 
 interface RecapSummary {
   total: number;
@@ -68,6 +83,9 @@ export default function AttendanceLogs() {
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // View mode
+  const [viewMode, setViewMode] = useState<'attendance' | 'permits'>('attendance');
+
   // Filters
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'custom'>('week');
   const [startDate, setStartDate] = useState('');
@@ -83,6 +101,9 @@ export default function AttendanceLogs() {
   const [newOvertimePay, setNewOvertimePay] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
+
+  // Permit evidence modal
+  const [evidenceModal, setEvidenceModal] = useState<{ open: boolean; url: string; worker: string }>({ open: false, url: '', worker: '' });
 
   const isSupervisor = user?.role && ['owner', 'director', 'supervisor', 'asset_admin'].includes(user.role);
 
@@ -217,6 +238,9 @@ export default function AttendanceLogs() {
 
   const formatRp = (val: number) => `Rp ${new Intl.NumberFormat('id-ID').format(val)}`;
 
+  // Permit-filtered records
+  const permitRecords = records.filter(r => r.status === 'Permit');
+
   return (
     <div className="logs-container">
       {/* Header */}
@@ -231,6 +255,25 @@ export default function AttendanceLogs() {
           <h1 className="logs-title">{t('attendanceLogs.title')}</h1>
           <p className="logs-subtitle">{t('attendanceLogs.subtitle')}</p>
         </div>
+      </div>
+
+      {/* View Mode Toggle */}
+      <div className="logs-view-toggle">
+        <button
+          className={`logs-view-btn ${viewMode === 'attendance' ? 'active' : ''}`}
+          onClick={() => setViewMode('attendance')}
+        >
+          <Users size={16} />
+          {t('attendanceLogs.viewMode.attendance')}
+        </button>
+        <button
+          className={`logs-view-btn ${viewMode === 'permits' ? 'active' : ''}`}
+          onClick={() => setViewMode('permits')}
+        >
+          <CalendarOff size={16} />
+          {t('attendanceLogs.viewMode.permits')}
+          {permitRecords.length > 0 && <span className="logs-view-count">{permitRecords.length}</span>}
+        </button>
       </div>
 
       {/* Filters */}
@@ -280,23 +323,25 @@ export default function AttendanceLogs() {
             </div>
           )}
 
-          <div className="logs-select-group">
-            <label className="logs-filter-label">{t('attendanceLogs.filters.payment')}</label>
-            <div className="logs-select-wrapper">
-              <Wallet size={14} className="logs-select-pre" />
-              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value as any)} className="logs-select">
-                <option value="Unpaid">{t('attendanceLogs.filters.paymentOptions.unpaid')}</option>
-                <option value="Paid">{t('attendanceLogs.filters.paymentOptions.paid')}</option>
-                <option value="All">{t('attendanceLogs.filters.paymentOptions.all')}</option>
-              </select>
-              <ChevronDown size={14} className="logs-select-icon" />
+          {viewMode === 'attendance' && (
+            <div className="logs-select-group">
+              <label className="logs-filter-label">{t('attendanceLogs.filters.payment')}</label>
+              <div className="logs-select-wrapper">
+                <Wallet size={14} className="logs-select-pre" />
+                <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value as any)} className="logs-select">
+                  <option value="Unpaid">{t('attendanceLogs.filters.paymentOptions.unpaid')}</option>
+                  <option value="Paid">{t('attendanceLogs.filters.paymentOptions.paid')}</option>
+                  <option value="All">{t('attendanceLogs.filters.paymentOptions.all')}</option>
+                </select>
+                <ChevronDown size={14} className="logs-select-icon" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </Card>
 
-      {/* Summary */}
-      {summary && (
+      {/* Summary - only in attendance mode */}
+      {viewMode === 'attendance' && summary && (
         <div className="logs-summary-grid">
           <Card className="logs-summary-item">
             <Calendar size={16} color="#6366F1" />
@@ -321,8 +366,8 @@ export default function AttendanceLogs() {
         </div>
       )}
 
-      {/* Pay All button */}
-      {isSupervisor && paymentStatus === 'Unpaid' && (summary?.totalPayment || 0) > 0 && (
+      {/* Pay All button - only in attendance mode */}
+      {viewMode === 'attendance' && isSupervisor && paymentStatus === 'Unpaid' && (summary?.totalPayment || 0) > 0 && (
         <div className="logs-pay-row">
           <Button
             title={t('attendanceLogs.actions.markAllPaid', { amount: formatRp(summary?.totalPayment || 0) })}
@@ -335,98 +380,195 @@ export default function AttendanceLogs() {
         </div>
       )}
 
-      {/* Records */}
-      {loading ? (
-        <div className="logs-loading">
-          <Loader size={24} className="dashboard-spinner" />
-          <span>{t('attendanceLogs.loading')}</span>
-        </div>
-      ) : records.length === 0 ? (
-        <EmptyState
-          icon={Calendar}
-          title={t('attendanceLogs.empty.title')}
-          description={t('attendanceLogs.empty.desc')}
-        />
-      ) : (
-        <div className="logs-records">
-          {records.map((record) => {
-            const statusStyle = STATUS_STYLES[record.status] || STATUS_STYLES.Present;
-            const totalPay = (record.dailyRate || 0) + (record.overtimePay || 0);
-            return (
-              <Card key={record._id} className="logs-record">
-                {/* Top row: Date + Status + Wage badge */}
-                <div className="logs-rec-top">
-                  <div className="logs-rec-date">
-                    <Calendar size={14} />
-                    <span>{formatDate(record.date)}</span>
-                  </div>
-                  <div className="logs-rec-badges">
-                    <span className="logs-rec-status" style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}>
-                      {record.status}
+      {/* ===== ATTENDANCE VIEW ===== */}
+      {viewMode === 'attendance' && (
+        <>
+          {loading ? (
+            <div className="logs-loading">
+              <Loader size={24} className="dashboard-spinner" />
+              <span>{t('attendanceLogs.loading')}</span>
+            </div>
+          ) : records.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              title={t('attendanceLogs.empty.title')}
+              description={t('attendanceLogs.empty.desc')}
+            />
+          ) : (
+            <div className="logs-records">
+              {records.map((record) => {
+                const statusStyle = STATUS_STYLES[record.status] || STATUS_STYLES.Present;
+                const totalPay = (record.dailyRate || 0) + (record.overtimePay || 0);
+                return (
+                  <Card key={record._id} className="logs-record">
+                    {/* Top row: Date + Status + Wage badge */}
+                    <div className="logs-rec-top">
+                      <div className="logs-rec-date">
+                        <Calendar size={14} />
+                        <span>{formatDate(record.date)}</span>
+                      </div>
+                      <div className="logs-rec-badges">
+                        <span className="logs-rec-status" style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}>
+                          {record.status}
+                        </span>
+                        <Badge label={getWageLabel(record.wageType)} variant={record.wageType === 'daily' ? 'neutral' : record.wageType === 'overtime_1.5' ? 'warning' : 'danger'} size="small" />
+                      </div>
+                    </div>
+
+                    {/* Worker info */}
+                    <div className="logs-rec-worker">
+                      <div className="logs-rec-avatar" style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}>
+                        {record.userId.fullName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="logs-rec-worker-info">
+                        <span className="logs-rec-name">{record.userId.fullName}</span>
+                        <span className="logs-rec-role">{record.userId.role}</span>
+                      </div>
+                      <div className="logs-rec-times">
+                        <span className="logs-rec-time">{record.checkIn?.time ? formatTime(record.checkIn.time) : '--:--'}</span>
+                        <span className="logs-rec-sep">→</span>
+                        <span className="logs-rec-time">{record.checkOut?.time ? formatTime(record.checkOut.time) : '--:--'}</span>
+                      </div>
+                    </div>
+
+                    {/* Financials row */}
+                    <div className="logs-rec-finance">
+                      <div className="logs-rec-fin-item">
+                        <span className="logs-rec-fin-label">{t('attendanceLogs.record.daily')}</span>
+                        <span className="logs-rec-fin-val">{formatRp(record.dailyRate || 0)}</span>
+                      </div>
+                      {record.overtimePay > 0 && (
+                        <div className="logs-rec-fin-item">
+                          <span className="logs-rec-fin-label">{t('attendanceLogs.record.overtime')}</span>
+                          <span className="logs-rec-fin-val">{formatRp(record.overtimePay)}</span>
+                        </div>
+                      )}
+                      <div className="logs-rec-fin-total">
+                        <span>{formatRp(totalPay)}</span>
+                        <Badge
+                          label={record.paymentStatus === 'Paid' ? t('attendanceLogs.filters.paymentOptions.paid') : t('attendanceLogs.filters.paymentOptions.unpaid')}
+                          variant={record.paymentStatus === 'Paid' ? 'success' : 'warning'}
+                          size="small"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Project + Action */}
+                    <div className="logs-rec-bottom">
+                      {record.projectId && (
+                        <div className="logs-rec-project">
+                          <Building size={12} />
+                          <span>{record.projectId.nama}</span>
+                        </div>
+                      )}
+                      {isSupervisor && (
+                        <Button
+                          title={t('attendanceLogs.actions.setWage')}
+                          icon={DollarSign}
+                          onClick={() => openWageModal(record)}
+                          variant="outline"
+                          size="small"
+                        />
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ===== PERMITS VIEW ===== */}
+      {viewMode === 'permits' && (
+        <>
+          {loading ? (
+            <div className="logs-loading">
+              <Loader size={24} className="dashboard-spinner" />
+              <span>{t('attendanceLogs.loading')}</span>
+            </div>
+          ) : permitRecords.length === 0 ? (
+            <EmptyState
+              icon={CalendarOff}
+              title={t('attendanceLogs.permit.emptyTitle')}
+              description={t('attendanceLogs.permit.emptyDesc')}
+            />
+          ) : (
+            <div className="logs-records">
+              {permitRecords.map((record) => (
+                <Card key={record._id} className="logs-record logs-permit-card">
+                  {/* Top row */}
+                  <div className="logs-rec-top">
+                    <div className="logs-rec-date">
+                      <Calendar size={14} />
+                      <span>{formatDate(record.date)}</span>
+                    </div>
+                    <span
+                      className="logs-rec-status"
+                      style={{
+                        backgroundColor: record.permit?.status === 'Approved' ? '#D1FAE5' : record.permit?.status === 'Rejected' ? '#FEE2E2' : '#FEF3C7',
+                        color: record.permit?.status === 'Approved' ? '#059669' : record.permit?.status === 'Rejected' ? '#DC2626' : '#D97706',
+                      }}
+                    >
+                      {record.permit?.status || 'Pending'}
                     </span>
-                    <Badge label={getWageLabel(record.wageType)} variant={record.wageType === 'daily' ? 'neutral' : record.wageType === 'overtime_1.5' ? 'warning' : 'danger'} size="small" />
                   </div>
-                </div>
 
-                {/* Worker info */}
-                <div className="logs-rec-worker">
-                  <div className="logs-rec-avatar" style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}>
-                    {record.userId.fullName.charAt(0).toUpperCase()}
+                  {/* Worker */}
+                  <div className="logs-rec-worker">
+                    <div className="logs-rec-avatar" style={{ backgroundColor: '#EDE9FE', color: '#7C3AED' }}>
+                      {record.userId.fullName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="logs-rec-worker-info">
+                      <span className="logs-rec-name">{record.userId.fullName}</span>
+                      <span className="logs-rec-role">{record.userId.role}</span>
+                    </div>
                   </div>
-                  <div className="logs-rec-worker-info">
-                    <span className="logs-rec-name">{record.userId.fullName}</span>
-                    <span className="logs-rec-role">{record.userId.role}</span>
-                  </div>
-                  <div className="logs-rec-times">
-                    <span className="logs-rec-time">{record.checkIn?.time ? formatTime(record.checkIn.time) : '--:--'}</span>
-                    <span className="logs-rec-sep">→</span>
-                    <span className="logs-rec-time">{record.checkOut?.time ? formatTime(record.checkOut.time) : '--:--'}</span>
-                  </div>
-                </div>
 
-                {/* Financials row */}
-                <div className="logs-rec-finance">
-                  <div className="logs-rec-fin-item">
-                    <span className="logs-rec-fin-label">{t('attendanceLogs.record.daily')}</span>
-                    <span className="logs-rec-fin-val">{formatRp(record.dailyRate || 0)}</span>
-                  </div>
-                  {record.overtimePay > 0 && (
-                    <div className="logs-rec-fin-item">
-                      <span className="logs-rec-fin-label">{t('attendanceLogs.record.overtime')}</span>
-                      <span className="logs-rec-fin-val">{formatRp(record.overtimePay)}</span>
+                  {/* Permit reason */}
+                  {record.permit?.reason && (
+                    <div className="logs-permit-reason">
+                      <FileText size={14} />
+                      <span>{record.permit.reason}</span>
                     </div>
                   )}
-                  <div className="logs-rec-fin-total">
-                    <span>{formatRp(totalPay)}</span>
-                    <Badge
-                      label={record.paymentStatus === 'Paid' ? t('attendanceLogs.filters.paymentOptions.paid') : t('attendanceLogs.filters.paymentOptions.unpaid')}
-                      variant={record.paymentStatus === 'Paid' ? 'success' : 'warning'}
-                      size="small"
-                    />
-                  </div>
-                </div>
 
-                {/* Project + Action */}
-                <div className="logs-rec-bottom">
-                  {record.projectId && (
-                    <div className="logs-rec-project">
-                      <Building size={12} />
-                      <span>{record.projectId.nama}</span>
+                  {/* Evidence */}
+                  {record.permit?.evidence && (
+                    <div
+                      className="logs-permit-evidence"
+                      onClick={() => setEvidenceModal({ open: true, url: getImageUrl(record.permit?.evidence), worker: record.userId.fullName })}
+                    >
+                      <img
+                        src={getImageUrl(record.permit?.evidence)}
+                        alt="Evidence"
+                        className="logs-permit-thumb"
+                      />
+                      <div className="logs-permit-evidence-overlay">
+                        <Eye size={16} />
+                        <span>{t('attendanceLogs.permit.viewEvidence')}</span>
+                      </div>
                     </div>
                   )}
-                  {isSupervisor && (
-                    <Button
-                      title={t('attendanceLogs.actions.setWage')}
-                      icon={DollarSign}
-                      onClick={() => openWageModal(record)}
-                      variant="outline"
-                      size="small"
-                    />
-                  )}
-                </div>
-              </Card>
-            );
-          })}
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Evidence Photo Modal */}
+      {evidenceModal.open && (
+        <div className="modal-overlay" onClick={() => setEvidenceModal({ open: false, url: '', worker: '' })}>
+          <div className="logs-evidence-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="logs-evidence-modal-header">
+              <h3>{t('attendanceLogs.permit.evidenceTitle', { name: evidenceModal.worker })}</h3>
+              <button className="logs-evidence-close" onClick={() => setEvidenceModal({ open: false, url: '', worker: '' })}>
+                <X size={20} />
+              </button>
+            </div>
+            <img src={evidenceModal.url} alt="Permit Evidence" className="logs-evidence-img" />
+          </div>
         </div>
       )}
 

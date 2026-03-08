@@ -278,6 +278,16 @@
   border-color: #312E59;
   box-shadow: 0 0 0 3px rgba(49, 46, 89, 0.1);
 }
+.pr-modal-input-error {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+.pr-modal-error {
+  color: #EF4444;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  font-weight: 500;
+}
 .pr-modal-actions {
   display: flex;
   gap: 10px;

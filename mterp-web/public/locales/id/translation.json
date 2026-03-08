@@ -419,6 +419,7 @@
       "reassign": "Tugaskan Ulang",
       "assign": "Tugaskan",
       "return": "Kembalikan",
+      "unassign": "Lepas Pengguna",
       "cancel": "Batal",
       "addToProject": "Tambah ke Proyek",
       "saveAssignment": "Simpan Penugasan"
@@ -436,7 +437,9 @@
       "addFailed": "Gagal menambahkan alat",
       "assignFailed": "Gagal menugaskan pengguna",
       "returnConfirm": "Kembalikan \"{{name}}\" ke gudang?",
-      "returnFailed": "Gagal mengembalikan alat"
+      "returnFailed": "Gagal mengembalikan alat",
+      "unassignConfirm": "Lepaskan \"{{name}}\" dari {{user}}?",
+      "unassignFailed": "Gagal melepas pengguna dari alat"
     }
   },
   "projectMaterials": {
@@ -648,6 +651,16 @@
       "daily": "Harian Biasa",
       "overtime15": "Lembur 1.5x",
       "overtime2": "Lembur 2x"
+    },
+    "viewMode": {
+      "attendance": "Kehadiran",
+      "permits": "Izin"
+    },
+    "permit": {
+      "emptyTitle": "Tidak Ada Izin",
+      "emptyDesc": "Tidak ditemukan permintaan izin untuk filter yang dipilih.",
+      "viewEvidence": "Lihat Bukti",
+      "evidenceTitle": "Izin {{name}}"
     }
   },
   "tasks": {
@@ -811,8 +824,17 @@
       "reject": "Tolak",
       "approve": "Setujui"
     },
+    "confirmModal": {
+      "title": "Konfirmasi Persetujuan",
+      "desc": "Masukkan kata sandi login Anda untuk mengkonfirmasi persetujuan ini.",
+      "placeholder": "Masukkan kata sandi (min 4 karakter)",
+      "btnCancel": "Batal",
+      "btnApprove": "Setujui",
+      "btnApproving": "Menyetujui..."
+    },
     "messages": {
-      "loadFailed": "Gagal memuat persetujuan"
+      "loadFailed": "Gagal memuat persetujuan",
+      "approveFailed": "Gagal menyetujui"
     }
   },
   "myPayments": {
@@ -980,9 +1002,9 @@
         "btnAuthorize": "Setujui"
       },
       "auth": {
-        "title": "Kata Sandi Digital",
-        "desc": "Masukkan kata sandi aman Anda untuk menyetujui slip gaji ini sebagai",
-        "placeholder": "Masukkan kata sandi (min 4 karakter)",
+        "title": "Konfirmasi Otorisasi",
+        "desc": "Masukkan kata sandi login Anda untuk menyetujui slip gaji ini sebagai",
+        "placeholder": "Masukkan kata sandi login Anda",
         "btnCancel": "Batal",
         "btnAuthorize": "Setujui",
         "btnAuthorizing": "Menyetujui..."
@@ -1085,9 +1107,9 @@
     },
     "approveModal": {
       "title": "Setujui Laporan",
-      "desc": "Masukkan kata sandi digital Anda untuk menyetujui laporan ini dan mengaktifkan ekspor PDF.",
-      "passphrase": "Kata Sandi Digital",
-      "placeholder": "Min 4 karakter"
+      "desc": "Masukkan kata sandi login Anda untuk menyetujui laporan ini dan mengaktifkan ekspor PDF.",
+      "passphrase": "Kata Sandi Login",
+      "placeholder": "Masukkan kata sandi login Anda"
     },
     "messages": {
       "error": "Error",

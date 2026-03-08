@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Wrench, User, Warehouse, Plus,
   ChevronDown, X, AlertCircle, Package, Search,
-  CheckCircle2, Settings, AlertTriangle, Calendar, MapPin
+  CheckCircle2, Settings, AlertTriangle, Calendar, MapPin, UserX
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/api';
@@ -132,6 +132,18 @@ export default function ProjectTools() {
       alert(err.response?.data?.msg || t('projectTools.messages.assignFailed'));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleUnassign = async (tool: ToolData) => {
+    if (!confirm(t('projectTools.messages.unassignConfirm', { name: tool.nama, user: tool.assignedTo?.fullName }))) return;
+
+    try {
+      await api.put(`/tools/${tool._id}/unassign`);
+      await fetchData();
+    } catch (err: any) {
+      console.error('Failed to unassign tool', err);
+      alert(err.response?.data?.msg || t('projectTools.messages.unassignFailed'));
     }
   };
 
@@ -337,6 +349,15 @@ export default function ProjectTools() {
                         variant="outline"
                         size="small"
                       />
+                      {tool.assignedTo && (
+                        <Button
+                          title={t('projectTools.actions.unassign')}
+                          icon={UserX}
+                          onClick={() => handleUnassign(tool)}
+                          variant="warning"
+                          size="small"
+                        />
+                      )}
                       <Button
                         title={t('projectTools.actions.return')}
                         icon={Warehouse}
