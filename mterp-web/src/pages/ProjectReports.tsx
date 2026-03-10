@@ -9,7 +9,6 @@ import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
 import api from '../api/api';
 import { Card, Button, Input, Alert, Badge } from '../components/shared';
-import './ProjectReports.css';
 
 /* ─── Helpers ─── */
 
@@ -591,7 +590,7 @@ export default function ProjectReports() {
 
   // ─── Render ───
   return (
-    <div className="pr-container">
+    <div className="p-3 sm:p-4 lg:p-6 max-w-[800px] mx-auto pb-24">
       <Alert
         visible={alertData.visible}
         type={alertData.type}
@@ -601,34 +600,35 @@ export default function ProjectReports() {
       />
 
       {/* Header */}
-      <div className="pr-header">
-        <div className="pr-header-left">
-          <button className="pr-back-btn" onClick={() => navigate(-1)}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
+        <div className="flex items-center gap-3">
+          <button className="w-10 h-10 rounded-full bg-bg-secondary flex items-center justify-center cursor-pointer transition-colors border-none text-text-primary hover:bg-border shrink-0" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="pr-title">{t('projectReports.title')}</h1>
-            <p className="pr-project-name">{projectName}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-text-primary m-0 mb-1">{t('projectReports.title')}</h1>
+            <p className="text-sm text-text-muted font-medium m-0">{projectName}</p>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <Card className="pr-card"><p className="pr-loading">{t('projectReports.loading')}</p></Card>
+        <Card className="mb-6"><p className="text-center text-text-muted py-8">{t('projectReports.loading')}</p></Card>
       ) : (
         <>
           {/* Submit New Report */}
-          <Card className="pr-card pr-submit-card">
-            <h3 className="pr-card-title">
-              <FileText size={18} /> {t('projectReports.submitNew')}
+          <Card className="mb-6 border-2 border-primary/20 shadow-sm relative overflow-visible">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+            <h3 className="flex items-center gap-2 text-lg font-bold text-text-primary m-0 mb-4 pb-3 border-b border-border">
+              <FileText size={18} className="text-primary" /> {t('projectReports.submitNew')}
             </h3>
 
             {/* Report Type Tabs */}
-            <div className="pr-type-tabs">
+            <div className="flex flex-wrap gap-2 mb-5">
               {(['daily', 'weekly', 'monthly', 'custom'] as ReportType[]).map((type) => (
                 <button
                   key={type}
-                  className={`pr-type-tab ${reportType === type ? 'active' : ''}`}
+                  className={`px-4 py-2 rounded-md text-sm font-semibold cursor-pointer transition-all duration-200 flex-1 min-w-[100px] text-center ${reportType === type ? 'bg-primary text-white shadow-md' : 'bg-bg-secondary text-text-secondary hover:bg-border/50 hover:text-text-primary'}`}
                   onClick={() => setReportType(type)}
                 >
                   {getTypeLabel(type)}
@@ -637,28 +637,30 @@ export default function ProjectReports() {
             </div>
 
             {/* Date Range */}
-            <div className="pr-date-range">
-              <div className="pr-date-field">
-                <label>{t('projectReports.startDate')}</label>
-                <div className="pr-date-input-wrapper">
-                  <Calendar size={16} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-[0.5px]">{t('projectReports.startDate')}</label>
+                <div className="flex items-center bg-bg-secondary border border-border rounded-md px-3 py-2 transition-all focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(49,46,89,0.1)] opacity-100 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <Calendar size={16} className="text-text-muted mr-2" />
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     disabled={reportType !== 'custom'}
+                    className="border-none bg-transparent outline-none w-full text-sm font-medium text-text-primary disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
-              <div className="pr-date-field">
-                <label>{t('projectReports.endDate')}</label>
-                <div className="pr-date-input-wrapper">
-                  <Calendar size={16} />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-[0.5px]">{t('projectReports.endDate')}</label>
+                <div className="flex items-center bg-bg-secondary border border-border rounded-md px-3 py-2 transition-all focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(49,46,89,0.1)] opacity-100 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <Calendar size={16} className="text-text-muted mr-2" />
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     disabled={reportType !== 'custom' && reportType !== 'daily'}
+                    className="border-none bg-transparent outline-none w-full text-sm font-medium text-text-primary disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -671,24 +673,26 @@ export default function ProjectReports() {
               loading={submitting}
               variant="primary"
               size="large"
-              fullWidth
+              style={{ width: '100%' }}
             />
           </Card>
 
           {/* Reports List */}
-          <Card className="pr-card">
-            <h3 className="pr-card-title">
-              <Clock size={18} /> {t('projectReports.submittedReports')} ({reports.length})
+          <Card className="mb-6">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-text-primary m-0 mb-4 pb-3 border-b border-border">
+              <Clock size={18} className="text-secondary" /> {t('projectReports.submittedReports')} ({reports.length})
             </h3>
 
             {reports.length === 0 ? (
-              <p className="pr-empty">{t('projectReports.empty')}</p>
+              <p className="text-center text-text-muted py-8 text-sm">{t('projectReports.empty')}</p>
             ) : (
-              <div className="pr-reports-list">
+              <div className="flex flex-col gap-4">
                 {reports.map((rpt) => (
-                  <div key={rpt._id} className="pr-report-card">
-                    <div className="pr-report-top">
-                      <div className="pr-report-type-badge">
+                  <div key={rpt._id} className="p-4 sm:p-5 border border-border rounded-lg bg-bg-secondary transition-all hover:-translate-y-1 hover:shadow-md hover:border-primary/50 relative overflow-hidden group">
+                    <div className={`absolute top-0 left-0 w-1.5 h-full ${rpt.status === 'approved' ? 'bg-success' : 'bg-warning'}`} />
+                    
+                    <div className="flex justify-between items-start mb-3 ml-2">
+                      <div className="px-2 py-1 rounded-sm bg-primary-bg text-primary text-xs font-bold uppercase tracking-wider">
                         {getTypeLabel(rpt.reportType)}
                       </div>
                       <Badge
@@ -698,25 +702,25 @@ export default function ProjectReports() {
                       />
                     </div>
 
-                    <div className="pr-report-dates">
-                      <Calendar size={14} />
+                    <div className="flex items-center gap-2 text-sm text-text-primary font-medium mb-2 ml-2">
+                      <Calendar size={14} className="text-text-muted" />
                       <span>{fmtDate(rpt.startDate)} — {fmtDate(rpt.endDate)}</span>
                     </div>
 
-                    <div className="pr-report-meta">
+                    <div className="flex items-center gap-2 text-xs text-text-muted mb-4 ml-2">
                       <span>{t('projectReports.dailyCount', { count: rpt.dailyReportIds?.length || 0 })}</span>
-                      <span>•</span>
-                      <span>{t('projectReports.by')} {rpt.submittedBy?.fullName || '-'}</span>
+                      <span className="mx-1">•</span>
+                      <span>{t('projectReports.by')} <span className="font-semibold text-text-primary">{rpt.submittedBy?.fullName || '-'}</span></span>
                     </div>
 
                     {rpt.status === 'approved' && rpt.authorization.directorName && (
-                      <div className="pr-report-approved-by">
+                      <div className="flex items-center gap-2 text-xs text-success bg-success-bg px-3 py-2 rounded-md mb-4 ml-2 border border-success/20 font-medium">
                         <Shield size={14} />
                         <span>{t('projectReports.approvedBy')} {rpt.authorization.directorName}</span>
                       </div>
                     )}
 
-                    <div className="pr-report-actions">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border/50 ml-2 mt-auto">
                       {rpt.status === 'pending' && (userRole === 'director' || userRole === 'owner') && (
                         <Button
                           title={t('projectReports.actions.approve')}
@@ -739,7 +743,7 @@ export default function ProjectReports() {
                         />
                       )}
                       {rpt.status === 'pending' && (
-                        <div className="pr-pending-label">
+                        <div className="flex items-center gap-2 text-xs text-warning bg-warning-bg px-3 py-2 rounded-md font-medium border border-warning/20">
                           <Lock size={14} />
                           <span>{t('projectReports.pendingApprovalNote')}</span>
                         </div>
@@ -755,27 +759,32 @@ export default function ProjectReports() {
 
       {/* Approve Modal */}
       {approveModal.open && (
-        <div className="pr-modal-overlay" onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); setPassphraseError(''); }}>
-          <div className="pr-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="pr-modal-title">
-              <Shield size={20} /> {t('projectReports.approveModal.title')}
-            </h3>
-            <p className="pr-modal-desc">{t('projectReports.approveModal.desc')}</p>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex justify-center items-center p-4 overflow-y-auto animate-fade-in" onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); setPassphraseError(''); }}>
+          <div className="bg-bg-primary rounded-xl w-full max-w-[450px] shadow-2xl overflow-hidden flex flex-col border border-border animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-border bg-bg-secondary flex gap-3 items-center">
+              <h3 className="text-lg font-bold text-text-primary m-0 flex items-center gap-2">
+                <Shield size={20} className="text-secondary" /> {t('projectReports.approveModal.title')}
+              </h3>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-sm text-text-muted m-0 mb-6 leading-relaxed">{t('projectReports.approveModal.desc')}</p>
 
-            <div className="pr-modal-input-group">
-              <label>{t('projectReports.approveModal.passphrase')}</label>
-              <input
-                type="password"
-                value={passphrase}
-                onChange={(e) => { setPassphrase(e.target.value); setPassphraseError(''); }}
-                placeholder={t('projectReports.approveModal.placeholder')}
-                className={`pr-modal-input ${passphraseError ? 'pr-modal-input-error' : ''}`}
-                onKeyDown={(e) => { if (e.key === 'Enter' && passphrase.length >= 4) handleApprove(); }}
-              />
-              {passphraseError && <p className="pr-modal-error">{passphraseError}</p>}
+              <div className="mb-2">
+                <label className="block text-xs font-semibold text-text-muted uppercase tracking-[0.5px] mb-2">{t('projectReports.approveModal.passphrase')}</label>
+                <input
+                  type="password"
+                  value={passphrase}
+                  onChange={(e) => { setPassphrase(e.target.value); setPassphraseError(''); }}
+                  placeholder={t('projectReports.approveModal.placeholder')}
+                  className={`w-full p-3 border rounded-md bg-bg-secondary text-text-primary text-sm transition-colors outline-none focus:bg-bg-primary ${passphraseError ? 'border-danger focus:border-danger focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]' : 'border-border focus:border-primary focus:shadow-[0_0_0_3px_rgba(49,46,89,0.1)]'}`}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && passphrase.length >= 4) handleApprove(); }}
+                />
+                {passphraseError && <p className="text-xs text-danger mt-1 font-medium">{passphraseError}</p>}
+              </div>
             </div>
 
-            <div className="pr-modal-actions">
+            <div className="px-6 py-4 bg-bg-secondary border-t border-border flex justify-end gap-3 rounded-b-xl">
               <Button
                 title={t('projectReports.actions.cancel')}
                 onClick={() => { setApproveModal({ open: false, reportId: '' }); setPassphrase(''); setPassphraseError(''); }}

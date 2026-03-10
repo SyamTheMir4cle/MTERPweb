@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import jsPDF from 'jspdf';
 import api from '../api/api';
 import { Card, Button, Input, Alert, Badge, CostInput } from '../components/shared';
-import './DailyReport.css';
 
 interface ProjectOption {
   _id: string;
@@ -938,7 +937,7 @@ export default function DailyReport() {
   };
 
   return (
-    <div className="report-container">
+    <div className="p-3 sm:p-4 lg:p-6 max-w-[700px] mx-auto pb-24">
       <Alert
         visible={alertData.visible}
         type={alertData.type}
@@ -948,26 +947,26 @@ export default function DailyReport() {
       />
 
       {/* Header */}
-      <div className="report-header">
-        <div className="report-header-left">
-          <button className="back-btn" onClick={() => navigate(-1)}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
+        <div className="flex items-center gap-3">
+          <button className="w-10 h-10 rounded-full bg-bg-secondary flex items-center justify-center cursor-pointer transition-colors border-none text-text-primary hover:bg-border shrink-0" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="report-title">{t('dailyReport.title')}</h1>
-            <span className="report-date">{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-text-primary m-0">{t('dailyReport.title')}</h1>
+            <span className="text-sm text-text-muted font-medium">{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
       </div>
 
       {/* Project Selector */}
-      <Card className="report-card">
-        <h3 className="card-title">
+      <Card className="mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
           <Layers size={18} /> {t('dailyReport.projectSelector.title')}
         </h3>
-        <div className="project-selector-wrapper">
+        <div className="relative">
           <select
-            className="project-selector"
+            className="w-full py-3 pr-8 pl-4 border border-border rounded-md bg-bg-primary text-text-primary text-base font-medium cursor-pointer appearance-none transition-colors outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(49,46,89,0.1)]"
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
           >
@@ -978,42 +977,42 @@ export default function DailyReport() {
               </option>
             ))}
           </select>
-          <ChevronDown size={16} className="selector-chevron" />
+          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
         </div>
         {selectedProjectName && (
-          <div className="selected-project-info">
-            <span className="selected-project-name">{selectedProjectName}</span>
+          <div className="flex items-center gap-3 mt-3 px-3 py-2 bg-primary-bg rounded-sm">
+            <span className="text-sm font-semibold text-primary flex-1">{selectedProjectName}</span>
             <Badge label={t('dailyReport.projectSelector.progress', { progress: computedProgress })} variant="primary" size="small" />
           </div>
         )}
       </Card>
 
       {/* Loading */}
-      {loadingProject && <p className="loading-text">{t('dailyReport.loadingProject')}</p>}
+      {loadingProject && <p className="text-center text-text-muted p-4 text-sm">{t('dailyReport.loadingProject')}</p>}
 
       {/* Work Item Progress */}
       {!loadingProject && workItemUpdates.length > 0 && (
-        <Card className="report-card">
-          <h3 className="card-title">
+        <Card className="mb-4">
+          <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
             <Layers size={18} /> {t('dailyReport.workItem.title')}
           </h3>
-          <div className="work-items-list">
+          <div className="flex flex-col gap-3">
             {workItemUpdates.map((item, i) => {
               const changed = item.newProgress !== item.currentProgress;
               const weight = totalCost > 0 ? ((item.cost / totalCost) * 100).toFixed(1) : '0';
               return (
-                <div key={item.workItemId} className={`work-item-row ${changed ? 'changed' : ''}`}>
-                  <div className="work-item-info">
-                    <span className="work-item-name">{item.name}</span>
-                    <div className="work-item-meta">
+                <div key={item.workItemId} className={`p-3 sm:p-4 border rounded-md transition-all duration-200 ${changed ? 'border-primary bg-primary-bg' : 'border-border bg-bg-primary'}`}>
+                  <div className="mb-2">
+                    <span className="text-base font-semibold text-text-primary">{item.name}</span>
+                    <div className="flex items-center gap-2 mt-0.5">
                       <Badge label={`${weight}%`} variant="neutral" size="small" />
-                      <span className="work-item-detail">{item.qty} {item.unit} · Rp {formatRupiah(item.cost)}</span>
+                      <span className="text-xs text-text-muted">{item.qty} {item.unit} · Rp {formatRupiah(item.cost)}</span>
                     </div>
                   </div>
-                  <div className="work-item-controls">
-                    <div className="progress-slider-group">
-                      <label className="slider-label">{t('dailyReport.workItem.progress')}</label>
-                      <div className="slider-row">
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start">
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-xs font-semibold text-text-muted uppercase tracking-[0.5px]">{t('dailyReport.workItem.progress')}</label>
+                      <div className="flex items-center gap-2">
                         <input
                           type="range"
                           min={0}
@@ -1021,19 +1020,19 @@ export default function DailyReport() {
                           step={5}
                           value={item.newProgress}
                           onChange={(e) => updateItemProgress(i, Number(e.target.value))}
-                          className="progress-slider"
+                          className="flex-1 h-1.5 appearance-none rounded-full bg-bg-secondary outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_2px_4px_rgba(49,46,89,0.3)] hover:[&::-webkit-slider-thumb]:scale-125 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:shadow-[0_2px_4px_rgba(49,46,89,0.3)]"
                         />
-                        <span className={`slider-value ${changed ? 'value-changed' : ''}`}>
+                        <span className={`text-sm font-bold min-w-[40px] text-right ${changed ? 'text-primary' : 'text-text-primary'}`}>
                           {item.newProgress}%
                         </span>
                       </div>
                       {changed && (
-                        <span className="progress-diff">
+                        <span className="text-xs font-medium text-primary">
                           {item.currentProgress}% → {item.newProgress}%
                         </span>
                       )}
                     </div>
-                    <div className="actual-cost-group">
+                    <div className="flex flex-col gap-0.5 min-w-[140px] sm:min-w-0">
                       <CostInput
                         label={t('dailyReport.workItem.actualCost')}
                         value={item.actualCost}
@@ -1050,42 +1049,51 @@ export default function DailyReport() {
 
       {/* Supply Plan Updates */}
       {!loadingProject && supplyUpdates.length > 0 && (
-        <Card className="report-card">
-          <h3 className="card-title">
+        <Card className="mb-4">
+          <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
             <Truck size={18} /> {t('dailyReport.supplyPlan.title')}
           </h3>
-          <div className="work-items-list">
+          <div className="flex flex-col gap-3">
             {supplyUpdates.map((supply, i) => {
               const changed = supply.newStatus !== supply.currentStatus;
               const weight = totalCost > 0 ? ((supply.cost / totalCost) * 100).toFixed(1) : '0';
               return (
-                <div key={supply.supplyId} className={`work-item-row ${changed ? 'changed' : ''}`}>
-                  <div className="work-item-info">
-                    <span className="work-item-name">{supply.item}</span>
-                    <div className="work-item-meta">
+                <div key={supply.supplyId} className={`p-3 sm:p-4 border rounded-md transition-all duration-200 ${changed ? 'border-primary bg-primary-bg' : 'border-border bg-bg-primary'}`}>
+                  <div className="mb-2">
+                    <span className="text-base font-semibold text-text-primary">{supply.item}</span>
+                    <div className="flex items-center gap-2 mt-0.5">
                       <Badge label={`${weight}%`} variant="neutral" size="small" />
-                      <span className="work-item-detail">{supply.qty} {supply.unit} · Rp {formatRupiah(supply.cost)}</span>
+                      <span className="text-xs text-text-muted">{supply.qty} {supply.unit} · Rp {formatRupiah(supply.cost)}</span>
                     </div>
                   </div>
-                  <div className="supply-status-controls">
-                    <label className="slider-label">{t('dailyReport.supplyPlan.status')}</label>
-                    <div className="supply-status-btns">
-                      {SUPPLY_STATUSES.map((status) => (
-                        <button
-                          key={status}
-                          className={`supply-status-btn ${supply.newStatus === status ? 'active' : ''} status-${status.toLowerCase()}`}
-                          onClick={() => updateSupplyStatus(i, status)}
-                        >
-                          {status === 'Pending' ? '⏳' : status === 'Ordered' ? '📦' : '✅'} {t(`dailyReport.status.${status.toLowerCase()}`)}
-                        </button>
-                      ))}
+                  <div className="flex flex-col gap-1 mt-2">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-[0.5px]">{t('dailyReport.supplyPlan.status')}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {SUPPLY_STATUSES.map((status) => {
+                        const isActive = supply.newStatus === status;
+                        let activeClasses = '';
+                        if (isActive) {
+                          if (status === 'Pending') activeClasses = 'bg-warning-bg border-warning text-[#92400e]';
+                          else if (status === 'Ordered') activeClasses = 'bg-info-bg border-info text-[#1e40af]';
+                          else if (status === 'Delivered') activeClasses = 'bg-success-bg border-success text-[#065f46]';
+                        }
+                        return (
+                          <button
+                            key={status}
+                            className={`flex-1 min-w-[100px] text-center px-3 py-2 border rounded-sm text-sm font-medium cursor-pointer transition-all duration-200 ${isActive ? activeClasses : 'border-border bg-bg-white text-text-secondary hover:border-primary'}`}
+                            onClick={() => updateSupplyStatus(i, status)}
+                          >
+                            {status === 'Pending' ? '⏳' : status === 'Ordered' ? '📦' : '✅'} {t(`dailyReport.status.${status.toLowerCase()}`)}
+                          </button>
+                        );
+                      })}
                     </div>
                     {changed && (
-                      <span className="progress-diff">
+                      <span className="text-xs font-medium text-primary mt-1">
                         {supply.currentStatus} → {supply.newStatus}
                       </span>
                     )}
-                    <div className="actual-cost-group">
+                    <div className="flex flex-col gap-0.5 min-w-[140px] sm:min-w-0 mt-2">
                       <CostInput
                         label={t('dailyReport.supplyPlan.actualCost')}
                         value={supply.actualCost}
@@ -1101,22 +1109,22 @@ export default function DailyReport() {
       )}
 
       {!loadingProject && selectedProjectId && workItemUpdates.length === 0 && supplyUpdates.length === 0 && (
-        <Card className="report-card">
-          <p className="empty-text">{t('dailyReport.emptyProject')}</p>
+        <Card className="mb-4">
+          <p className="text-center text-text-muted text-sm p-4">{t('dailyReport.emptyProject')}</p>
         </Card>
       )}
 
       {/* Report Details: Date & Weather */}
-      <Card className="report-card">
-        <h3 className="card-title">
+      <Card className="mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
           <Calendar size={18} /> {t('dailyReport.date.title')}
         </h3>
-        <p style={{ fontSize: '0.8rem', color: '#64748B', margin: '0 0 12px', lineHeight: 1.4 }}>
+        <p className="text-xs text-text-muted m-0 mb-3 leading-snug">
           {t('dailyReport.date.hint')}
         </p>
 
         {/* Quick date buttons */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {(() => {
             const today = new Date();
             const fmtLocal = (d: Date) => { const dd = new Date(d); dd.setMinutes(dd.getMinutes() - dd.getTimezoneOffset()); return dd.toISOString().split('T')[0]; };
@@ -1134,17 +1142,7 @@ export default function DailyReport() {
                 <button
                   key={offset}
                   onClick={() => setSelectedDate(val)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: 8,
-                    border: selectedDate === val ? '2px solid #312E59' : '1px solid #E2E8F0',
-                    background: selectedDate === val ? '#312E59' : '#F8FAFC',
-                    color: selectedDate === val ? '#fff' : '#475569',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all duration-200 ${selectedDate === val ? 'border-2 border-primary bg-primary text-white' : 'border border-border bg-bg-secondary text-text-secondary hover:border-primary'}`}
                 >
                   {label}
                 </button>
@@ -1153,26 +1151,26 @@ export default function DailyReport() {
           })()}
         </div>
 
-        <div className="report-form-group" style={{ marginBottom: 20 }}>
-          <div className="report-input-wrapper" style={{ display: 'flex', alignItems: 'center', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 12px' }}>
-            <Calendar size={18} color="#64748B" style={{ marginRight: 10 }} />
+        <div className="mb-5">
+          <div className="flex items-center bg-bg-secondary border border-border rounded-md px-3 py-2 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(49,46,89,0.1)] transition-all">
+            <Calendar size={18} className="text-text-muted mr-2" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '1rem', color: '#1E293B' }}
+              className="border-none bg-transparent outline-none w-full text-base font-medium text-text-primary uppercase tracking-[0.5px]"
             />
           </div>
         </div>
 
-        <h3 className="card-title" style={{ marginTop: 24 }}>
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mt-6 mb-3">
           <Cloud size={18} /> {t('dailyReport.weather.title')}
         </h3>
-        <div className="weather-options">
+        <div className="flex flex-wrap gap-2">
           {['Cerah', 'Berawan', 'Hujan'].map((w) => (
             <button
               key={w}
-              className={`weather-btn ${formData.weather === w ? 'active' : ''}`}
+              className={`px-4 py-2 border rounded-md text-sm font-medium cursor-pointer transition-all duration-200 flex-1 min-w-[100px] text-center ${formData.weather === w ? 'bg-primary border-primary text-white' : 'border-border bg-bg-white text-text-secondary hover:border-primary'}`}
               onClick={() => setFormData({ ...formData, weather: w })}
             >
               {getIcon(w)} {getTranslationValue(w)}
@@ -1182,8 +1180,8 @@ export default function DailyReport() {
       </Card>
 
       {/* Materials */}
-      <Card className="report-card">
-        <h3 className="card-title">
+      <Card className="mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
           <Package size={18} /> {t('dailyReport.materials.title')}
         </h3>
         <Input
@@ -1196,8 +1194,8 @@ export default function DailyReport() {
       </Card>
 
       {/* Workforce */}
-      <Card className="report-card">
-        <h3 className="card-title">
+      <Card className="mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
           <Users size={18} /> {t('dailyReport.workforce.title')}
         </h3>
         <Input
@@ -1211,20 +1209,20 @@ export default function DailyReport() {
 
       {/* Equipment Usage */}
       {!loadingProject && equipmentData.length > 0 && (
-        <Card className="report-card">
-          <h3 className="card-title">
+        <Card className="mb-4">
+          <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
             <Wrench size={18} /> {t('dailyReport.equipment.title')}
           </h3>
-          <div className="work-items-list">
+          <div className="flex flex-col gap-3">
             {equipmentData.map((tool: any) => (
-              <div key={tool._id} className="work-item-row">
-                <div className="work-item-info">
-                  <span className="work-item-name">{tool.nama}</span>
-                  <div className="work-item-meta">
+              <div key={tool._id} className="p-3 sm:p-4 border border-border rounded-md bg-bg-primary">
+                <div>
+                  <span className="text-base font-semibold text-text-primary">{tool.nama}</span>
+                  <div className="flex items-center gap-2 mt-0.5">
                     <Badge label={tool.kondisi || 'Baik'} variant={tool.kondisi === 'Baik' ? 'primary' : 'neutral'} size="small" />
-                    <span className="work-item-detail">{tool.stok || 0} {tool.satuan || 'unit'} · {tool.kategori || '-'}</span>
+                    <span className="text-xs text-text-muted">{tool.stok || 0} {tool.satuan || 'unit'} · {tool.kategori || '-'}</span>
                     {tool.assignedTo?.fullName && (
-                      <span className="work-item-detail">→ {tool.assignedTo.fullName}</span>
+                      <span className="text-xs text-text-muted">→ {tool.assignedTo.fullName}</span>
                     )}
                   </div>
                 </div>
@@ -1235,8 +1233,8 @@ export default function DailyReport() {
       )}
 
       {/* Notes */}
-      <Card className="report-card">
-        <h3 className="card-title">{t('dailyReport.notes.title')}</h3>
+      <Card className="mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">{t('dailyReport.notes.title')}</h3>
         <Input
           placeholder={t('dailyReport.notes.placeholder')}
           value={formData.notes}
@@ -1247,28 +1245,28 @@ export default function DailyReport() {
       </Card>
 
       {/* Photos */}
-      <Card className="report-card">
-        <h3 className="card-title">
+      <Card className="mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-text-primary m-0 mb-3">
           <Camera size={18} /> {t('dailyReport.photos.title')}
         </h3>
-        <div className="photo-upload-grid">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {photoPreviewUrls.map((url, i) => (
-            <div key={i} className="photo-thumbnail">
-              <img src={url} alt={`Photo ${i + 1}`} />
-              <button className="photo-remove-btn" onClick={() => handleRemovePhoto(i)} title={t('dailyReport.photos.remove')}>
+            <div key={i} className="relative aspect-square rounded-md overflow-hidden border-2 border-border transition-colors hover:border-primary group">
+              <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+              <button className="absolute top-1 right-1 w-6 h-6 rounded-full bg-danger/90 text-white border-none cursor-pointer flex items-center justify-center opacity-0 transition-opacity shadow-md group-hover:opacity-100" onClick={() => handleRemovePhoto(i)} title={t('dailyReport.photos.remove')}>
                 <X size={14} />
               </button>
             </div>
           ))}
           {photos.length < MAX_PHOTOS && (
-            <button className="photo-add-btn" onClick={() => fileInputRef.current?.click()}>
+            <button className="aspect-square border-2 border-dashed border-border rounded-md bg-bg-secondary text-text-muted cursor-pointer flex flex-col items-center justify-center gap-1 text-xs font-semibold transition-all hover:border-primary hover:text-primary hover:bg-primary-bg min-h-[100px]" onClick={() => fileInputRef.current?.click()}>
               <Plus size={24} />
               <span>{t('dailyReport.photos.add')}</span>
             </button>
           )}
         </div>
         {photos.length >= MAX_PHOTOS && (
-          <p className="photo-limit-text">{t('dailyReport.photos.maxReached')}</p>
+          <p className="text-xs text-text-muted text-center mt-2">{t('dailyReport.photos.maxReached')}</p>
         )}
         <input
           ref={fileInputRef}
@@ -1281,7 +1279,7 @@ export default function DailyReport() {
       </Card>
 
       {/* Action Buttons */}
-      <div className="report-actions">
+      <div className="flex flex-col sm:flex-row gap-3 mt-4">
         <Button
           title={t('dailyReport.actions.exportPdf')}
           icon={FileDown}
