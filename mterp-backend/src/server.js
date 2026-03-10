@@ -15,6 +15,7 @@ const {
   kasbonRoutes,
   taskRoutes,
   slipGajiRoutes,
+  userRoutes,
 } = require('./routes');
 const updatesRoutes = require('./routes/updates');
 const dashboardRoutes = require('./routes/dashboard');
@@ -54,6 +55,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/slipgaji', slipGajiRoutes);
 app.use('/api/updates', updatesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

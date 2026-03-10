@@ -24,6 +24,7 @@ import MyPayments from './pages/MyPayments';
 import Dashboard from './pages/Dashboard';
 import SlipGaji from './pages/SlipGaji';
 import ProjectReports from './pages/ProjectReports';
+import Users from './pages/Users';
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
             <Route path="/my-payments" element={<MyPayments />} />
             <Route path="/slip-gaji" element={<SlipGaji />} />
             <Route path="/project-reports/:id" element={<ProjectReports />} />
+            <Route path="/users" element={<Users />} />
           </Route>
 
           {/* Fallback */}

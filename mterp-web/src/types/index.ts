@@ -98,11 +98,12 @@ export interface User {
   username: string;
   fullName: string;
   email?: string;
-  role: string;
+  role: string; // worker, tukang, helper, supervisor, site_manager, foreman, asset_admin, admin_project, director, president_director, operational_director, owner
   token?: string;
   phone?: string;
   address?: string;
   profilePhoto?: string;
+  isVerified?: boolean;
 }
 
 export interface MaterialRequest {

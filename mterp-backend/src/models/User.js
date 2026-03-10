@@ -28,7 +28,13 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['worker', 'supervisor', 'asset_admin', 'director', 'owner'],
+    enum: [
+      'worker', 'tukang', 'helper',
+      'supervisor', 'site_manager', 'foreman',
+      'device_admin', 'asset_admin', 'admin_project',
+      'director', 'president_director', 'operational_director',
+      'owner'
+    ],
     default: 'worker',
   },
   isVerified: {
